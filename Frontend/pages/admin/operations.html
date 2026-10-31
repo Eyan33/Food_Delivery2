@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Operations | FoodDelivery Admin</title>
+  <title>Operations | DeRon Market Deliveries Admin</title>
 
   <link rel="stylesheet" href="../../assets/css/style.css" />
   <link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
@@ -14,11 +14,11 @@
 <body>
   <div id="adminMessage" class="admin-message" role="status" aria-live="polite"></div>
 
-  <aside class="admin-sidebar" id="adminSidebar"><div class="admin-sidebar-header"><a href="dashboard.html" class="admin-logo">Food<span>Delivery</span></a><button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button></div><div class="admin-profile"><div class="admin-profile-avatar">A</div><div class="admin-profile-info"><strong>Loading account…</strong><span>Loading role…</span></div></div><nav class="admin-navigation" aria-label="Admin navigation">
+  <aside class="admin-sidebar" id="adminSidebar"><div class="admin-sidebar-header"><a href="dashboard.html" class="admin-logo">products<span>Delivery</span></a><button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button></div><div class="admin-profile"><div class="admin-profile-avatar">A</div><div class="admin-profile-info"><strong>Loading account…</strong><span>Loading role…</span></div></div><nav class="admin-navigation" aria-label="Admin navigation">
             <a href="dashboard.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Dashboard</span></a>
             <a href="orders.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Orders</span></a>
             <a href="customers.html" class="admin-nav-link"><span class="admin-nav-icon">♙</span><span>Customers</span></a>
-            <a href="restaurants.html" class="admin-nav-link"><span class="admin-nav-icon">⌂</span><span>Restaurants</span></a>
+            <a href="restaurants.html" class="admin-nav-link"><span class="admin-nav-icon">⌂</span><span>markets</span></a>
             <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
             <a href="deleted-accounts.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
             <a href="payments.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Payments</span></a>
@@ -54,7 +54,7 @@
         <div class="admin-card-header">
           <div>
             <h3>Platform fees</h3>
-            <p>Configure the platform transaction percentage and the delivery charge per kilometre. Delivery charges are calculated from restaurant-to-customer distance at checkout.</p>
+            <p>Configure the platform transaction percentage and the delivery charge per kilometre. Delivery charges are calculated from market-to-customer distance at checkout.</p>
           </div>
         </div>
 
@@ -78,8 +78,8 @@
       <section class="admin-content-card operations-panel" id="panel-catalog">
         <div class="admin-card-header">
           <div>
-            <h3>Restaurant catalog</h3>
-            <p>Select a restaurant to manage its foods and categories.</p>
+            <h3>market catalog</h3>
+            <p>Select a market to manage its products and categories.</p>
           </div>
           <button class="admin-secondary-button" id="refreshCatalog" type="button">
             Refresh
@@ -95,19 +95,19 @@
           <div class="restaurant-workspace-header">
             <button type="button" id="backToRestaurants"
               class="admin-secondary-button">
-              ← All restaurants
+              ← All markets
             </button>
-            <h3 id="selectedRestaurantName">Restaurant catalog</h3>
+            <h3 id="selectedRestaurantName">market catalog</h3>
             <p id="selectedRestaurantSummary">
-              Manage this restaurant's food items and categories.
+              Manage this market's products items and categories.
             </p>
           </div>
 
-          <h3 class="catalog-section-title">Food items</h3>
+          <h3 class="catalog-section-title">products items</h3>
 
           <form class="operations-form" id="foodForm">
             <label hidden>
-              Restaurant
+              market
               <select id="foodRestaurant" required></select>
             </label>
 
@@ -117,7 +117,7 @@
             </label>
 
             <label>
-              Food name
+              products name
               <input id="foodName" required maxlength="150"
                 placeholder="e.g. Chicken biryani" />
             </label>
@@ -135,7 +135,7 @@
             </label>
 
             <label class="food-image-field">
-              Food image <span aria-hidden="true">*</span>
+              products image <span aria-hidden="true">*</span>
               <input id="foodImage" type="file"
                 accept="image/jpeg,image/png,image/webp" required
                 aria-describedby="foodImageHelp" />
@@ -145,13 +145,13 @@
             </label>
 
             <button class="admin-primary-button" type="submit">
-              Add food
+              Add products
             </button>
           </form>
 
           <div class="operations-tools">
             <label>
-              Search foods
+              Search products
               <input type="search" id="foodSearch"
                 placeholder="Search this restaurant's foods" />
             </label>
@@ -161,8 +161,8 @@
             <table class="operations-table">
               <thead>
                 <tr>
-                  <th>Food</th>
-                  <th>Restaurant</th>
+                  <th>products</th>
+                  <th>market</th>
                   <th>Price</th>
                   <th>Availability</th>
                   <th>Actions</th>
@@ -176,7 +176,7 @@
 
           <form class="operations-form" id="categoryForm">
             <label hidden>
-              Restaurant
+              market
               <select id="categoryRestaurant" required></select>
             </label>
 
@@ -196,7 +196,7 @@
               <thead>
                 <tr>
                   <th>Category</th>
-                  <th>Restaurant</th>
+                  <th>market</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
@@ -288,7 +288,7 @@
           <table class="operations-table">
             <thead>
               <tr>
-                <th>Customer</th><th>Restaurant</th><th>Rating</th>
+                <th>Customer</th><th>market</th><th>Rating</th>
                 <th>Comment</th><th>Date</th><th>Visibility</th><th>Action</th>
               </tr>
             </thead>
@@ -381,7 +381,7 @@
 
         <div id="catalogEditFoodOptions" hidden>
           <label for="catalogEditImage">
-            Replace food image (optional)
+            Replace products image (optional)
             <input id="catalogEditImage" type="file"
               accept="image/jpeg,image/png,image/webp" />
           </label>
@@ -390,7 +390,7 @@
             alt="Current or replacement food image" hidden />
           <label class="catalog-featured-option" for="catalogEditFeatured">
             <input id="catalogEditFeatured" type="checkbox" />
-            Show in Popular Foods on the customer home page
+            Show in Popular products on the customer home page
           </label>
         </div>
 
