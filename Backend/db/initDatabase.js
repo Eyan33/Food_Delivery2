@@ -468,9 +468,37 @@ async function seedSuperAdmin() {
         if (existing.rows[0].role !== "super_admin") {
             throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
         }
+
+        const otherSuperAdmin = await pool.query(
+            "SELECT id FROM public.users WHERE role = 'super_admin' AND id <> $1 LIMIT 1",
+            [existing.rows[0].id]
+        );
+        if (otherSuperAdmin.rows.length) {
+            throw new Error("More than one super_admin account exists. Resolve the duplicate accounts before starting the service.");
+        }
+
         log("super admin account already exists; leaving it unchanged.");
         return;
     }
+
+    // The platform must have exactly one super admin. Never silently promote
+    // an existing account or create a second super-admin identity.
+    const existingSuperAdmin = await pool.query(
+        "SELECT id FROM public.users WHERE role = 'super_admin' LIMIT 1"
+    );
+    if (existingSuperAdmin.rows.length) {
+        throw new Error("A super_admin account already exists with a different email. No second super admin was created.");
+    }
+
+    // Repair a potentially stale users.id sequence before inserting, so the
+    // initial super-admin ID is higher than every existing account ID.
+    await pool.query(
+        `SELECT setval(
+            pg_get_serial_sequence('public.users', 'id'),
+            GREATEST(COALESCE((SELECT MAX(id) FROM public.users), 1), 1),
+            TRUE
+        )`
+    );
 
     const passwordHash = await bcrypt.hash(password, 12);
     const result = await pool.query(
