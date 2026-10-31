@@ -768,12 +768,7 @@ deactivate(id) {
             );
         }
 
-        actions.append(
-            createActionButton("Deactivate/delete rider", riderId, {
-                text: "Delete",
-                action: "delete",
-                danger: true,
-            }),
+        actions.appendChild(
             createActionButton("Permanently delete rider (archive first)", riderId, {
                 text: "Delete permanently",
                 action: "permanent-delete",
