@@ -120,6 +120,8 @@ async function ensureSchema() {
 }
 
 async function seedAdmin() {
+    const system = String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase();
+    const adminRole = system === "market" ? "admin2" : system === "food" ? "admin1" : "admin";
     const email = normalizeEmail(process.env.ADMIN_EMAIL);
     const password = process.env.ADMIN_PASSWORD;
 
@@ -146,7 +148,7 @@ async function seedAdmin() {
     );
 
     if (existing.rows.length > 0) {
-        if (existing.rows[0].role !== "admin") {
+        if (existing.rows[0].role !== adminRole) {
             log(`account ${email} already exists and is not an admin, leaving it unchanged`);
         } else {
             log("admin account already exists, nothing to do");
@@ -160,7 +162,7 @@ async function seedAdmin() {
     await pool.query(
         `
         INSERT INTO users (first_name, last_name, email, phone, password_hash, role)
-        VALUES ($1, $2, $3, $4, $5, 'admin')
+        VALUES ($1, $2, $3, $4, $5, '${adminRole}')
         `,
         [
             (process.env.ADMIN_FIRST_NAME || "Platform").trim(),
