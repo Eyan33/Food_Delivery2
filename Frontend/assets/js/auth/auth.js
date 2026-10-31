@@ -14,10 +14,20 @@ function setLoginMessage(message, type) {
 function destinationForRole(role) {
     const destinations = {
         customer: "../customer/home.html",
+        customer1: "../customer/home.html",
+        customer2: "../customer/home.html",
         restaurant: "../restaurant/dashboard.html",
+        restaurant1: "../restaurant/dashboard.html",
+        market_owner2: "../restaurant/dashboard.html",
         rider: "../rider/dashboard.html",
+        rider1: "../rider/dashboard.html",
+        rider2: "../rider/dashboard.html",
         admin: "../admin/dashboard.html",
+        admin1: "../admin/dashboard.html",
+        admin2: "../admin/dashboard.html",
         super_admin: "../admin/dashboard.html",
+        super_admin1: "../admin/dashboard.html",
+        super_admin2: "../admin/dashboard.html",
     };
 
     return destinations[String(role || "").toLowerCase()] || "../../index.html";
