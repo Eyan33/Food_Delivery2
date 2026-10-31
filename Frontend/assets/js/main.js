@@ -1,3 +1,5 @@
+(() => {
+"use strict";
 // ============================================
 //                 ADMIN GLOBAL
 // ============================================
@@ -194,3 +196,5 @@ document.addEventListener("DOMContentLoaded", () => {
         link.addEventListener("click", () => api?.clearSession?.());
     });
 });
+
+})();

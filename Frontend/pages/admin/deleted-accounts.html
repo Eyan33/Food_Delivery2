@@ -5,85 +5,72 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Deleted Accounts | Admin</title>
 <link rel="stylesheet" href="../../assets/css/style.css">
-<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css">
 <style>
-.deleted-wrap{max-width:1200px;margin:28px auto;padding:0 20px}.deleted-card{background:#fff;border:1px solid #e4e7eb;border-radius:12px;padding:22px;box-shadow:0 4px 18px #172b4d0a}.deleted-filters{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}.deleted-filters input,.deleted-filters select{padding:11px 12px;border:1px solid #cbd2d9;border-radius:7px;min-width:180px}.deleted-filters button,.deleted-btn{padding:10px 15px;border:0;border-radius:7px;background:#013420;color:white;cursor:pointer}.deleted-table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e7eaee;vertical-align:top}th{background:#f5f7f5}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:480px;margin:0;font-size:12px}.deleted-status{margin:12px 0;color:#4b5563}.deleted-pagination{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:16px}.deleted-pagination button{padding:8px 12px;border:1px solid #ccd2d7;border-radius:6px;background:#fff;cursor:pointer}.deleted-pagination button:disabled{opacity:.45;cursor:not-allowed}
+.deleted-wrap{width:100%;max-width:none;margin:0 auto;padding:0}
+.deleted-intro{color:#666;margin:0 0 22px}
+.deleted-card{background:#fff;border:1px solid #ececec;border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+.deleted-filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 18px}
+.deleted-filters input,.deleted-filters select{min-height:42px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;min-width:180px;max-width:100%;background:#fff;color:#171717}
+.deleted-filters input{flex:1 1 230px}.deleted-filters select{flex:0 1 180px}
+.deleted-filters button{min-height:42px;padding:9px 16px;border:1px solid #ff5a1f;border-radius:8px;background:#ff5a1f;color:#fff;cursor:pointer;font-weight:600;white-space:nowrap}
+.deleted-filters button:hover{background:#e64a16;border-color:#e64a16}.deleted-filters button:disabled{opacity:.55;cursor:wait}
+.deleted-filters button:focus-visible,.deleted-filters input:focus-visible,.deleted-filters select:focus-visible,.deleted-pagination button:focus-visible{outline:3px solid rgba(255,90,31,.3);outline-offset:2px}
+.deleted-status{margin:12px 0 14px;color:#666;min-height:24px}.deleted-status.error{color:#a11b1b}
+.deleted-table-wrap{width:100%;overflow-x:auto;border:1px solid #ececec;border-radius:8px}
+.deleted-table-wrap table{width:100%;border-collapse:collapse;min-width:760px}
+.deleted-table-wrap th,.deleted-table-wrap td{text-align:left;padding:13px 14px;border-bottom:1px solid #ececec;vertical-align:top;overflow-wrap:anywhere}
+.deleted-table-wrap th{background:#f7f8f9;color:#555;font-size:11px;text-transform:uppercase;letter-spacing:.03em;font-weight:700;white-space:nowrap}
+.deleted-table-wrap tbody tr:last-child td{border-bottom:0}.deleted-table-wrap tbody tr:hover{background:#fffaf7}
+.deleted-empty{text-align:center;padding:24px;color:#666}
+.deleted-pagination{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:16px;color:#666}
+.deleted-pagination button{min-height:38px;padding:7px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#333;cursor:pointer}
+.deleted-pagination button:hover:not(:disabled){border-color:#ff5a1f;color:#ff5a1f}.deleted-pagination button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){.deleted-card{padding:14px}.deleted-filters{display:grid;grid-template-columns:1fr}.deleted-filters input,.deleted-filters select,.deleted-filters button{width:100%;min-width:0}.deleted-pagination{justify-content:center}}
 </style>
 </head>
-<body>
-<header class="admin-header"><div class="admin-header-inner"><a href="dashboard.html">Admin Dashboard</a><nav><a href="customers.html">Customers</a><a href="restaurants.html">Restaurants</a><a href="riders.html">Riders</a><a href="deleted-accounts.html" aria-current="page">Deleted Accounts</a></nav></div></header>
-<main class="deleted-wrap">
-<h1>Deleted Accounts Archive</h1>
-<p>Search archived account snapshots. This page is read-only; archived records are retained for audit and history.</p>
-<section class="deleted-card" style="margin-bottom:18px">
-<h2>Permanently delete an account</h2>
-<p>This is separate from deactivation. The account snapshot is archived in the database before deletion. If related order or payment records prevent deletion, the entire operation is rolled back.</p>
+<body> 
+<aside class="admin-sidebar" id="adminSidebar">
+ <div class="admin-sidebar-header"><a href="dashboard.html" class="admin-logo">Food<span>Delivery</span></a><button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button></div>
+ <div class="admin-profile"><div class="admin-profile-avatar">A</div><div class="admin-profile-info"><strong>Loading account…</strong><span>Loading role…</span></div></div>
+ <nav class="admin-navigation" aria-label="Admin navigation">
+ <a href="dashboard.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Dashboard</span></a>
+ <a href="orders.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Orders</span></a>
+ <a href="customers.html" class="admin-nav-link"><span class="admin-nav-icon">♙</span><span>Customers</span></a>
+ <a href="restaurants.html" class="admin-nav-link"><span class="admin-nav-icon">⌂</span><span>Restaurants</span></a>
+ <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
+ <a href="deleted-accounts.html" class="admin-nav-link active" aria-current="page"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
+ <a href="payments.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Payments</span></a>
+ <a href="reports.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Reports</span></a>
+ <a href="operations.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Operations</span></a>
+ <a href="settings.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Settings</span></a>
+ </nav><div class="admin-sidebar-bottom"><a href="../../pages/auth/login.html" class="admin-nav-link logout-link"><span class="admin-nav-icon">↪</span><span>Logout</span></a></div>
+</aside>
+<main class="admin-main">
+<header class="admin-topbar"><div class="admin-topbar-left"><button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button><div class="admin-page-heading"><h1>Deleted Accounts</h1><p>Review account deletion audit records.</p></div></div>
+<div class="admin-topbar-right"><button type="button" class="admin-notification-button" aria-label="Notifications"><span>🔔</span><span class="admin-notification-badge" hidden></span></button><div class="admin-topbar-profile"><div class="admin-topbar-avatar">A</div><div class="admin-topbar-profile-info"><strong>Loading account…</strong><span>Loading role…</span></div></div></div></header>
+<section class="admin-content"><div class="deleted-wrap">
+<h1>Deleted Accounts</h1>
+<p class="deleted-intro">This read-only register records account deletion details for audit purposes. Personal-data snapshots are not displayed or exported.</p>
+<section class="deleted-card" aria-label="Deleted accounts register">
 <div class="deleted-filters">
-<select id="deleteType" aria-label="Account type to permanently delete"><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
-<input id="deleteId" type="number" min="1" step="1" placeholder="Account ID" aria-label="Account ID to permanently delete" required>
-<input id="deleteReason" type="text" maxlength="1000" placeholder="Reason (optional)" aria-label="Deletion reason">
-<button id="permanentDelete" type="button" style="background:#a12622">Permanently delete</button>
-</div>
-<div id="deleteStatus" class="deleted-status" role="status"></div>
-</section>
-<section class="deleted-card">
-<div class="deleted-filters">
-<input id="search" type="search" placeholder="Search name, email, or details" aria-label="Search archived accounts">
+<input id="search" type="search" placeholder="Search account, ID, or reason" aria-label="Search deleted accounts">
 <select id="type" aria-label="Account type"><option value="">All account types</option><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
 <button id="apply" type="button">Search</button>
-<button id="export" type="button">Export CSV</button>
+<button id="export" type="button">Export All Matching CSV</button>
 </div>
-<div id="status" class="deleted-status" role="status">Loading archived accounts…</div>
-<div class="deleted-table-wrap"><table><thead><tr><th>Deleted at</th><th>Type</th><th>Original ID</th><th>Account</th><th>Deleted by</th><th>Reason</th><th>Snapshot</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div id="status" class="deleted-status" role="status" aria-live="polite">Loading deleted accounts…</div>
+<div class="deleted-table-wrap"><table><thead><tr><th>Deleted at</th><th>Type</th><th>Original ID</th><th>Account</th><th>Deleted by</th><th>Reason</th></tr></thead><tbody id="rows"></tbody></table></div>
 <div class="deleted-pagination"><button id="prev" type="button">Previous</button><span id="pageLabel">Page 1</span><button id="next" type="button">Next</button></div>
 </section>
-</main>
+</div></section></main>
+
 <script src="../../assets/js/api-config.js"></script>
 <script src="../../assets/js/main.js"></script>
 <script src="../../assets/js/auth/auth-api.js"></script>
-<script>
-(() => {
- const $=id=>document.getElementById(id); let page=1, pages=1, records=[];
- const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- function token(){return localStorage.getItem("token")||localStorage.getItem("authToken")||sessionStorage.getItem("token")||"";}
- async function load(){
-  $("status").textContent="Loading archived accounts…";
-  const params=new URLSearchParams({page:String(page),limit:"25",search:$("search").value.trim(),type:$("type").value});
-  try{
-   const response=await fetch((window.FOOD_DELIVERY_API_BASE||"")+"/admins/deleted-accounts?"+params,{headers:{Authorization:"Bearer "+token(),"Accept":"application/json"}});
-   const payload=await response.json();
-   if(!response.ok||!payload.success) throw new Error(payload.message||"Could not load archive.");
-   records=payload.data.accounts||[]; pages=Math.max(1,payload.data.pagination.pages||1);
-   $("rows").innerHTML=records.map(row=>'<tr><td>'+esc(row.deleted_at?new Date(row.deleted_at).toLocaleString():"")+'</td><td>'+esc(row.account_type)+'</td><td>'+esc(row.original_account_id)+'</td><td>'+esc(row.account_label)+'</td><td>'+esc(row.deleted_by??"—")+'</td><td>'+esc(row.deletion_reason||"—")+'</td><td><details><summary>View snapshot</summary><pre>'+esc(JSON.stringify(row.account_data,null,2))+'</pre></details></td></tr>').join("");
-   $("status").textContent=payload.data.pagination.total+" archived account(s) found.";
-   $("pageLabel").textContent="Page "+page+" of "+pages;$("prev").disabled=page<=1;$("next").disabled=page>=pages;
-  }catch(error){$("rows").innerHTML="";$("status").textContent=error.message+" Check that you are signed in as an admin.";}
- }
- function csvCell(value){return '"'+String(value??"").replace(/"/g,'""')+'"';}
- $("permanentDelete").addEventListener("click",async()=>{
-  const type=$("deleteType").value;const id=String($("deleteId").value||"").trim();const reason=$("deleteReason").value.trim();
-  if(!/^[1-9][0-9]*$/.test(id)){ $("deleteStatus").textContent="Enter a valid positive account ID.";return; }
-  const confirmed=window.confirm("Permanently delete this "+type+" account #"+id+"? A snapshot will be archived first. This cannot be undone.");
-  if(!confirmed)return;
-  $("deleteStatus").textContent="Processing permanent deletion…";
-  try{
-   const response=await fetch((window.FOOD_DELIVERY_API_BASE||"")+"/admins/deleted-accounts/"+encodeURIComponent(type)+"/"+encodeURIComponent(id),{
-    method:"DELETE",headers:{Authorization:"Bearer "+token(),"Accept":"application/json","Content-Type":"application/json"},
-    body:JSON.stringify({reason})
-   });
-   const payload=await response.json();
-   if(!response.ok||!payload.success)throw new Error(payload.message||"Permanent deletion failed.");
-   $("deleteStatus").textContent=payload.message||"Account permanently deleted and archived.";
-   $("deleteId").value="";$("deleteReason").value="";page=1;load();
-  }catch(error){$("deleteStatus").textContent=error.message;}
- });
- $("apply").addEventListener("click",()=>{page=1;load();});
- $("search").addEventListener("keydown",e=>{if(e.key==="Enter"){page=1;load();}});
- $("type").addEventListener("change",()=>{page=1;load();});
- $("prev").addEventListener("click",()=>{if(page>1){page--;load();}});
- $("next").addEventListener("click",()=>{if(page<pages){page++;load();}});
- $("export").addEventListener("click",()=>{if(!records.length){$("status").textContent="There are no rows on this page to export.";return;}const columns=["deleted_at","account_type","original_account_id","account_label","deleted_by","deletion_reason","account_data"];const csv=[columns.join(","),...records.map(row=>columns.map(k=>csvCell(k==="account_data"?JSON.stringify(row[k]):row[k])).join(","))].join("\r\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="deleted-accounts-page-"+page+".csv";a.click();URL.revokeObjectURL(url);});
- load();
-})();
-</script>
-</body></html>
+<script src="../../assets/js/admin/admin-header.js" defer></script>
+<script src="../../assets/js/admin/admin-notifications.js" defer></script>
+
+<script src="../../assets/js/admin/deleted-accounts.js" defer></script>
+</body>
+</html>
