@@ -858,12 +858,8 @@
           </td>
 
           <td>
-            <button
-              type="button"
-              class="admin-view-button"
-            >
-              View
-            </button>
+            <button type="button" class="admin-view-button">View</button>
+            <button type="button" class="admin-permanent-delete-button" data-account-id="${escapeHtml(String(customer.id))}" style="margin-left:6px;background:#a12622;color:#fff;border:0;border-radius:6px;padding:7px 9px;cursor:pointer">Delete permanently</button>
           </td>
         `;
 
@@ -879,6 +875,10 @@
               customer.id,
             ),
         );
+
+        row.querySelector(".admin-permanent-delete-button")?.addEventListener("click", () => {
+          window.location.href = "deleted-accounts.html?type=customer&id=" + encodeURIComponent(customer.id);
+        });
 
         tableBody.appendChild(
           row,
