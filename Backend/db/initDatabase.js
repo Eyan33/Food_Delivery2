@@ -192,6 +192,7 @@ async function ensureFoodImageSchema() {
 async function ensureAdminSupportSchema() {
     await pool.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url text;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS must_change_password boolean NOT NULL DEFAULT false;
 
         CREATE TABLE IF NOT EXISTS admin_settings (
             id smallint PRIMARY KEY DEFAULT 1 CHECK (id = 1),
