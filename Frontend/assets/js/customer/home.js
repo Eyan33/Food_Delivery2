@@ -221,7 +221,7 @@ if (greeting) {
         if (availableRestaurants.length === 0) {
             showMessage(
                 restaurantGrid,
-                "No restaurants are available right now."
+                "No markets are available right now."
             );
             return;
         }
@@ -229,7 +229,7 @@ if (greeting) {
         restaurantGrid.innerHTML = availableRestaurants
             .slice(0, 6)
             .map((restaurant) => {
-                const name = restaurant.name || "Restaurant";
+                const name = restaurant.name || "Market";
                 const isOpen = restaurant.is_open === true;
                 const rating = Number(restaurant.average_rating);
                 const ratingCount = Number(restaurant.rating_count) || 0;
@@ -246,7 +246,7 @@ if (greeting) {
                     ? `${formatKES(deliveryFee)} delivery`
                     : "Delivery fee unavailable";
 
-                const firstLocationWord = String(restaurant.name || "Restaurant").trim().split(/\s+/)[0] || "Restaurant";
+                const firstLocationWord = String(restaurant.name || "Market").trim().split(/\s+/)[0] || "Market";
                 const location = restaurant.location_name || `${firstLocationWord} Location`;
 
                 const imageUrl = getImageUrl(
@@ -278,7 +278,7 @@ if (greeting) {
                             </div>
 
                             <p class="restaurant-category">
-                                ${escapeHTML(location || restaurant.description || "Restaurant")}
+                                ${escapeHTML(location || restaurant.description || "Market")}
                             </p>
 
                             <div class="restaurant-meta">
@@ -294,7 +294,7 @@ if (greeting) {
     async function loadRestaurants() {
         if (!restaurantGrid) return;
 
-        showMessage(restaurantGrid, "Loading restaurants...");
+        showMessage(restaurantGrid, "Loading markets...");
 
         try {
             const data = await fetchPublicData("/restaurants");
@@ -339,7 +339,7 @@ if (greeting) {
             .map((food) => {
                 const name = food.name || "Food item";
                 const restaurantName =
-                    food.restaurant_name || "Restaurant";
+                    food.restaurant_name || "Market";
                 const description =
                     food.description || "A delicious meal to enjoy.";
 
@@ -438,7 +438,7 @@ if (greeting) {
         if (cart.length && cart.some(item => item.restaurant_id != null && restaurantId != null && String(item.restaurant_id) !== String(restaurantId))) { if (!window.confirm("Your cart contains items from another market. Clear it and add this product?")) return; cart = []; }
         const existing = cart.find(item => String(item.id) === String(food.id) && String(item.restaurant_id) === String(restaurantId));
         if (existing) existing.quantity = Math.max(1, Number(existing.quantity) || 1) + 1;
-        else cart.push({ id: food.id, restaurant_id: restaurantId, restaurant_name: food.restaurant_name || restaurant?.name || "Restaurant", restaurant_is_open: restaurant?.is_open, delivery_fee: restaurant?.delivery_fee, name: food.name || "Food item", category: food.category_name || food.category || "Other", description: food.description || "", price: Number(food.price) || 0, image: getImageUrl(food.image_url, FOOD_PLACEHOLDER), quantity: 1 });
+        else cart.push({ id: food.id, restaurant_id: restaurantId, restaurant_name: food.restaurant_name || restaurant?.name || "Market", restaurant_is_open: restaurant?.is_open, delivery_fee: restaurant?.delivery_fee, name: food.name || "Food item", category: food.category_name || food.category || "Other", description: food.description || "", price: Number(food.price) || 0, image: getImageUrl(food.image_url, FOOD_PLACEHOLDER), quantity: 1 });
         try { localStorage.setItem("foodDeliveryCart", JSON.stringify(cart)); } catch { showMessage(foodGrid, "Could not save your cart. Check browser storage.", "error"); return; }
         updateCartCount(); if (button) { const old = button.textContent; button.textContent = "✓"; window.setTimeout(() => button.textContent = old, 900); }
     }
