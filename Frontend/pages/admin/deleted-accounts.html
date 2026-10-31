@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deleted Accounts | Admin</title>
+<link rel="stylesheet" href="../../assets/css/style.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<style>
+.deleted-wrap{max-width:1200px;margin:28px auto;padding:0 20px}.deleted-card{background:#fff;border:1px solid #e4e7eb;border-radius:12px;padding:22px;box-shadow:0 4px 18px #172b4d0a}.deleted-filters{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}.deleted-filters input,.deleted-filters select{padding:11px 12px;border:1px solid #cbd2d9;border-radius:7px;min-width:180px}.deleted-filters button,.deleted-btn{padding:10px 15px;border:0;border-radius:7px;background:#013420;color:white;cursor:pointer}.deleted-table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e7eaee;vertical-align:top}th{background:#f5f7f5}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:480px;margin:0;font-size:12px}.deleted-status{margin:12px 0;color:#4b5563}.deleted-pagination{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:16px}.deleted-pagination button{padding:8px 12px;border:1px solid #ccd2d7;border-radius:6px;background:#fff;cursor:pointer}.deleted-pagination button:disabled{opacity:.45;cursor:not-allowed}
+</style>
+</head>
+<body>
+<header class="admin-header"><div class="admin-header-inner"><a href="dashboard.html">Admin Dashboard</a><nav><a href="customers.html">Customers</a><a href="restaurants.html">Restaurants</a><a href="riders.html">Riders</a><a href="deleted-accounts.html" aria-current="page">Deleted Accounts</a></nav></div></header>
+<main class="deleted-wrap">
+<h1>Deleted Accounts Archive</h1>
+<p>Search archived account snapshots. This page is read-only; archived records are retained for audit and history.</p>
+<section class="deleted-card" style="margin-bottom:18px">
+<h2>Permanently delete an account</h2>
+<p>This is separate from deactivation. The account snapshot is archived in the database before deletion. If related order or payment records prevent deletion, the entire operation is rolled back.</p>
+<div class="deleted-filters">
+<select id="deleteType" aria-label="Account type to permanently delete"><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
+<input id="deleteId" type="number" min="1" step="1" placeholder="Account ID" aria-label="Account ID to permanently delete" required>
+<input id="deleteReason" type="text" maxlength="1000" placeholder="Reason (optional)" aria-label="Deletion reason">
+<button id="permanentDelete" type="button" style="background:#a12622">Permanently delete</button>
+</div>
+<div id="deleteStatus" class="deleted-status" role="status"></div>
+</section>
+<section class="deleted-card">
+<div class="deleted-filters">
+<input id="search" type="search" placeholder="Search name, email, or details" aria-label="Search archived accounts">
+<select id="type" aria-label="Account type"><option value="">All account types</option><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
+<button id="apply" type="button">Search</button>
+<button id="export" type="button">Export CSV</button>
+</div>
+<div id="status" class="deleted-status" role="status">Loading archived accounts…</div>
+<div class="deleted-table-wrap"><table><thead><tr><th>Deleted at</th><th>Type</th><th>Original ID</th><th>Account</th><th>Deleted by</th><th>Reason</th><th>Snapshot</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="deleted-pagination"><button id="prev" type="button">Previous</button><span id="pageLabel">Page 1</span><button id="next" type="button">Next</button></div>
+</section>
+</main>
+<script src="../../assets/js/api-config.js"></script>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/auth/auth-api.js"></script>
+<script>
+(() => {
+ const $=id=>document.getElementById(id); let page=1, pages=1, records=[];
+ const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ function token(){return localStorage.getItem("token")||localStorage.getItem("authToken")||sessionStorage.getItem("token")||"";}
+ async function load(){
+  $("status").textContent="Loading archived accounts…";
+  const params=new URLSearchParams({page:String(page),limit:"25",search:$("search").value.trim(),type:$("type").value});
+  try{
+   const response=await fetch((window.FOOD_DELIVERY_API_BASE||"")+"/admins/deleted-accounts?"+params,{headers:{Authorization:"Bearer "+token(),"Accept":"application/json"}});
+   const payload=await response.json();
+   if(!response.ok||!payload.success) throw new Error(payload.message||"Could not load archive.");
+   records=payload.data.accounts||[]; pages=Math.max(1,payload.data.pagination.pages||1);
+   $("rows").innerHTML=records.map(row=>'<tr><td>'+esc(row.deleted_at?new Date(row.deleted_at).toLocaleString():"")+'</td><td>'+esc(row.account_type)+'</td><td>'+esc(row.original_account_id)+'</td><td>'+esc(row.account_label)+'</td><td>'+esc(row.deleted_by??"—")+'</td><td>'+esc(row.deletion_reason||"—")+'</td><td><details><summary>View snapshot</summary><pre>'+esc(JSON.stringify(row.account_data,null,2))+'</pre></details></td></tr>').join("");
+   $("status").textContent=payload.data.pagination.total+" archived account(s) found.";
+   $("pageLabel").textContent="Page "+page+" of "+pages;$("prev").disabled=page<=1;$("next").disabled=page>=pages;
+  }catch(error){$("rows").innerHTML="";$("status").textContent=error.message+" Check that you are signed in as an admin.";}
+ }
+ function csvCell(value){return '"'+String(value??"").replace(/"/g,'""')+'"';}
+ $("permanentDelete").addEventListener("click",async()=>{
+  const type=$("deleteType").value;const id=String($("deleteId").value||"").trim();const reason=$("deleteReason").value.trim();
+  if(!/^[1-9][0-9]*$/.test(id)){ $("deleteStatus").textContent="Enter a valid positive account ID.";return; }
+  const confirmed=window.confirm("Permanently delete this "+type+" account #"+id+"? A snapshot will be archived first. This cannot be undone.");
+  if(!confirmed)return;
+  $("deleteStatus").textContent="Processing permanent deletion…";
+  try{
+   const response=await fetch((window.FOOD_DELIVERY_API_BASE||"")+"/admins/deleted-accounts/"+encodeURIComponent(type)+"/"+encodeURIComponent(id),{
+    method:"DELETE",headers:{Authorization:"Bearer "+token(),"Accept":"application/json","Content-Type":"application/json"},
+    body:JSON.stringify({reason})
+   });
+   const payload=await response.json();
+   if(!response.ok||!payload.success)throw new Error(payload.message||"Permanent deletion failed.");
+   $("deleteStatus").textContent=payload.message||"Account permanently deleted and archived.";
+   $("deleteId").value="";$("deleteReason").value="";page=1;load();
+  }catch(error){$("deleteStatus").textContent=error.message;}
+ });
+ $("apply").addEventListener("click",()=>{page=1;load();});
+ $("search").addEventListener("keydown",e=>{if(e.key==="Enter"){page=1;load();}});
+ $("type").addEventListener("change",()=>{page=1;load();});
+ $("prev").addEventListener("click",()=>{if(page>1){page--;load();}});
+ $("next").addEventListener("click",()=>{if(page<pages){page++;load();}});
+ $("export").addEventListener("click",()=>{if(!records.length){$("status").textContent="There are no rows on this page to export.";return;}const columns=["deleted_at","account_type","original_account_id","account_label","deleted_by","deletion_reason","account_data"];const csv=[columns.join(","),...records.map(row=>columns.map(k=>csvCell(k==="account_data"?JSON.stringify(row[k]):row[k])).join(","))].join("\r\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="deleted-accounts-page-"+page+".csv";a.click();URL.revokeObjectURL(url);});
+ load();
+})();
+</script>
+</body></html>
