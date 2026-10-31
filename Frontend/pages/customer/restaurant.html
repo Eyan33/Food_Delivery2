@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Restaurant | FoodDelivery</title>
+  <title>Restaurant | DeRon</title>
 
   <link rel="stylesheet" href="../../assets/css/style.css" />
   <link rel="stylesheet" href="../../assets/css/pages/customer/customer.css" />
@@ -19,12 +19,12 @@
     ========================== -->
   <header class="customer-header">
   <div class="customer-header-container">
-    <a href="home.html" class="customer-logo" aria-label="FoodDelivery home">Food<span>Delivery</span></a>
+    <a href="home.html" class="customer-logo" aria-label="DeRon home">Food<span>Delivery</span></a>
     <a href="addresses.html" class="delivery-location-link" aria-label="Manage delivery addresses"><span class="delivery-location"><span class="location-icon" aria-hidden="true">📍</span><span class="location-text"><small>Deliver to</small><strong>Select location</strong></span></span></a>
-    <nav class="customer-navigation" aria-label="Customer navigation"><a href="home.html" data-customer-nav>Home</a><a href="restaurants.html" data-customer-nav>Restaurants</a><a href="cart.html" data-customer-nav>Cart</a><a href="orders.html" data-customer-nav>Orders</a><a href="addresses.html" data-customer-nav>Addresses</a><a href="profile.html" data-customer-nav>Profile</a><a href="../auth/login.html" data-customer-logout>Logout</a></nav>
+    <nav class="customer-navigation" aria-label="Customer navigation"><a href="home.html" data-customer-nav>Home</a><a href="restaurants.html" data-customer-nav>Markets</a><a href="cart.html" data-customer-nav>Cart</a><a href="orders.html" data-customer-nav>Orders</a><a href="addresses.html" data-customer-nav>Addresses</a><a href="profile.html" data-customer-nav>Profile</a><a href="../auth/login.html" data-customer-logout>Logout</a></nav>
     <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNavigation"><span aria-hidden="true">☰</span></button>
   </div>
-  <nav class="mobile-navigation" id="mobileNavigation" aria-label="Customer navigation" aria-hidden="true"><a href="home.html" data-customer-nav>Home</a><a href="restaurants.html" data-customer-nav>Restaurants</a><a href="cart.html" data-customer-nav>Cart</a><a href="orders.html" data-customer-nav>Orders</a><a href="addresses.html" data-customer-nav>Addresses</a><a href="profile.html" data-customer-nav>Profile</a><a href="../auth/login.html" data-customer-logout>Logout</a></nav>
+  <nav class="mobile-navigation" id="mobileNavigation" aria-label="Customer navigation" aria-hidden="true"><a href="home.html" data-customer-nav>Home</a><a href="restaurants.html" data-customer-nav>Markets</a><a href="cart.html" data-customer-nav>Cart</a><a href="orders.html" data-customer-nav>Orders</a><a href="addresses.html" data-customer-nav>Addresses</a><a href="profile.html" data-customer-nav>Profile</a><a href="../auth/login.html" data-customer-logout>Logout</a></nav>
 </header>
 
 <main class="customer-main">
@@ -35,7 +35,7 @@
       <div class="restaurant-details-container">
         <!-- Back -->
         <a href="restaurants.html" class="back-link">
-          ← Back to restaurants
+          ← Back to markets
         </a>
 
         <!-- Restaurant Information -->
@@ -57,7 +57,7 @@
             <h1 id="restaurantName">Loading restaurant…</h1>
 
             <p class="restaurant-description" id="restaurantDescription">
-              Restaurant details will appear here once loaded.
+              Market details will appear here once loaded.
             </p>
 
             <!-- Rating -->
@@ -97,7 +97,7 @@
     <!-- Customer reviews -->
     <section class="customer-section restaurant-reviews-section" aria-labelledby="restaurantReviewsHeading">
       <div class="restaurant-reviews-container">
-        <div class="section-header"><div><span class="section-label">Customer feedback</span><h2 id="restaurantReviewsHeading">Restaurant reviews</h2></div></div>
+        <div class="section-header"><div><span class="section-label">Customer feedback</span><h2 id="restaurantReviewsHeading">Market reviews</h2></div></div>
         <div id="restaurantReviewsList" class="restaurant-reviews-list" aria-live="polite"><p class="home-message">Loading reviews…</p></div>
       </div>
     </section>
@@ -110,14 +110,14 @@
         <!-- Menu Header -->
         <div class="menu-header">
           <div>
-            <span class="section-label"> Our menu </span>
+            <span class="section-label"> Our products </span>
 
-            <h2>What would you like?</h2>
+            <h2>What would you like to shop for?</h2>
           </div>
 
           <!-- Menu Search -->
           <form class="menu-search" id="menuSearchForm">
-            <input type="search" id="menuSearch" placeholder="Search menu..." autocomplete="off" />
+            <input type="search" id="menuSearch" placeholder="Search products..." autocomplete="off" />
 
             <button type="submit">Search</button>
           </form>
@@ -134,14 +134,14 @@
                      MENU GRID
                 ========================== -->
         <div class="menu-food-grid" id="menuFoodGrid" aria-live="polite">
-          <p class="home-message">Loading this restaurant’s menu…</p>
+          <p class="home-message">Loading market products…</p>
         </div>
 
         <!-- No Menu Results -->
         <div class="no-results" id="noMenuResults" hidden>
-          <h3>No food found</h3>
+          <h3>No products found</h3>
 
-          <p>Try another search or menu category.</p>
+          <p>Try another search or product category.</p>
         </div>
       </div>
     </section>
@@ -163,11 +163,11 @@
         <div class="customer-footer-container">
             <div class="footer-brand">
                 <a href="home.html" class="customer-logo">Food<span>Delivery</span></a>
-                <p>Delicious food delivered straight to your door.</p>
+                <p>Fresh groceries and everyday essentials delivered to your door.</p>
             </div>
             <nav class="footer-links" aria-label="Customer footer navigation">
                 <a href="home.html">Home</a>
-                <a href="restaurants.html">Restaurants</a>
+                <a href="restaurants.html">Markets</a>
                 <a href="cart.html">Cart</a>
                 <a href="orders.html">Orders</a>
                 <a href="addresses.html">Addresses</a>
@@ -175,7 +175,7 @@
             </nav>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 FoodDelivery. All rights reserved.</p>
+            <p>&copy; 2026 DeRon. All rights reserved.</p>
         </div>
     </footer>
 
