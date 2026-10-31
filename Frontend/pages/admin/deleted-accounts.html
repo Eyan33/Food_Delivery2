@@ -39,7 +39,7 @@
   $("status").textContent="Loading archived accounts…";
   const params=new URLSearchParams({page:String(page),limit:"25",search:$("search").value.trim(),type:$("type").value});
   try{
-   const response=await fetch((window.API_BASE_URL||"")+"/api/admins/deleted-accounts?"+params,{headers:{Authorization:"Bearer "+token(),"Accept":"application/json"}});
+   const response=await fetch((window.FOOD_DELIVERY_API_BASE||"")+"/admins/deleted-accounts?"+params,{headers:{Authorization:"Bearer "+token(),"Accept":"application/json"}});
    const payload=await response.json();
    if(!response.ok||!payload.success) throw new Error(payload.message||"Could not load archive.");
    records=payload.data.accounts||[]; pages=Math.max(1,payload.data.pagination.pages||1);
