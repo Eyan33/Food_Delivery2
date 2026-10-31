@@ -510,6 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </button>
 
                         ${quickAction}
+                        <button type="button" class="admin-table-action permanent-delete-button" data-id="${escapeHtml(restaurant.id)}" aria-label="Permanently delete restaurant" title="Permanently delete restaurant">Delete</button>
 
                     </div>
 
@@ -567,6 +568,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (button.classList.contains("deactivate-button")) {
       await handleDeactivateRestaurant(restaurantId);
+    }
+    if (button.classList.contains("permanent-delete-button")) {
+      window.location.href = "deleted-accounts.html?type=restaurant&id=" + encodeURIComponent(restaurantId);
     }
   });
 

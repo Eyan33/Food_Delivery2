@@ -9,7 +9,6 @@
     const chartMetric = document.getElementById("reportChartMetric");
     const applyButton = document.querySelector(".admin-report-filter-button .admin-primary-button");
     const exportButton = document.querySelector(".admin-page-actions .admin-secondary-button");
-    const generateButton = document.querySelector(".admin-page-actions .admin-primary-button");
     const messageBox = document.getElementById("adminMessage");
     const money = value => `KSh ${Number(value || 0).toLocaleString("en-KE", { maximumFractionDigits: 2 })}`;
     const number = value => Number(value || 0).toLocaleString("en-KE");
@@ -211,7 +210,6 @@
     chartMetric?.addEventListener("change", () => { if (currentReport) { try { renderReport(currentReport); } catch (error) { showMessage(error.message, "danger"); } } });
     document.querySelector(".admin-reports-revenue-card .admin-period-select")?.addEventListener("change", event => { periodSelect.value = event.currentTarget.value; setPreset(periodSelect.value); loadReport(); });
     applyButton?.addEventListener("click", () => loadReport(applyButton));
-    generateButton?.addEventListener("click", () => loadReport(generateButton));
     exportButton?.addEventListener("click", exportReport);
     setPreset(periodSelect.value || "Last 7 Days");
     loadReport();
