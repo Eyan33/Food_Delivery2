@@ -420,6 +420,25 @@ async function ensureMpesaPaymentSchema() {
     `);
 }
 
+async function ensureDeletedAccountsSchema() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS public.deleted_accounts (
+            id bigserial PRIMARY KEY,
+            original_account_id bigint NOT NULL,
+            account_type varchar(20) NOT NULL CHECK (account_type IN ('customer', 'restaurant', 'rider')),
+            account_label text NOT NULL DEFAULT '',
+            account_data jsonb NOT NULL,
+            deleted_by bigint,
+            deletion_reason text,
+            deleted_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_deleted_accounts_type_deleted_at
+            ON public.deleted_accounts (account_type, deleted_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_deleted_accounts_label
+            ON public.deleted_accounts (account_label);
+    `);
+}
+
 async function initializeDatabase() {
     await waitForDatabase();
     await ensureSchema();
@@ -432,6 +451,7 @@ async function initializeDatabase() {
     await ensureMpesaPaymentSchema();
     await ensureRestaurantNotificationSchema();
     await ensureRiderNotificationSchema();
+    await ensureDeletedAccountsSchema();
     await seedAdmin();
 }
 
