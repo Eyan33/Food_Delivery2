@@ -1,6 +1,7 @@
 const express = require("express");
 
 const adminController = require("../../controllers/admin/adminController");
+const deletedAccountsController = require("../../controllers/admin/deletedAccountsController");
 const authenticateToken = require("../../middleware/auth/authMiddleware");
 const authorizeRoles = require("../../middleware/auth/roleMiddleware");
 const auditAdminAction = require("../../middleware/adminAuditMiddleware");
@@ -24,6 +25,7 @@ router.get("/notifications", adminController.getNotifications);
 router.patch("/notifications/read-all", adminController.markAllNotificationsRead);
 router.patch("/notifications/:id/read", adminController.markNotificationRead);
 router.get("/audit-logs", adminController.getAuditLogs);
+router.get("/deleted-accounts", deletedAccountsController.listDeletedAccounts);
 router.get("/reviews", adminController.getReviews);
 router.patch("/reviews/:id/visibility", adminController.updateReviewVisibility);
 
