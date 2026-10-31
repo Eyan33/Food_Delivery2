@@ -439,6 +439,55 @@ async function ensureDeletedAccountsSchema() {
     `);
 }
 
+async function ensureSuperAdminRoleSchema() {
+    await pool.query(`
+        ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
+        ALTER TABLE public.users
+            ADD CONSTRAINT users_role_check
+            CHECK (role IN ('customer', 'restaurant', 'rider', 'admin', 'super_admin'));
+    `);
+}
+
+async function seedSuperAdmin() {
+    const email = normalizeEmail(process.env.SUPER_ADMIN_EMAIL);
+    const password = process.env.SUPER_ADMIN_PASSWORD;
+
+    if (!email && !password) return;
+    if (!email || !password) {
+        throw new Error("SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD must both be set to create the super admin.");
+    }
+    if (!isValidEmail(email)) throw new Error("SUPER_ADMIN_EMAIL is not a valid email address.");
+    if (password.length < 16) throw new Error("SUPER_ADMIN_PASSWORD must be at least 16 characters.");
+
+    const existing = await pool.query(
+        "SELECT id, role FROM public.users WHERE email = $1 LIMIT 1",
+        [email]
+    );
+
+    if (existing.rows.length) {
+        if (existing.rows[0].role !== "super_admin") {
+            throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
+        }
+        log("super admin account already exists; leaving it unchanged.");
+        return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const result = await pool.query(
+        `INSERT INTO public.users (first_name, last_name, email, phone, password_hash, role, is_active)
+         VALUES ($1, $2, $3, $4, $5, 'super_admin', TRUE)
+         RETURNING id`,
+        [
+            String(process.env.SUPER_ADMIN_FIRST_NAME || "Platform").trim().slice(0, 100),
+            String(process.env.SUPER_ADMIN_LAST_NAME || "Super Admin").trim().slice(0, 100),
+            email,
+            process.env.SUPER_ADMIN_PHONE ? String(process.env.SUPER_ADMIN_PHONE).trim().slice(0, 30) : null,
+            passwordHash
+        ]
+    );
+    log(`super admin account created (user ID ${result.rows[0].id}). Remove SUPER_ADMIN_PASSWORD from the environment after successful creation.`);
+}
+
 async function initializeDatabase() {
     await waitForDatabase();
     await ensureSchema();
@@ -452,7 +501,9 @@ async function initializeDatabase() {
     await ensureRestaurantNotificationSchema();
     await ensureRiderNotificationSchema();
     await ensureDeletedAccountsSchema();
+    await ensureSuperAdminRoleSchema();
     await seedAdmin();
+    await seedSuperAdmin();
 }
 
 module.exports = {
