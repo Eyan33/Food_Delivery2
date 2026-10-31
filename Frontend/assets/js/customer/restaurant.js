@@ -250,12 +250,12 @@ document.addEventListener("DOMContentLoaded", () => {
         restaurant = data;
 
         if (restaurantName) {
-            restaurantName.textContent = data.name || "Restaurant";
+            restaurantName.textContent = data.name || "Market";
         }
 
         if (restaurantDescription) {
             restaurantDescription.textContent =
-                data.description || "Explore this restaurant's menu.";
+                data.description || "Browse products available at this market.";
         }
 
         if (restaurantImage) {
@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 RESTAURANT_PLACEHOLDER
             );
 
-            restaurantImage.alt = data.name || "Restaurant";
+            restaurantImage.alt = data.name || "Market";
 
             restaurantImage.onerror = () => {
                 restaurantImage.onerror = null;
@@ -278,12 +278,12 @@ document.addEventListener("DOMContentLoaded", () => {
             restaurantStatus.classList.toggle("closed", !isOpen);
             restaurantStatus.setAttribute(
                 "aria-label",
-                isOpen ? "Restaurant is open" : "Restaurant is closed"
+                isOpen ? "Market is open" : "Market is closed"
             );
         }
 
         if (restaurantCuisine) {
-            restaurantCuisine.textContent = data.cuisine || data.cuisine_name || data.category_name || "Restaurant";
+            restaurantCuisine.textContent = data.cuisine || data.cuisine_name || data.category_name || "Market";
         }
 
         if (restaurantRating) {
@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Update the restaurant image even if the initial HTML has a placeholder.
-        document.title = `${data.name || "Restaurant"} | FoodDelivery`;
+        document.title = `${data.name || "Market"} | DeRon Market Deliveries`;
 
         // Update the existing delivery and minimum-order values without
         // requiring changes to the page layout.
@@ -329,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = result.data?.restaurant || result.restaurant;
 
         if (!data || data.id == null) {
-            throw new Error("The API response did not contain restaurant details.");
+            throw new Error("The API response did not contain market details.");
         }
 
         updateRestaurantDetails(data);
@@ -350,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return `<article class="restaurant-review-card"><div class="restaurant-review-card-heading"><strong>${customer}</strong><span class="restaurant-review-stars" aria-label="${rating} out of 5 stars">${"★".repeat(rating)}${"☆".repeat(5-rating)}</span></div><p>${comment}</p><small>${escapeHTML(date)}</small></article>`;
             }).join("");
         } catch (error) {
-            console.error("Could not load restaurant reviews:", error);
+            console.error("Could not load market reviews:", error);
             container.innerHTML = '<p class="home-message">Reviews could not be loaded right now.</p>';
         }
     }
