@@ -441,15 +441,28 @@ async function ensureDeletedAccountsSchema() {
 }
 
 async function ensureSuperAdminRoleSchema() {
+    // Preserve legacy values while allowing both isolated role families.
+    // Do not rewrite existing user roles during application startup.
     await pool.query(`
         ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
         ALTER TABLE public.users
             ADD CONSTRAINT users_role_check
-            CHECK (role IN ('customer', 'restaurant', 'rider', 'admin', 'super_admin'));
+            CHECK (role IN (
+                'customer', 'restaurant', 'rider', 'admin', 'super_admin',
+                'customer1', 'restaurant1', 'rider1', 'admin1', 'super_admin1',
+                'customer2', 'market_owner2', 'rider2', 'admin2', 'super_admin2'
+            ));
     `);
 }
 
 async function seedSuperAdmin() {
+    // The legacy global seed account must not be created in either isolated
+    // deployment. Project-specific Super Admins are provisioned separately.
+    if (["food", "market"].includes(String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase())) {
+        log("project-specific Super Admin provisioning is managed separately; skipping legacy global seed.");
+        return;
+    }
+
     const email = normalizeEmail(process.env.SUPER_ADMIN_EMAIL);
     const password = process.env.SUPER_ADMIN_PASSWORD;
 
