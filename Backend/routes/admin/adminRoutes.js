@@ -6,12 +6,13 @@ const permanentAccountDeletionController = require("../../controllers/admin/perm
 const authenticateToken = require("../../middleware/auth/authMiddleware");
 const authorizeRoles = require("../../middleware/auth/roleMiddleware");
 const auditAdminAction = require("../../middleware/adminAuditMiddleware");
+const requireSuperAdmin = require("../../middleware/auth/superAdminMiddleware");
 
 const router = express.Router();
 
 router.use(
     authenticateToken,
-    authorizeRoles("admin"),
+    authorizeRoles("admin", "super_admin"),
     auditAdminAction
 );
 
@@ -31,12 +32,12 @@ router.delete("/deleted-accounts/:type/:id", permanentAccountDeletionController.
 router.get("/reviews", adminController.getReviews);
 router.patch("/reviews/:id/visibility", adminController.updateReviewVisibility);
 
-router.get("/", adminController.getAdmins);
-router.post("/", adminController.createAdmin);
+router.get("/", requireSuperAdmin, adminController.getAdmins);
+router.post("/", requireSuperAdmin, adminController.createAdmin);
 
-router.get("/:id", adminController.getAdmin);
-router.put("/:id", adminController.updateAdmin);
-router.patch("/:id/activate", adminController.activateAdmin);
-router.delete("/:id", adminController.deactivateAdmin);
+router.get("/:id", requireSuperAdmin, adminController.getAdmin);
+router.put("/:id", requireSuperAdmin, adminController.updateAdmin);
+router.patch("/:id/activate", requireSuperAdmin, adminController.activateAdmin);
+router.delete("/:id", requireSuperAdmin, adminController.deactivateAdmin);
 
 module.exports = router;

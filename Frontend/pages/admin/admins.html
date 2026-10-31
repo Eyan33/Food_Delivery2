@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Accounts | FoodDelivery</title>
+<link rel="stylesheet" href="../../assets/css/style.css">
+<link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/theme-palette.css">
+<style>
+.super-admin-accounts{padding:28px;max-width:1200px;margin:auto}.super-admin-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px;margin-bottom:20px}.super-admin-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.super-admin-form label{display:flex;flex-direction:column;gap:6px;font-size:14px}.super-admin-form input{padding:11px;border:1px solid #cbd2d9;border-radius:7px}.super-admin-form button{background:#ff5a1f;color:#fff;border:0;border-radius:7px;padding:12px;cursor:pointer;align-self:end}.super-admin-status{margin-top:12px}.super-admin-table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid #e5e7eb}th{background:#f5f7f7}.account-action{padding:7px 10px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}.account-action.danger{color:#b42318}@media(max-width:700px){.super-admin-accounts{padding:16px}.super-admin-form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="admin-sidebar" id="adminSidebar">
+ <div class="admin-sidebar-header"><a href="dashboard.html" class="admin-logo">Food<span>Delivery</span></a><button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button></div>
+ <div class="admin-profile"><div class="admin-profile-avatar">SA</div><div class="admin-profile-info"><strong>Super Admin</strong><span>Platform owner</span></div></div>
+ <nav class="admin-navigation" aria-label="Admin navigation">
+ <a href="dashboard.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Dashboard</span></a>
+ <a href="orders.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Orders</span></a>
+ <a href="customers.html" class="admin-nav-link"><span class="admin-nav-icon">♙</span><span>Customers</span></a>
+ <a href="restaurants.html" class="admin-nav-link"><span class="admin-nav-icon">⌂</span><span>Restaurants</span></a>
+ <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
+ <a href="deleted-accounts.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
+ <a href="admins.html" class="admin-nav-link active" aria-current="page"><span class="admin-nav-icon">♙</span><span>Admin Accounts</span></a>
+ <a href="payments.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Payments</span></a>
+ <a href="reports.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Reports</span></a>
+ <a href="operations.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Operations</span></a>
+ <a href="settings.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Settings</span></a>
+ </nav><div class="admin-sidebar-bottom"><a href="../../pages/auth/login.html" class="admin-nav-link logout-link"><span class="admin-nav-icon">↪</span><span>Logout</span></a></div>
+</aside>
+<main class="admin-main"><header class="admin-topbar"><div class="admin-topbar-left"><button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button><div class="admin-page-heading"><h1>Admin Accounts</h1><p>Super-admin-only account management.</p></div></div><div class="admin-topbar-right"><div class="admin-topbar-profile"><div class="admin-topbar-avatar">SA</div><div class="admin-topbar-profile-info"><strong id="superAdminName">Super Admin</strong><span>Super Administrator</span></div></div></div></header>
+<section class="admin-content super-admin-accounts">
+ <div class="admin-page-header"><div><h2>Administrator Management</h2><p>Create, activate, or deactivate regular admin accounts. This page cannot create another super admin.</p></div></div>
+ <section class="super-admin-card"><h3>Create Admin Account</h3><form id="createAdminForm" class="super-admin-form">
+ <label>First name<input name="first_name" required minlength="2" maxlength="100"></label>
+ <label>Last name<input name="last_name" required minlength="2" maxlength="100"></label>
+ <label>Email<input name="email" type="email" required maxlength="255"></label>
+ <label>Phone (optional)<input name="phone" type="tel" maxlength="30"></label>
+ <label>Temporary password<input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
+ <button type="submit" id="createAdminButton">Create Admin</button></form><p id="createStatus" class="super-admin-status" role="status"></p></section>
+ <section class="super-admin-card"><div style="display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap"><h3>Existing Admin Accounts</h3><button type="button" id="refreshAdmins" class="account-action">Refresh</button></div><p id="listStatus" role="status">Loading administrator accounts…</p><div class="super-admin-table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody id="adminRows"></tbody></table></div></section>
+</section></main>
+<script src="../../assets/js/api-config.js"></script><script src="../../assets/js/main.js"></script><script src="../../assets/js/auth/auth-api.js"></script><script src="../../assets/js/admin/admins.js" defer></script>
+</body></html>

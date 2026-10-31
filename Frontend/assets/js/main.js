@@ -6,6 +6,26 @@
 
 const adminSidebar = document.getElementById("adminSidebar");
 const adminMenuButton = document.getElementById("adminMenuButton");
+
+// Only expose the Admin Accounts navigation entry to a Super Admin.
+// Backend middleware independently enforces access to every management endpoint.
+if (adminSidebar) {
+    try {
+        const rawUser = localStorage.getItem("foodDeliveryUser") || sessionStorage.getItem("foodDeliveryUser");
+        const currentUser = rawUser ? JSON.parse(rawUser) : null;
+        const navigation = adminSidebar.querySelector(".admin-navigation");
+        if (currentUser?.role === "super_admin" && navigation &&
+            !navigation.querySelector('a[href="admins.html"]')) {
+            const link = document.createElement("a");
+            link.href = "admins.html";
+            link.className = "admin-nav-link";
+            link.innerHTML = '<span class="admin-nav-icon" aria-hidden="true">♙</span><span>Admin Accounts</span>';
+            navigation.appendChild(link);
+        }
+    } catch (error) {
+        console.warn("Could not initialize Super Admin navigation:", error);
+    }
+}
 const adminCloseMenuButton = document.getElementById(
     "adminCloseMenuButton",
 );

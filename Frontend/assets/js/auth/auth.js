@@ -17,6 +17,7 @@ function destinationForRole(role) {
         restaurant: "../restaurant/dashboard.html",
         rider: "../rider/dashboard.html",
         admin: "../admin/dashboard.html",
+        super_admin: "../admin/dashboard.html",
     };
 
     return destinations[String(role || "").toLowerCase()] || "../../index.html";
@@ -40,7 +41,9 @@ loginForm.addEventListener("submit", async (event) => {
         window.FoodDeliveryAuthApi.saveSession(session, rememberMeInput.checked);
         setLoginMessage("Login successful. Redirecting…", "success");
         window.setTimeout(() => {
-            window.location.href = destinationForRole(session.user.role);
+            window.location.href = session.user.must_change_password
+                ? "change-first-password.html"
+                : destinationForRole(session.user.role);
         }, 500);
     } catch (error) {
         setLoginMessage(error.message || "Unable to log in. Please try again.", "error");
