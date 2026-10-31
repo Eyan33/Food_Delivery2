@@ -5,10 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Restaurants | FoodDelivery</title>
+    <title>Markets | DeRon</title>
 
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <link rel="stylesheet" href="../../assets/css/pages/admin/restaurants.css" />
+    <link rel="stylesheet" href="../../assets/css/pages/admin/markets.css" />
     <link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
     <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
 </head>
@@ -21,7 +21,7 @@
 
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-header">
-            <a href="dashboard.html" class="admin-logo">Food<span>Delivery</span></a>
+            <a href="dashboard.html" class="admin-logo">DeRon<span>Market Deliveries</span></a>
             <button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button>
         </div>
         <div class="admin-profile">
@@ -44,9 +44,9 @@
                 <span class="admin-nav-icon">♙</span>
                 <span>Customers</span>
             </a>
-            <a href="restaurants.html" class="admin-nav-link active" aria-current="page">
+            <a href="markets.html" class="admin-nav-link active" aria-current="page">
                 <span class="admin-nav-icon">⌂</span>
-                <span>Restaurants</span>
+                <span>Markets</span>
             </a>
             <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
             <a href="deleted-accounts.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
@@ -89,8 +89,8 @@
         <div class="admin-topbar-left">
             <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
             <div class="admin-page-heading">
-                <h1>Restaurants</h1>
-                <p>Manage restaurants registered on your platform.</p>
+                <h1>Markets</h1>
+                <p>Manage markets registered on your platform.</p>
             </div>
         </div>
         <div class="admin-topbar-right">
@@ -122,8 +122,8 @@
             <div class="admin-page-header">
 
                 <div>
-                    <h2>Restaurant Management</h2>
-                    <p>View, approve and manage restaurants on the platform.</p>
+                    <h2>Market Management</h2>
+                    <p>View, approve and manage markets on the platform.</p>
                 </div>
 
                 <div class="admin-page-actions">
@@ -131,17 +131,17 @@
                     <button
                         type="button"
                         class="admin-secondary-button"
-                        id="exportRestaurantsButton"
+                        id="exportMarketsButton"
                     >
-                        Export Restaurants
+                        Export Markets
                     </button>
 
                     <button
                         type="button"
                         class="admin-primary-button"
-                        id="addRestaurantButton"
+                        id="addMarketButton"
                     >
-                        + Add Restaurant
+                        + Add Market
                     </button>
 
                 </div>
@@ -160,8 +160,8 @@
                     <div class="admin-stat-icon">▦</div>
 
                     <div class="admin-stat-content">
-                        <span>Total Restaurants</span>
-                        <strong id="restaurantTotalStat">0</strong>
+                        <span>Total Markets</span>
+                        <strong id="marketTotalStat">0</strong>
                     </div>
 
                 </div>
@@ -172,8 +172,8 @@
                     <div class="admin-stat-icon">✓</div>
 
                     <div class="admin-stat-content">
-                        <span>Active Restaurants</span>
-                        <strong id="restaurantActiveStat">0</strong>
+                        <span>Active Markets</span>
+                        <strong id="marketActiveStat">0</strong>
                     </div>
 
                 </div>
@@ -185,7 +185,7 @@
 
                     <div class="admin-stat-content">
                         <span>Pending Approval</span>
-                        <strong id="restaurantPendingStat">0</strong>
+                        <strong id="marketPendingStat">0</strong>
                     </div>
 
                 </div>
@@ -197,7 +197,7 @@
 
                     <div class="admin-stat-content">
                         <span>Top Rated</span>
-                        <strong id="restaurantTopRatedStat">0</strong>
+                        <strong id="marketTopRatedStat">0</strong>
                     </div>
 
                 </div>
@@ -209,27 +209,27 @@
                  RESTAURANT TABLE CARD
             ========================== -->
 
-            <div class="admin-content-card admin-restaurants-card">
+            <div class="admin-content-card admin-markets-card">
 
                 <div class="admin-card-header">
 
                     <div>
-                        <h3>All Restaurants</h3>
-                        <p>Manage restaurant accounts and information.</p>
+                        <h3>All Markets</h3>
+                        <p>Manage market accounts and information.</p>
                     </div>
 
-                    <div class="admin-restaurant-tools">
+                    <div class="admin-market-tools">
 
                         <div class="admin-search">
 
                             <span>⌕</span>
 
                             <input
-                                id="restaurantSearch"
-                                name="restaurantSearch"
+                                id="marketSearch"
+                                name="marketSearch"
                                 type="search"
-                                placeholder="Search restaurants..."
-                                aria-label="Search restaurants"
+                                placeholder="Search markets..."
+                                aria-label="Search markets"
                                 autocomplete="off"
                             />
 
@@ -238,9 +238,9 @@
                         <button
                             type="button"
                             class="admin-filter-button"
-                            id="restaurantFilterButton"
+                            id="marketFilterButton"
                             aria-expanded="false"
-                            aria-controls="restaurantFilterPanel"
+                            aria-controls="marketFilterPanel"
                         >
                             ☷ Filter
                         </button>
@@ -255,7 +255,7 @@
                 ========================== -->
 
                 <div
-                    id="restaurantFilterPanel"
+                    id="marketFilterPanel"
                     hidden
                     style="padding: 18px 20px; border-bottom: 1px solid #eee;"
                 >
@@ -271,13 +271,13 @@
 
                         <div class="admin-form-field">
 
-                            <label for="restaurantOpenFilter">
+                            <label for="marketOpenFilter">
                                 Opening status
                             </label>
 
                             <select
-                                id="restaurantOpenFilter"
-                                name="restaurantOpenFilter"
+                                id="marketOpenFilter"
+                                name="marketOpenFilter"
                             >
                                 <option value="all">All</option>
                                 <option value="open">Open</option>
@@ -289,13 +289,13 @@
 
                         <div class="admin-form-field">
 
-                            <label for="restaurantApprovalFilter">
+                            <label for="marketApprovalFilter">
                                 Approval status
                             </label>
 
                             <select
-                                id="restaurantApprovalFilter"
-                                name="restaurantApprovalFilter"
+                                id="marketApprovalFilter"
+                                name="marketApprovalFilter"
                             >
                                 <option value="all">All</option>
                                 <option value="pending">Pending</option>
@@ -320,7 +320,7 @@
                         <button
                             type="button"
                             class="admin-secondary-button"
-                            id="resetRestaurantFiltersButton"
+                            id="resetMarketFiltersButton"
                         >
                             Reset
                         </button>
@@ -328,7 +328,7 @@
                         <button
                             type="button"
                             class="admin-primary-button"
-                            id="applyRestaurantFiltersButton"
+                            id="applyMarketFiltersButton"
                         >
                             Apply Filters
                         </button>
@@ -342,11 +342,11 @@
                      FILTER TABS
                 ========================== -->
 
-                <div class="admin-restaurant-tabs">
+                <div class="admin-market-tabs">
 
                     <a
                         href="#"
-                        class="admin-restaurant-tab active"
+                        class="admin-market-tab active"
                         data-filter="all"
                     >
                         All
@@ -354,7 +354,7 @@
 
                     <a
                         href="#"
-                        class="admin-restaurant-tab"
+                        class="admin-market-tab"
                         data-filter="active"
                     >
                         Active
@@ -362,7 +362,7 @@
 
                     <a
                         href="#"
-                        class="admin-restaurant-tab"
+                        class="admin-market-tab"
                         data-filter="pending"
                     >
                         Pending
@@ -370,7 +370,7 @@
 
                     <a
                         href="#"
-                        class="admin-restaurant-tab"
+                        class="admin-market-tab"
                         data-filter="suspended"
                     >
                         Suspended
@@ -390,7 +390,7 @@
                         <thead>
 
                             <tr>
-                                <th>Restaurant</th>
+                                <th>Market</th>
                                 <th>Owner</th>
                                 <th>Location</th>
                                 <th>Orders</th>
@@ -401,7 +401,7 @@
 
                         </thead>
 
-                        <tbody id="restaurantTableBody">
+                        <tbody id="marketTableBody">
                         </tbody>
 
                     </table>
@@ -415,13 +415,13 @@
 
                 <div class="admin-table-footer">
 
-                    <p id="restaurantShowingText">
-                        Showing 0–0 of 0 restaurants
+                    <p id="marketShowingText">
+                        Showing 0–0 of 0 markets
                     </p>
 
                     <div
                         class="admin-pagination"
-                        id="restaurantPagination"
+                        id="marketPagination"
                     >
                     </div>
 
@@ -443,8 +443,8 @@
                     <div class="admin-card-header">
 
                         <div>
-                            <h3>Restaurant Operations</h3>
-                            <p>Current restaurant platform status.</p>
+                            <h3>Market Operations</h3>
+                            <p>Current market platform status.</p>
                         </div>
 
                     </div>
@@ -454,12 +454,12 @@
                         <div class="admin-summary-item">
                             <div>
                                 <div class="admin-summary-icon">✓</div>
-                                <strong>Active Restaurants</strong>
+                                <strong>Active Markets</strong>
                             </div>
 
                             <span
                                 class="total"
-                                id="restaurantSummaryActive"
+                                id="marketSummaryActive"
                             >
                                 0
                             </span>
@@ -474,7 +474,7 @@
 
                             <span
                                 class="total"
-                                id="restaurantSummaryOpen"
+                                id="marketSummaryOpen"
                             >
                                 0
                             </span>
@@ -489,7 +489,7 @@
 
                             <span
                                 class="total"
-                                id="restaurantSummaryPending"
+                                id="marketSummaryPending"
                             >
                                 0
                             </span>
@@ -504,7 +504,7 @@
 
                             <span
                                 class="total"
-                                id="restaurantSummaryRejected"
+                                id="marketSummaryRejected"
                             >
                                 0
                             </span>
@@ -519,7 +519,7 @@
 
                             <span
                                 class="total"
-                                id="restaurantSummaryInactive"
+                                id="marketSummaryInactive"
                             >
                                 0
                             </span>
@@ -560,7 +560,7 @@
     <script src="../../assets/js/auth/auth-api.js"></script>
     <script src="../../assets/js/admin/admin-header.js" defer></script>
     <script src="../../assets/js/admin/admin-notifications.js" defer></script>
-    <script src="../../assets/js/admin/restaurant.js"></script>
+    <script src="../../assets/js/admin/market.js"></script>
 
 </body>
 
