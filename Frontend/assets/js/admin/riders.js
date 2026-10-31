@@ -768,10 +768,15 @@ deactivate(id) {
             );
         }
 
-        actions.appendChild(
-            createActionButton("Delete rider", riderId, {
+        actions.append(
+            createActionButton("Deactivate/delete rider", riderId, {
                 text: "Delete",
                 action: "delete",
+                danger: true,
+            }),
+            createActionButton("Permanently delete rider (archive first)", riderId, {
+                text: "Delete permanently",
+                action: "permanent-delete",
                 danger: true,
             }),
         );
@@ -2188,6 +2193,10 @@ async function deactivateRider(riderId, options = {}) {
 
                 case "delete":
                     await deleteRider(riderId);
+                    break;
+
+                case "permanent-delete":
+                    window.location.href = `deleted-accounts.html?type=rider&id=${encodeURIComponent(riderId)}`;
                     break;
 
                 default:
