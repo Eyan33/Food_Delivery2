@@ -15,6 +15,17 @@
 <main class="deleted-wrap">
 <h1>Deleted Accounts Archive</h1>
 <p>Search archived account snapshots. This page is read-only; archived records are retained for audit and history.</p>
+<section class="deleted-card" style="margin-bottom:18px">
+<h2>Permanently delete an account</h2>
+<p>This is separate from deactivation. The account snapshot is archived in the database before deletion. If related order or payment records prevent deletion, the entire operation is rolled back.</p>
+<div class="deleted-filters">
+<select id="deleteType" aria-label="Account type to permanently delete"><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
+<input id="deleteId" type="number" min="1" step="1" placeholder="Account ID" aria-label="Account ID to permanently delete" required>
+<input id="deleteReason" type="text" maxlength="1000" placeholder="Reason (optional)" aria-label="Deletion reason">
+<button id="permanentDelete" type="button" style="background:#a12622">Permanently delete</button>
+</div>
+<div id="deleteStatus" class="deleted-status" role="status"></div>
+</section>
 <section class="deleted-card">
 <div class="deleted-filters">
 <input id="search" type="search" placeholder="Search name, email, or details" aria-label="Search archived accounts">
@@ -49,6 +60,23 @@
   }catch(error){$("rows").innerHTML="";$("status").textContent=error.message+" Check that you are signed in as an admin.";}
  }
  function csvCell(value){return '"'+String(value??"").replace(/"/g,'""')+'"';}
+ $("permanentDelete").addEventListener("click",async()=>{
+  const type=$("deleteType").value;const id=String($("deleteId").value||"").trim();const reason=$("deleteReason").value.trim();
+  if(!/^[1-9][0-9]*$/.test(id)){ $("deleteStatus").textContent="Enter a valid positive account ID.";return; }
+  const confirmed=window.confirm("Permanently delete this "+type+" account #"+id+"? A snapshot will be archived first. This cannot be undone.");
+  if(!confirmed)return;
+  $("deleteStatus").textContent="Processing permanent deletion…";
+  try{
+   const response=await fetch((window.FOOD_DELIVERY_API_BASE||"")+"/admins/deleted-accounts/"+encodeURIComponent(type)+"/"+encodeURIComponent(id),{
+    method:"DELETE",headers:{Authorization:"Bearer "+token(),"Accept":"application/json","Content-Type":"application/json"},
+    body:JSON.stringify({reason})
+   });
+   const payload=await response.json();
+   if(!response.ok||!payload.success)throw new Error(payload.message||"Permanent deletion failed.");
+   $("deleteStatus").textContent=payload.message||"Account permanently deleted and archived.";
+   $("deleteId").value="";$("deleteReason").value="";page=1;load();
+  }catch(error){$("deleteStatus").textContent=error.message;}
+ });
  $("apply").addEventListener("click",()=>{page=1;load();});
  $("search").addEventListener("keydown",e=>{if(e.key==="Enter"){page=1;load();}});
  $("type").addEventListener("change",()=>{page=1;load();});
