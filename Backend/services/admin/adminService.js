@@ -329,7 +329,8 @@ async function createAdmin(input) {
             phone,
             password_hash,
             role,
-            is_active
+            is_active,
+            must_change_password
         )
         VALUES (
             $1,
@@ -338,6 +339,7 @@ async function createAdmin(input) {
             $4,
             $5,
             'admin',
+            true,
             true
         )
         RETURNING ${ADMIN_COLUMNS}
