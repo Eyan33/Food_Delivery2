@@ -120,6 +120,8 @@ async function ensureSchema() {
 }
 
 async function seedAdmin() {
+    const system = String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase();
+    const adminRole = system === "market" ? "admin2" : system === "food" ? "admin1" : "admin";
     const email = normalizeEmail(process.env.ADMIN_EMAIL);
     const password = process.env.ADMIN_PASSWORD;
 
@@ -146,7 +148,7 @@ async function seedAdmin() {
     );
 
     if (existing.rows.length > 0) {
-        if (existing.rows[0].role !== "admin") {
+        if (existing.rows[0].role !== adminRole) {
             log(`account ${email} already exists and is not an admin, leaving it unchanged`);
         } else {
             log("admin account already exists, nothing to do");
@@ -160,7 +162,7 @@ async function seedAdmin() {
     await pool.query(
         `
         INSERT INTO users (first_name, last_name, email, phone, password_hash, role)
-        VALUES ($1, $2, $3, $4, $5, 'admin')
+        VALUES ($1, $2, $3, $4, $5, '${adminRole}')
         `,
         [
             (process.env.ADMIN_FIRST_NAME || "Platform").trim(),
@@ -441,15 +443,28 @@ async function ensureDeletedAccountsSchema() {
 }
 
 async function ensureSuperAdminRoleSchema() {
+    // Preserve legacy values while allowing both isolated role families.
+    // Do not rewrite existing user roles during application startup.
     await pool.query(`
         ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
         ALTER TABLE public.users
             ADD CONSTRAINT users_role_check
-            CHECK (role IN ('customer', 'restaurant', 'rider', 'admin', 'super_admin'));
+            CHECK (role IN (
+                'customer', 'restaurant', 'rider', 'admin', 'super_admin',
+                'customer1', 'restaurant1', 'rider1', 'admin1', 'super_admin1',
+                'customer2', 'market_owner2', 'rider2', 'admin2', 'super_admin2'
+            ));
     `);
 }
 
 async function seedSuperAdmin() {
+    // The legacy global seed account must not be created in either isolated
+    // deployment. Project-specific Super Admins are provisioned separately.
+    if (["food", "market"].includes(String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase())) {
+        log("project-specific Super Admin provisioning is managed separately; skipping legacy global seed.");
+        return;
+    }
+
     const email = normalizeEmail(process.env.SUPER_ADMIN_EMAIL);
     const password = process.env.SUPER_ADMIN_PASSWORD;
 

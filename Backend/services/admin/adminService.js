@@ -1,6 +1,11 @@
 const bcrypt = require("bcrypt");
 const pool = require("../../config/database");
 
+const ADMIN_ROLE = String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase() === "market" ? "admin2"
+    : String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase() === "food" ? "admin1" : "admin";
+const SUPER_ADMIN_ROLE = String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase() === "market" ? "super_admin2"
+    : String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase() === "food" ? "super_admin1" : "super_admin";
+
 const {
     normalizeEmail,
     isValidEmail,
@@ -199,7 +204,7 @@ async function getAdmins(options = {}) {
                 WHERE ${filter}
             )::int AS filtered
         FROM users
-        WHERE role = 'admin'
+        WHERE role = '${ADMIN_ROLE}'
         `,
         values
     );
@@ -208,7 +213,7 @@ async function getAdmins(options = {}) {
         `
         SELECT ${ADMIN_COLUMNS}
         FROM users
-        WHERE role = 'admin'
+        WHERE role = '${ADMIN_ROLE}'
           AND ${filter}
         ORDER BY created_at DESC, id DESC
         LIMIT $${values.length + 1}
@@ -256,7 +261,7 @@ async function getAdminById(id) {
         SELECT ${ADMIN_COLUMNS}
         FROM users
         WHERE id = $1
-          AND role IN ('admin', 'super_admin')
+          AND role IN ('${ADMIN_ROLE}', '${SUPER_ADMIN_ROLE}')
         LIMIT 1
         `,
         [adminId]
@@ -269,7 +274,7 @@ async function updateAdminAvatar(id, avatarUrl) {
     const adminId = validateAdminId(id);
     const result = await pool.query(
         `UPDATE users SET avatar_url = $1, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $2 AND role = 'admin'
+         WHERE id = $2 AND role = '${ADMIN_ROLE}'
          RETURNING ${ADMIN_COLUMNS}`,
         [avatarUrl, adminId]
     );
@@ -338,7 +343,7 @@ async function createAdmin(input) {
             $3,
             $4,
             $5,
-            'admin',
+            '${ADMIN_ROLE}',
             true,
             true
         )
@@ -445,7 +450,7 @@ async function updateAdmin(id, input) {
         UPDATE users
         SET ${assignments.join(", ")}
         WHERE id = $${values.length}
-          AND role = 'admin'
+          AND role = '${ADMIN_ROLE}'
         RETURNING ${ADMIN_COLUMNS}
         `,
         values
@@ -475,7 +480,7 @@ async function deactivateAdmin(
                 `
                 SELECT id
                 FROM users
-                WHERE role = 'admin'
+                WHERE role = '${ADMIN_ROLE}'
                   AND is_active = true
                 FOR UPDATE
                 `
@@ -487,7 +492,7 @@ async function deactivateAdmin(
                 SELECT ${ADMIN_COLUMNS}
                 FROM users
                 WHERE id = $1
-                  AND role = 'admin'
+                  AND role = '${ADMIN_ROLE}'
                 FOR UPDATE
                 `,
                 [adminId]
@@ -528,7 +533,7 @@ async function deactivateAdmin(
                 UPDATE users
                 SET is_active = false
                 WHERE id = $1
-                  AND role = 'admin'
+                  AND role = '${ADMIN_ROLE}'
                 RETURNING ${ADMIN_COLUMNS}
                 `,
                 [adminId]
@@ -557,7 +562,7 @@ async function activateAdmin(id) {
         UPDATE users
         SET is_active = true
         WHERE id = $1
-          AND role = 'admin'
+          AND role = '${ADMIN_ROLE}'
         RETURNING ${ADMIN_COLUMNS}
         `,
         [adminId]
