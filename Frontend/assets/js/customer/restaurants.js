@@ -1,26 +1,26 @@
-/* Customer market discovery: API-backed search, filters, sorting and recovery. */
+/* Customer restaurant discovery: API-backed search, filters, sorting and recovery. */
 document.addEventListener("DOMContentLoaded", () => {
     "use strict";
 
     const API_BASE = (window.FOOD_DELIVERY_API_BASE ||
         document.querySelector('meta[name="api-base-url"]')?.content?.trim() ||
         "http://localhost:5000/api").replace(/\/+$/, "");
-    const PLACEHOLDER = "../../assets/images/markets/market-placeholder.jpg";
+    const PLACEHOLDER = "../../assets/images/restaurants/restaurant-placeholder.jpg";
 
-    const searchForm = document.getElementById("marketSearchForm");
-    const searchInput = document.getElementById("marketSearch");
-    const clearSearchButton = document.getElementById("clearMarketSearch");
-    const grid = document.getElementById("marketGrid");
-    const resultsCount = document.getElementById("marketResultsCount");
-    const noResults = document.getElementById("noMarketsMessage");
-    const availabilityFilter = document.getElementById("marketAvailability");
-    const categoryFilter = document.getElementById("marketCategory");
-    const sortSelect = document.getElementById("marketSort");
-    const resetFiltersButton = document.getElementById("resetMarketFilters");
-    const clearAllButton = document.getElementById("clearMarketFilters");
+    const searchForm = document.getElementById("restaurantSearchForm");
+    const searchInput = document.getElementById("restaurantSearch");
+    const clearSearchButton = document.getElementById("clearRestaurantSearch");
+    const grid = document.getElementById("restaurantGrid");
+    const resultsCount = document.getElementById("restaurantResultsCount");
+    const noResults = document.getElementById("noRestaurantsMessage");
+    const availabilityFilter = document.getElementById("restaurantAvailability");
+    const cuisineFilter = document.getElementById("restaurantCuisine");
+    const sortSelect = document.getElementById("restaurantSort");
+    const resetFiltersButton = document.getElementById("resetRestaurantFilters");
+    const clearAllButton = document.getElementById("clearRestaurantFilters");
     const cartCount = document.getElementById("cartCount");
 
-    let markets = [];
+    let restaurants = [];
     let loadingFailed = false;
 
     const text = (value) => String(value ?? "").trim();
@@ -39,24 +39,24 @@ document.addEventListener("DOMContentLoaded", () => {
         return defaultValue;
     }
 
-    function isOpen(market) {
-        return asBoolean(market.is_open ?? market.isOpen ?? market.open_now, false);
+    function isOpen(restaurant) {
+        return asBoolean(restaurant.is_open ?? restaurant.isOpen ?? restaurant.open_now, false);
     }
 
-    function getCategorys(market) {
-        const raw = market.categories ?? market.category ?? market.categories ??
-            market.category ?? market.products_types ?? [];
+    function getCuisines(restaurant) {
+        const raw = restaurant.cuisines ?? restaurant.cuisine ?? restaurant.categories ??
+            restaurant.category ?? restaurant.food_types ?? [];
         const values = Array.isArray(raw) ? raw : String(raw).split(/[,|]/);
         return values.map((item) => typeof item === "object" && item !== null
             ? text(item.name ?? item.title ?? item.label)
             : text(item)).filter(Boolean);
     }
 
-    function getSearchText(market) {
+    function getSearchText(restaurant) {
         return [
-            market.name, market.description, market.location_name,
-            market.location, market.category, market.category, market.products_type,
-            ...getCategorys(market)
+            restaurant.name, restaurant.description, restaurant.location_name,
+            restaurant.location, restaurant.cuisine, restaurant.category, restaurant.food_type,
+            ...getCuisines(restaurant)
         ].filter(Boolean).join(" ").toLowerCase();
     }
 
@@ -87,37 +87,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showGridMessage(message, isError = false) {
         if (!grid) return;
-        grid.innerHTML = `<div class="market-grid-message${isError ? " is-error" : ""}">
+        grid.innerHTML = `<div class="restaurant-grid-message${isError ? " is-error" : ""}">
             <p>${escapeHTML(message)}</p>
-            ${isError ? '<button type="button" id="retryMarkets" class="market-reset-filters">Try again</button>' : ""}
+            ${isError ? '<button type="button" id="retryRestaurants" class="restaurant-reset-filters">Try again</button>' : ""}
         </div>`;
         if (noResults) noResults.hidden = true;
-        const retry = document.getElementById("retryMarkets");
-        if (retry) retry.addEventListener("click", loadMarkets);
+        const retry = document.getElementById("retryRestaurants");
+        if (retry) retry.addEventListener("click", loadRestaurants);
     }
 
-    function populateCategoryOptions() {
-        if (!categoryFilter) return;
-        const selected = categoryFilter.value || "all";
-        const categories = [...new Set(markets.flatMap(getCategorys))]
+    function populateCuisineOptions() {
+        if (!cuisineFilter) return;
+        const selected = cuisineFilter.value || "all";
+        const cuisines = [...new Set(restaurants.flatMap(getCuisines))]
             .sort((a, b) => a.localeCompare(b));
-        categoryFilter.innerHTML = '<option value="all">All categories</option>' +
-            categories.map((category) => `<option value="${escapeHTML(normalize(category))}">${escapeHTML(category)}</option>`).join("");
-        categoryFilter.value = categories.some((category) => normalize(category) === selected) ? selected : "all";
+        cuisineFilter.innerHTML = '<option value="all">All cuisines</option>' +
+            cuisines.map((cuisine) => `<option value="${escapeHTML(normalize(cuisine))}">${escapeHTML(cuisine)}</option>`).join("");
+        cuisineFilter.value = cuisines.some((cuisine) => normalize(cuisine) === selected) ? selected : "all";
     }
 
-    function renderMarkets() {
+    function renderRestaurants() {
         if (!grid || loadingFailed) return;
         const term = normalize(searchInput?.value);
         const availability = availabilityFilter?.value || "all";
-        const category = categoryFilter?.value || "all";
+        const cuisine = cuisineFilter?.value || "all";
         const sortBy = sortSelect?.value || "recommended";
 
-        let filtered = markets.filter((market) => {
-            if (term && !getSearchText(market).includes(term)) return false;
-            if (availability === "open" && !isOpen(market)) return false;
-            if (availability === "closed" && isOpen(market)) return false;
-            if (category !== "all" && !getCategorys(market).some((item) => normalize(item) === category)) return false;
+        let filtered = restaurants.filter((restaurant) => {
+            if (term && !getSearchText(restaurant).includes(term)) return false;
+            if (availability === "open" && !isOpen(restaurant)) return false;
+            if (availability === "closed" && isOpen(restaurant)) return false;
+            if (cuisine !== "all" && !getCuisines(restaurant).some((item) => normalize(item) === cuisine)) return false;
             return true;
         });
 
@@ -131,45 +131,45 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (noResults) noResults.hidden = true;
 
-        grid.innerHTML = filtered.map((market) => {
-            const name = text(market.name) || "Market";
-            const open = isOpen(market);
-            const rating = Number(market.average_rating);
-            const ratingText = market.average_rating !== null &&
-                market.average_rating !== undefined && Number.isFinite(rating)
+        grid.innerHTML = filtered.map((restaurant) => {
+            const name = text(restaurant.name) || "Restaurant";
+            const open = isOpen(restaurant);
+            const rating = Number(restaurant.average_rating);
+            const ratingText = restaurant.average_rating !== null &&
+                restaurant.average_rating !== undefined && Number.isFinite(rating)
                 ? `★ ${rating.toFixed(1)}` : "No ratings";
-            const categories = getCategorys(market);
-            const firstLocationWord = (text(market.name) || "Market").split(/\s+/)[0] || "Market";
-            const location = text(market.location_name) || `${firstLocationWord} Location`;
-            const image = getImageUrl(market.logo_url || market.cover_image_url || market.image_url);
-            const marketId = market.id ?? market.restaurant_id;
-            const marketUrl = marketId !== null && marketId !== undefined
-                ? `market.html?id=${encodeURIComponent(marketId)}`
-                : "market.html";
-            return `<article class="market-card">
-                <div class="market-image${image ? "" : " has-no-image"}">
-                    ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(name)}" loading="lazy" data-image-fallback="true">` : '<span class="market-image-fallback" aria-hidden="true">🍽</span>'}
-                    <span class="market-status ${open ? "is-open" : "is-closed"}">${open ? "Open" : "Closed"}</span>
+            const cuisines = getCuisines(restaurant);
+            const firstLocationWord = (text(restaurant.name) || "Restaurant").split(/\s+/)[0] || "Restaurant";
+            const location = text(restaurant.location_name) || `${firstLocationWord} Location`;
+            const image = getImageUrl(restaurant.logo_url || restaurant.cover_image_url || restaurant.image_url);
+            const restaurantId = restaurant.id ?? restaurant.restaurant_id;
+            const restaurantUrl = restaurantId !== null && restaurantId !== undefined
+                ? `restaurant.html?id=${encodeURIComponent(restaurantId)}`
+                : "restaurant.html";
+            return `<article class="restaurant-card">
+                <div class="restaurant-image${image ? "" : " has-no-image"}">
+                    ${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(name)}" loading="lazy" data-image-fallback="true">` : '<span class="restaurant-image-fallback" aria-hidden="true">🍽</span>'}
+                    <span class="restaurant-status ${open ? "is-open" : "is-closed"}">${open ? "Open" : "Closed"}</span>
                 </div>
-                <div class="market-info">
-                    <div class="market-title-row"><h3>${escapeHTML(name)}</h3><span class="rating">${escapeHTML(ratingText)}</span></div>
-                    <p class="market-category">${escapeHTML(categories.join(" · ") || location || text(market.description) || "Category not specified")}</p>
-                    <div class="market-meta">
+                <div class="restaurant-info">
+                    <div class="restaurant-title-row"><h3>${escapeHTML(name)}</h3><span class="rating">${escapeHTML(ratingText)}</span></div>
+                    <p class="restaurant-category">${escapeHTML(cuisines.join(" · ") || location || text(restaurant.description) || "Cuisine not specified")}</p>
+                    <div class="restaurant-meta">
                         ${location ? `<span>${escapeHTML(location)}</span>` : ""}
                     </div>
-                    <a href="${escapeHTML(marketUrl)}" class="view-market-button">View Market</a>
+                    <a href="${escapeHTML(restaurantUrl)}" class="view-restaurant-button">View Market</a>
                 </div>
             </article>`;
         }).join("");
 
         grid.querySelectorAll("img[data-image-fallback]").forEach((img) => {
             img.addEventListener("error", () => {
-                const wrapper = img.closest(".market-image");
+                const wrapper = img.closest(".restaurant-image");
                 if (wrapper) {
                     img.remove();
                     wrapper.classList.add("has-no-image");
                     const fallback = document.createElement("span");
-                    fallback.className = "market-image-fallback";
+                    fallback.className = "restaurant-image-fallback";
                     fallback.setAttribute("aria-hidden", "true");
                     fallback.textContent = "🍽";
                     wrapper.prepend(fallback);
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    async function loadMarkets() {
+    async function loadRestaurants() {
         if (!grid) return;
         loadingFailed = false;
         showGridMessage("Loading markets…");
@@ -199,22 +199,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(result?.message || `Request failed (HTTP ${response.status}).`);
             }
 
-            // The current backend returns { success: true, data: { markets: [...] } }.
+            // The current backend returns { success: true, data: { restaurants: [...] } }.
             // Also accept common wrappers used by older deployments or API gateways.
-            function extractMarketList(value, depth = 0) {
+            function extractRestaurantList(value, depth = 0) {
                 if (Array.isArray(value)) return value;
                 if (!value || typeof value !== "object" || depth > 5) return null;
 
-                for (const key of ["markets", "items", "results", "records", "rows", "data"]) {
+                for (const key of ["restaurants", "items", "results", "records", "rows", "data"]) {
                     if (Object.prototype.hasOwnProperty.call(value, key)) {
-                        const found = extractMarketList(value[key], depth + 1);
+                        const found = extractRestaurantList(value[key], depth + 1);
                         if (found) return found;
                     }
                 }
                 return null;
             }
 
-            const list = extractMarketList(result);
+            const list = extractRestaurantList(result);
             if (!list) {
                 const responseShape = result && typeof result === "object"
                     ? Object.fromEntries(Object.entries(result).map(([key, value]) => [
@@ -223,22 +223,22 @@ document.addEventListener("DOMContentLoaded", () => {
                             value === null ? "null" : typeof value === "object" ? Object.keys(value).slice(0, 12) : typeof value
                     ]))
                     : typeof result;
-                console.error("Unexpected markets API response shape:", responseShape, result);
-                throw new Error("The API response did not contain a market list. Check the response shape in the console.");
+                console.error("Unexpected restaurants API response shape:", responseShape, result);
+                throw new Error("The API response did not contain a restaurant list. Check the response shape in the console.");
             }
 
-            markets = list.filter((market) => {
-                if (!market || typeof market !== "object") return false;
-                const activeValue = market.is_active ?? market.isActive ?? market.active;
+            restaurants = list.filter((restaurant) => {
+                if (!restaurant || typeof restaurant !== "object") return false;
+                const activeValue = restaurant.is_active ?? restaurant.isActive ?? restaurant.active;
                 if (activeValue !== undefined && !asBoolean(activeValue, true)) return false;
-                const status = normalize(market.approval_status ?? market.status);
+                const status = normalize(restaurant.approval_status ?? restaurant.status);
                 return !["pending", "rejected", "declined", "suspended", "inactive"].includes(status);
             });
-            populateCategoryOptions();
-            renderMarkets();
+            populateCuisineOptions();
+            renderRestaurants();
         } catch (error) {
             loadingFailed = true;
-            console.error("Failed to load customer markets:", error);
+            console.error("Failed to load customer restaurants:", error);
             updateCount(0);
             showGridMessage("We couldn't load markets. Check your connection and try again.", true);
         }
@@ -246,23 +246,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (searchForm) searchForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        renderMarkets();
+        renderRestaurants();
     });
-    if (searchInput) searchInput.addEventListener("input", renderMarkets);
-    [availabilityFilter, categoryFilter, sortSelect].forEach((control) => {
-        if (control) control.addEventListener("change", renderMarkets);
+    if (searchInput) searchInput.addEventListener("input", renderRestaurants);
+    [availabilityFilter, cuisineFilter, sortSelect].forEach((control) => {
+        if (control) control.addEventListener("change", renderRestaurants);
     });
 
     function resetFilters(clearSearch = false) {
         if (clearSearch && searchInput) searchInput.value = "";
         if (availabilityFilter) availabilityFilter.value = "all";
-        if (categoryFilter) categoryFilter.value = "all";
+        if (cuisineFilter) cuisineFilter.value = "all";
         if (sortSelect) sortSelect.value = "recommended";
-        renderMarkets();
+        renderRestaurants();
     }
     if (clearSearchButton) clearSearchButton.addEventListener("click", () => {
         if (searchInput) searchInput.value = "";
-        renderMarkets();
+        renderRestaurants();
         searchInput?.focus();
     });
     if (resetFiltersButton) resetFiltersButton.addEventListener("click", () => resetFilters(false));
@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateCartCount() {
         if (!cartCount) return;
         try {
-            const savedCart = JSON.parse(localStorage.getItem("productsDeliveryCart") || "[]");
+            const savedCart = JSON.parse(localStorage.getItem("foodDeliveryCart") || "[]");
             const total = Array.isArray(savedCart) ? savedCart.reduce((sum, item) =>
                 sum + Math.max(0, Number(item.quantity) || 0), 0) : 0;
             cartCount.textContent = String(total);
@@ -285,5 +285,5 @@ document.addEventListener("DOMContentLoaded", () => {
     const initialSearch = new URLSearchParams(window.location.search).get("search");
     if (searchInput && initialSearch) searchInput.value = initialSearch;
     updateCartCount();
-    loadMarkets();
+    loadRestaurants();
 });
