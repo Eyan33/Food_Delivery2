@@ -85,10 +85,16 @@ async function permanentlyDeleteAccount(req, res) {
         // Delete it in the same transaction; dependent order/payment history
         // causes PostgreSQL to reject the operation and the archive insert rolls back.
         if (type === "restaurant" && account.owner_id) {
-            await client.query(
-                "DELETE FROM public.users WHERE id = $1 AND role = 'restaurant'",
+            const remainingRestaurants = await client.query(
+                "SELECT 1 FROM public.restaurants WHERE owner_id = $1 LIMIT 1",
                 [account.owner_id]
             );
+            if (remainingRestaurants.rowCount === 0) {
+                await client.query(
+                    "DELETE FROM public.users WHERE id = $1 AND role = 'restaurant'",
+                    [account.owner_id]
+                );
+            }
         }
 
         await client.query("COMMIT");
