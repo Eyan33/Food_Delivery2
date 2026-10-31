@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tableBody.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align:center; padding:35px;">
-                    Loading restaurants...
+                    Loading markets...
                 </td>
             </tr>
         `;
@@ -369,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" style="text-align:center; padding:35px;">
-                        No restaurants found.
+                        No markets found.
                     </td>
                 </tr>
             `;
@@ -503,8 +503,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             type="button"
                             class="admin-table-action edit-button"
                             data-id="${escapeHtml(restaurant.id)}"
-                            aria-label="Edit restaurant"
-                            title="Edit restaurant"
+                            aria-label="Edit market"
+                            title="Edit market"
                         >
                             ✎
                         </button>
@@ -916,11 +916,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     </p>
 
                     <h2 id="restaurantModalTitle">
-                        Add Restaurant
+                        Add Market
                     </h2>
 
                     <p id="restaurantModalSubtitle">
-                        Create a restaurant account for the platform.
+                        Create a market account for the platform.
                     </p>
 
                 </div>
@@ -1884,7 +1884,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearModalMessage();
     resetCredentialsView();
 
-    modalTitle.textContent = "Add Restaurant";
+    modalTitle.textContent = "Add Market";
 
     modalSubtitle.textContent = "Create a new restaurant and owner account.";
 
@@ -2016,7 +2016,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const restaurant = response?.restaurant || null;
 
       if (!restaurant) {
-        throw new Error("Restaurant details were not returned by the server.");
+        throw new Error("Market details were not returned by the server.");
       }
 
       restaurantModal.restaurant = restaurant;
@@ -2230,7 +2230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await loadRestaurants();
 
-      showMessage("Restaurant rejected successfully.");
+      showMessage("Market rejected successfully.");
     } catch (error) {
       console.error("Failed to reject restaurant:", error);
 
@@ -2262,7 +2262,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await loadRestaurants();
 
-      showMessage("Restaurant activated successfully.");
+      showMessage("Market activated successfully.");
     } catch (error) {
       console.error("Failed to activate restaurant:", error);
 
@@ -2302,7 +2302,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await loadRestaurants();
 
-      showMessage("Restaurant deactivated successfully.");
+      showMessage("Market deactivated successfully.");
     } catch (error) {
       console.error("Failed to deactivate restaurant:", error);
 

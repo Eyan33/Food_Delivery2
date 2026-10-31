@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateCount(count) {
         if (resultsCount) resultsCount.textContent =
-            count === 1 ? "1 restaurant available" : `${count} restaurants available`;
+            count === 1 ? "1 market available" : `${count} markets available`;
     }
 
     function showGridMessage(message, isError = false) {
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const selected = cuisineFilter.value || "all";
         const cuisines = [...new Set(restaurants.flatMap(getCuisines))]
             .sort((a, b) => a.localeCompare(b));
-        cuisineFilter.innerHTML = '<option value="all">All cuisines</option>' +
+        cuisineFilter.innerHTML = '<option value="all">All categories</option>' +
             cuisines.map((cuisine) => `<option value="${escapeHTML(normalize(cuisine))}">${escapeHTML(cuisine)}</option>`).join("");
         cuisineFilter.value = cuisines.some((cuisine) => normalize(cuisine) === selected) ? selected : "all";
     }
@@ -132,14 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (noResults) noResults.hidden = true;
 
         grid.innerHTML = filtered.map((restaurant) => {
-            const name = text(restaurant.name) || "Restaurant";
+            const name = text(restaurant.name) || "Market";
             const open = isOpen(restaurant);
             const rating = Number(restaurant.average_rating);
             const ratingText = restaurant.average_rating !== null &&
                 restaurant.average_rating !== undefined && Number.isFinite(rating)
                 ? `★ ${rating.toFixed(1)}` : "No ratings";
             const cuisines = getCuisines(restaurant);
-            const firstLocationWord = (text(restaurant.name) || "Restaurant").split(/\s+/)[0] || "Restaurant";
+            const firstLocationWord = (text(restaurant.name) || "Market").split(/\s+/)[0] || "Market";
             const location = text(restaurant.location_name) || `${firstLocationWord} Location`;
             const image = getImageUrl(restaurant.logo_url || restaurant.cover_image_url || restaurant.image_url);
             const restaurantId = restaurant.id ?? restaurant.restaurant_id;
@@ -153,11 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="restaurant-info">
                     <div class="restaurant-title-row"><h3>${escapeHTML(name)}</h3><span class="rating">${escapeHTML(ratingText)}</span></div>
-                    <p class="restaurant-category">${escapeHTML(cuisines.join(" · ") || location || text(restaurant.description) || "Cuisine not specified")}</p>
+                    <p class="restaurant-category">${escapeHTML(cuisines.join(" · ") || location || text(restaurant.description) || "Category not specified")}</p>
                     <div class="restaurant-meta">
                         ${location ? `<span>${escapeHTML(location)}</span>` : ""}
                     </div>
-                    <a href="${escapeHTML(restaurantUrl)}" class="view-restaurant-button">View Restaurant</a>
+                    <a href="${escapeHTML(restaurantUrl)}" class="view-restaurant-button">View Market</a>
                 </div>
             </article>`;
         }).join("");
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadRestaurants() {
         if (!grid) return;
         loadingFailed = false;
-        showGridMessage("Loading restaurants…");
+        showGridMessage("Loading markets…");
         updateCount(0);
         try {
             const response = await fetch(`${API_BASE}/restaurants`, {
@@ -224,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ]))
                     : typeof result;
                 console.error("Unexpected restaurants API response shape:", responseShape, result);
-                throw new Error("The API response did not contain a restaurant list. Check the response shape in the console.");
+                throw new Error("The API response did not contain a market list. Check the response shape in the console.");
             }
 
             restaurants = list.filter((restaurant) => {
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
             loadingFailed = true;
             console.error("Failed to load customer restaurants:", error);
             updateCount(0);
-            showGridMessage("We couldn't load restaurants. Check your connection and try again.", true);
+            showGridMessage("We couldn't load markets. Check your connection and try again.", true);
         }
     }
 

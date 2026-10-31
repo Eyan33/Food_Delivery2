@@ -1,32 +1,32 @@
-/* Shared Food Delivery palette — loaded after page-specific CSS */
+/* DeRon Market Deliveries palette — loaded after page-specific CSS */
 :root {
-  --brand-forest:#001512; --brand-deep:#013420; --brand-green:#2D7F4B;
-  --brand-lime:#7FE84D; --brand-yellow:#F9D629; --brand-white:#FFFFFF;
-  --brand-soft-green:#B7DCB0; --brand-page:#EDEFE8; --brand-orange:#F47735;
+  --brand-forest:#07130F; --brand-deep:#123329; --brand-green:#A9C94B;
+  --brand-lime:#DDF56B; --brand-yellow:#F9D629; --brand-white:#FFFFFF;
+  --brand-soft-green:#C9D8B4; --brand-page:#F5F7F0; --brand-orange:#F47735;
   --brand-purple:#7950D9;
-  --primary:#2D7F4B; --primary-dark:#013420; --background:#EDEFE8;
-  --white:#FFFFFF; --text:#001512; --text-light:#42564C; --border:#D3DED0;
+  --primary:#A9C94B; --primary-dark:#123329; --background:#F5F7F0;
+  --white:#FFFFFF; --text:#07130F; --text-light:#42564C; --border:#D3DED0;
 }
 html,body{background-color:var(--brand-page);color:var(--brand-forest)}
 ::selection{background:var(--brand-lime);color:var(--brand-forest)}
-a:hover{color:var(--brand-green)}
-.logo span,.customer-logo span,.admin-logo span,.restaurant-logo span,.rider-logo span{color:var(--brand-green)}
+a:hover{color:var(--brand-deep)}
+.logo span,.customer-logo span,.admin-logo span,.restaurant-logo span,.rider-logo span{color:var(--brand-deep)}
 .primary-button,.nav-button,.food-search button,.promotion-button,.admin-primary-button,.btn-primary,.button-primary{
- background:var(--brand-green);border-color:var(--brand-green);color:var(--brand-white)
+ background:var(--brand-green);border-color:var(--brand-deep);color:var(--brand-white)
 }
 .primary-button:hover,.nav-button:hover,.food-search button:hover,.promotion-button:hover,.btn-primary:hover,.button-primary:hover{
- background:var(--brand-deep);border-color:var(--brand-deep);color:var(--brand-white)
+ background:var(--brand-green);border-color:var(--brand-green);color:var(--brand-forest)
 }
 .admin-sidebar,.restaurant-sidebar,.rider-sidebar{background:var(--brand-deep);color:var(--brand-white)}
 .admin-sidebar a,.restaurant-sidebar a,.rider-sidebar a{color:var(--brand-white)}
 .admin-sidebar .active,.restaurant-sidebar .active,.rider-sidebar .active,
-.admin-sidebar a:hover,.restaurant-sidebar a:hover,.rider-sidebar a:hover{background:var(--brand-green);color:var(--brand-white)}
+.admin-sidebar a:hover,.restaurant-sidebar a:hover,.rider-sidebar a:hover{background:var(--brand-green);color:var(--brand-forest)}
 .customer-header,.header,.customer-topbar,.restaurant-topbar,.rider-topbar,.admin-topbar{border-color:var(--brand-soft-green)}
 .auth-card,.feature-card,.admin-content-card,.admin-stat-card,.restaurant-stat-card,
 .restaurant-dashboard-card,.rider-stat-card,.rider-content-card,.food-card,.restaurant-card,
 .modal,.modal-content{border-color:var(--brand-soft-green)}
 input,textarea,select{border-color:#C6D6C2}
-input:focus,textarea:focus,select:focus{border-color:var(--brand-green);box-shadow:0 0 0 3px rgba(45,127,75,.14)}
+input:focus,textarea:focus,select:focus{border-color:var(--brand-deep);box-shadow:0 0 0 3px rgba(45,127,75,.14)}
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--brand-lime);outline-offset:2px}
 .customer-footer,.footer{background:var(--brand-forest);color:var(--brand-soft-green)}
 .customer-footer a,.footer a{color:var(--brand-white)}

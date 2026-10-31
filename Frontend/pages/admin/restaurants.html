@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Restaurants | FoodDelivery</title>
+    <title>Markets | DeRon</title>
 
     <link rel="stylesheet" href="../../assets/css/style.css" />
     <link rel="stylesheet" href="../../assets/css/pages/admin/restaurants.css" />
@@ -21,7 +21,7 @@
 
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-header">
-            <a href="dashboard.html" class="admin-logo">Food<span>Delivery</span></a>
+            <a href="dashboard.html" class="admin-logo">DeRon<span>Market Deliveries</span></a>
             <button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button>
         </div>
         <div class="admin-profile">
@@ -46,7 +46,7 @@
             </a>
             <a href="restaurants.html" class="admin-nav-link active" aria-current="page">
                 <span class="admin-nav-icon">⌂</span>
-                <span>Restaurants</span>
+                <span>Markets</span>
             </a>
             <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
             <a href="deleted-accounts.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
@@ -89,8 +89,8 @@
         <div class="admin-topbar-left">
             <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
             <div class="admin-page-heading">
-                <h1>Restaurants</h1>
-                <p>Manage restaurants registered on your platform.</p>
+                <h1>Markets</h1>
+                <p>Manage markets registered on your platform.</p>
             </div>
         </div>
         <div class="admin-topbar-right">
@@ -122,8 +122,8 @@
             <div class="admin-page-header">
 
                 <div>
-                    <h2>Restaurant Management</h2>
-                    <p>View, approve and manage restaurants on the platform.</p>
+                    <h2>Market Management</h2>
+                    <p>View, approve and manage markets on the platform.</p>
                 </div>
 
                 <div class="admin-page-actions">
@@ -133,7 +133,7 @@
                         class="admin-secondary-button"
                         id="exportRestaurantsButton"
                     >
-                        Export Restaurants
+                        Export Markets
                     </button>
 
                     <button
@@ -141,7 +141,7 @@
                         class="admin-primary-button"
                         id="addRestaurantButton"
                     >
-                        + Add Restaurant
+                        + Add Market
                     </button>
 
                 </div>
@@ -160,7 +160,7 @@
                     <div class="admin-stat-icon">▦</div>
 
                     <div class="admin-stat-content">
-                        <span>Total Restaurants</span>
+                        <span>Total Markets</span>
                         <strong id="restaurantTotalStat">0</strong>
                     </div>
 
@@ -172,7 +172,7 @@
                     <div class="admin-stat-icon">✓</div>
 
                     <div class="admin-stat-content">
-                        <span>Active Restaurants</span>
+                        <span>Active Markets</span>
                         <strong id="restaurantActiveStat">0</strong>
                     </div>
 
@@ -214,8 +214,8 @@
                 <div class="admin-card-header">
 
                     <div>
-                        <h3>All Restaurants</h3>
-                        <p>Manage restaurant accounts and information.</p>
+                        <h3>All Markets</h3>
+                        <p>Manage market accounts and information.</p>
                     </div>
 
                     <div class="admin-restaurant-tools">
@@ -228,8 +228,8 @@
                                 id="restaurantSearch"
                                 name="restaurantSearch"
                                 type="search"
-                                placeholder="Search restaurants..."
-                                aria-label="Search restaurants"
+                                placeholder="Search markets..."
+                                aria-label="Search markets"
                                 autocomplete="off"
                             />
 
@@ -390,7 +390,7 @@
                         <thead>
 
                             <tr>
-                                <th>Restaurant</th>
+                                <th>Market</th>
                                 <th>Owner</th>
                                 <th>Location</th>
                                 <th>Orders</th>
@@ -416,7 +416,7 @@
                 <div class="admin-table-footer">
 
                     <p id="restaurantShowingText">
-                        Showing 0–0 of 0 restaurants
+                        Showing 0–0 of 0 markets
                     </p>
 
                     <div
@@ -443,8 +443,8 @@
                     <div class="admin-card-header">
 
                         <div>
-                            <h3>Restaurant Operations</h3>
-                            <p>Current restaurant platform status.</p>
+                            <h3>Market Operations</h3>
+                            <p>Current market platform status.</p>
                         </div>
 
                     </div>
@@ -454,7 +454,7 @@
                         <div class="admin-summary-item">
                             <div>
                                 <div class="admin-summary-icon">✓</div>
-                                <strong>Active Restaurants</strong>
+                                <strong>Active Markets</strong>
                             </div>
 
                             <span
