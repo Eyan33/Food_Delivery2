@@ -1,7 +1,7 @@
 
 /* =========================================================
    CUSTOMER RESTAURANT PAGE
-   Loads market details and products from the backend.
+   Loads restaurant details and menu from the backend.
    Preserves cart, search, category filters and mobile nav.
    ========================================================= */
 
@@ -10,30 +10,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const API_BASE = (window.FOOD_DELIVERY_API_BASE || document.querySelector('meta[name="api-base-url"]')?.content?.trim() || "http://localhost:5000/api").replace(/\/+$/, "");
     const FOOD_PLACEHOLDER =
-        "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22360%22%20viewBox%3D%220%200%20640%20360%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f3f5%22%2F%3E%3Cg%20fill%3D%22%2368707a%22%20font-family%3D%22Arial%2Csans-serif%22%20text-anchor%3D%22middle%22%3E%3Ctext%20x%3D%22320%22%20y%3D%22175%22%20font-size%3D%2226%22%3EProductsDelivery%3C%2Ftext%3E%3Ctext%20x%3D%22320%22%20y%3D%22210%22%20font-size%3D%2216%22%3EImage%20unavailable%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E";
+        "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22360%22%20viewBox%3D%220%200%20640%20360%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f3f5%22%2F%3E%3Cg%20fill%3D%22%2368707a%22%20font-family%3D%22Arial%2Csans-serif%22%20text-anchor%3D%22middle%22%3E%3Ctext%20x%3D%22320%22%20y%3D%22175%22%20font-size%3D%2226%22%3EFoodDelivery%3C%2Ftext%3E%3Ctext%20x%3D%22320%22%20y%3D%22210%22%20font-size%3D%2216%22%3EImage%20unavailable%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E";
     const RESTAURANT_PLACEHOLDER =
-        "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22360%22%20viewBox%3D%220%200%20640%20360%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f3f5%22%2F%3E%3Cg%20fill%3D%22%2368707a%22%20font-family%3D%22Arial%2Csans-serif%22%20text-anchor%3D%22middle%22%3E%3Ctext%20x%3D%22320%22%20y%3D%22175%22%20font-size%3D%2226%22%3EProductsDelivery%3C%2Ftext%3E%3Ctext%20x%3D%22320%22%20y%3D%22210%22%20font-size%3D%2216%22%3EImage%20unavailable%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E";
+        "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22360%22%20viewBox%3D%220%200%20640%20360%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f3f5%22%2F%3E%3Cg%20fill%3D%22%2368707a%22%20font-family%3D%22Arial%2Csans-serif%22%20text-anchor%3D%22middle%22%3E%3Ctext%20x%3D%22320%22%20y%3D%22175%22%20font-size%3D%2226%22%3EFoodDelivery%3C%2Ftext%3E%3Ctext%20x%3D%22320%22%20y%3D%22210%22%20font-size%3D%2216%22%3EImage%20unavailable%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E";
 
-    // Market elements
-    const marketName = document.getElementById("marketName");
-    const marketImage = document.getElementById("marketImage");
-    const marketDescription =
-        document.getElementById("marketDescription");
-    const marketStatus = document.getElementById("marketStatus");
-    const marketRating = document.getElementById("marketRating");
-    const marketCategory = document.getElementById("marketCategory");
-    const marketDeliveryTime = document.getElementById("marketDeliveryTime");
+    // Restaurant elements
+    const restaurantName = document.getElementById("restaurantName");
+    const restaurantImage = document.getElementById("restaurantImage");
+    const restaurantDescription =
+        document.getElementById("restaurantDescription");
+    const restaurantStatus = document.getElementById("restaurantStatus");
+    const restaurantRating = document.getElementById("restaurantRating");
+    const restaurantCuisine = document.getElementById("restaurantCuisine");
+    const restaurantDeliveryTime = document.getElementById("restaurantDeliveryTime");
 
-    // Products elements
-    const productsSearchForm = document.getElementById("productsSearchForm");
-    const productsSearch = document.getElementById("productsSearch");
-    const productsProductsGrid = document.getElementById("productsProductsGrid");
-    const productsCategories = document.getElementById("productsCategories");
-    const noProductsResults = document.getElementById("noProductsResults");
+    // Menu elements
+    const menuSearchForm = document.getElementById("menuSearchForm");
+    const menuSearch = document.getElementById("menuSearch");
+    const menuFoodGrid = document.getElementById("menuFoodGrid");
+    const menuCategories = document.getElementById("menuCategories");
+    const noMenuResults = document.getElementById("noMenuResults");
     const cartCount = document.getElementById("cartCount");
 
-    let market = null;
-    let productss = [];
+    let restaurant = null;
+    let foods = [];
     let cart = [];
     let selectedCategory = "all";
 
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .toLowerCase();
     }
 
-    function getMarketId() {
+    function getRestaurantId() {
         return new URLSearchParams(window.location.search).get("id");
     }
 
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     try {
-        const savedCart = localStorage.getItem("productsDeliveryCart");
+        const savedCart = localStorage.getItem("foodDeliveryCart");
         if (savedCart) {
             const parsedCart = JSON.parse(savedCart);
             cart = Array.isArray(parsedCart) ? parsedCart : [];
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveCart() {
         try {
-            localStorage.setItem("productsDeliveryCart", JSON.stringify(cart));
+            localStorage.setItem("foodDeliveryCart", JSON.stringify(cart));
             return true;
         } catch (error) {
             console.error("Unable to save cart:", error);
@@ -158,32 +158,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function addToCart(products, button) {
-        if (!market || !products) return;
+    function addToCart(food, button) {
+        if (!restaurant || !food) return;
 
         const previousCart = cart.map(item => ({ ...item }));
 
-        if (!normalizeBoolean(market.is_open)) {
+        if (!normalizeBoolean(restaurant.is_open)) {
             alert("This market is currently closed.");
             return;
         }
 
-        if (!normalizeBoolean(products.is_available, true)) {
+        if (!normalizeBoolean(food.is_available, true)) {
             alert("This product is currently unavailable.");
             return;
         }
 
-        // Prevent a cart from mixing products from different markets.
-        const otherMarketItem = cart.find(
+        // Prevent a cart from mixing food from different restaurants.
+        const otherRestaurantItem = cart.find(
             item =>
                 item.restaurant_id != null &&
-                String(item.restaurant_id) !== String(market.id)
+                String(item.restaurant_id) !== String(restaurant.id)
         );
 
-        if (otherMarketItem) {
+        if (otherRestaurantItem) {
             const confirmed = window.confirm(
                 "Your cart contains items from another market. " +
-                "Clear the existing cart and add this item?"
+                "Clear the existing cart and add this product?"
             );
 
             if (!confirmed) return;
@@ -192,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const existingItem = cart.find(
             item =>
-                String(item.id) === String(products.id) &&
-                String(item.restaurant_id) === String(products.restaurant_id)
+                String(item.id) === String(food.id) &&
+                String(item.restaurant_id) === String(food.restaurant_id)
         );
 
         if (existingItem) {
@@ -205,25 +205,25 @@ document.addEventListener("DOMContentLoaded", () => {
             existingItem.quantity = currentQuantity + 1;
         } else {
             cart.push({
-                id: products.id,
-                restaurant_id: products.restaurant_id ?? market.id,
-                market_name: market.name,
-                market_is_open: normalizeBoolean(market.is_open),
+                id: food.id,
+                restaurant_id: food.restaurant_id ?? restaurant.id,
+                restaurant_name: restaurant.name,
+                restaurant_is_open: normalizeBoolean(restaurant.is_open),
                 delivery_fee: (() => {
-                    const fee = Number(market.delivery_fee ?? market.deliveryFee);
+                    const fee = Number(restaurant.delivery_fee ?? restaurant.deliveryFee);
                     return Number.isFinite(fee) && fee >= 0 ? fee : null;
                 })(),
-                name: products.name,
-                category: products.category_name || "Other",
-                description: products.description || "",
-                price: Number(products.price) || 0,
-                image: getImageUrl(products.image_url, FOOD_PLACEHOLDER),
+                name: food.name,
+                category: food.category_name || "Other",
+                description: food.description || "",
+                price: Number(food.price) || 0,
+                image: getImageUrl(food.image_url, FOOD_PLACEHOLDER),
                 quantity: 1
             });
         }
 
         if (!saveCart()) {
-            // Restore the entire prior cart, including items cleared after a market switch.
+            // Restore the entire prior cart, including items cleared after a restaurant switch.
             cart = previousCart;
             updateCartCount();
             return;
@@ -246,61 +246,61 @@ document.addEventListener("DOMContentLoaded", () => {
        RESTAURANT DETAILS
     ===================================================== */
 
-    function updateMarketDetails(data) {
-        market = data;
+    function updateRestaurantDetails(data) {
+        restaurant = data;
 
-        if (marketName) {
-            marketName.textContent = data.name || "Market";
+        if (restaurantName) {
+            restaurantName.textContent = data.name || "Restaurant";
         }
 
-        if (marketDescription) {
-            marketDescription.textContent =
-                data.description || "Explore this market's products.";
+        if (restaurantDescription) {
+            restaurantDescription.textContent =
+                data.description || "Explore this restaurant's menu.";
         }
 
-        if (marketImage) {
-            marketImage.src = getImageUrl(
+        if (restaurantImage) {
+            restaurantImage.src = getImageUrl(
                 data.cover_image_url || data.logo_url,
                 RESTAURANT_PLACEHOLDER
             );
 
-            marketImage.alt = data.name || "Market";
+            restaurantImage.alt = data.name || "Restaurant";
 
-            marketImage.onerror = () => {
-                marketImage.onerror = null;
-                marketImage.src = RESTAURANT_PLACEHOLDER;
+            restaurantImage.onerror = () => {
+                restaurantImage.onerror = null;
+                restaurantImage.src = RESTAURANT_PLACEHOLDER;
             };
         }
 
-        if (marketStatus) {
+        if (restaurantStatus) {
             const isOpen = normalizeBoolean(data.is_open);
-            marketStatus.textContent = isOpen ? "Open" : "Closed";
-            marketStatus.classList.toggle("closed", !isOpen);
-            marketStatus.setAttribute(
+            restaurantStatus.textContent = isOpen ? "Open" : "Closed";
+            restaurantStatus.classList.toggle("closed", !isOpen);
+            restaurantStatus.setAttribute(
                 "aria-label",
-                isOpen ? "Market is open" : "Market is closed"
+                isOpen ? "Restaurant is open" : "Restaurant is closed"
             );
         }
 
-        if (marketCategory) {
-            marketCategory.textContent = data.category || data.category_name || data.category_name || "Market";
+        if (restaurantCuisine) {
+            restaurantCuisine.textContent = data.cuisine || data.cuisine_name || data.category_name || "Restaurant";
         }
 
-        if (marketRating) {
+        if (restaurantRating) {
             const rating = Number(data.average_rating);
-            marketRating.textContent =
+            restaurantRating.textContent =
                 Number.isFinite(rating) && rating > 0
                     ? rating.toFixed(1)
                     : "No ratings";
         }
 
-        // Update the market image even if the initial HTML has a placeholder.
-        document.title = `${data.name || "Market"} | ProductsDelivery`;
+        // Update the restaurant image even if the initial HTML has a placeholder.
+        document.title = `${data.name || "Restaurant"} | FoodDelivery`;
 
         // Update the existing delivery and minimum-order values without
         // requiring changes to the page layout.
         const metaItems = document.querySelectorAll(
-            ".market-details-meta .meta-item"
+            ".restaurant-details-meta .meta-item"
         );
 
         metaItems.forEach((item) => {
@@ -321,25 +321,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    async function loadMarket(id) {
+    async function loadRestaurant(id) {
         const result = await fetchJSON(
-            `${API_BASE}/markets/${encodeURIComponent(id)}`
+            `${API_BASE}/restaurants/${encodeURIComponent(id)}`
         );
 
-        const data = result.data?.market || result.market;
+        const data = result.data?.restaurant || result.restaurant;
 
         if (!data || data.id == null) {
-            throw new Error("The API response did not contain market details.");
+            throw new Error("The API response did not contain restaurant details.");
         }
 
-        updateMarketDetails(data);
+        updateRestaurantDetails(data);
     }
 
-    async function loadMarketReviews(marketId) {
-        const container = document.getElementById("marketReviewsList");
+    async function loadRestaurantReviews(restaurantId) {
+        const container = document.getElementById("restaurantReviewsList");
         if (!container) return;
         try {
-            const result = await fetchJSON(`${API_BASE}/reviews/market/${encodeURIComponent(marketId)}`);
+            const result = await fetchJSON(`${API_BASE}/reviews/restaurant/${encodeURIComponent(restaurantId)}`);
             const reviews = Array.isArray(result) ? result : (result.data?.reviews || result.reviews || []);
             if (!reviews.length) { container.innerHTML = '<p class="home-message">No reviews yet. Place an order and share your experience after it is delivered.</p>'; return; }
             container.innerHTML = reviews.map(review => {
@@ -347,10 +347,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 const customer = escapeHTML(review.customer_name || "Customer");
                 const comment = escapeHTML(review.comment || "No written comment provided.");
                 const date = review.created_at ? new Date(review.created_at).toLocaleDateString("en-KE", { dateStyle: "medium" }) : "";
-                return `<article class="market-review-card"><div class="market-review-card-heading"><strong>${customer}</strong><span class="market-review-stars" aria-label="${rating} out of 5 stars">${"★".repeat(rating)}${"☆".repeat(5-rating)}</span></div><p>${comment}</p><small>${escapeHTML(date)}</small></article>`;
+                return `<article class="restaurant-review-card"><div class="restaurant-review-card-heading"><strong>${customer}</strong><span class="restaurant-review-stars" aria-label="${rating} out of 5 stars">${"★".repeat(rating)}${"☆".repeat(5-rating)}</span></div><p>${comment}</p><small>${escapeHTML(date)}</small></article>`;
             }).join("");
         } catch (error) {
-            console.error("Could not load market reviews:", error);
+            console.error("Could not load restaurant reviews:", error);
             container.innerHTML = '<p class="home-message">Reviews could not be loaded right now.</p>';
         }
     }
@@ -360,31 +360,31 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function buildCategoryButtons() {
-        if (!productsCategories) return;
+        if (!menuCategories) return;
 
         const categoryNames = [
             ...new Set(
-                productss.map(products => String(products.category_name || "").trim())
+                foods.map(food => String(food.category_name || "").trim())
                     .filter(Boolean)
             )
         ].sort((a, b) => a.localeCompare(b));
 
-        productsCategories.innerHTML = "";
+        menuCategories.innerHTML = "";
 
         const allButton = document.createElement("button");
         allButton.type = "button";
-        allButton.className = "products-category active";
+        allButton.className = "menu-category active";
         allButton.dataset.category = "all";
         allButton.textContent = "All";
-        productsCategories.appendChild(allButton);
+        menuCategories.appendChild(allButton);
 
         categoryNames.forEach(name => {
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "products-category";
+            button.className = "menu-category";
             button.dataset.category = normalizeCategory(name);
             button.textContent = name;
-            productsCategories.appendChild(button);
+            menuCategories.appendChild(button);
         });
     }
 
@@ -392,37 +392,37 @@ document.addEventListener("DOMContentLoaded", () => {
        RENDER MENU
     ===================================================== */
 
-    function renderProductss() {
-        if (!productsProductsGrid) return;
+    function renderFoods() {
+        if (!menuFoodGrid) return;
 
-        if (productss.length === 0) {
-            productsProductsGrid.innerHTML =
-                '<p class="home-message">This market has no available products items right now.</p>';
+        if (foods.length === 0) {
+            menuFoodGrid.innerHTML =
+                '<p class="home-message">This restaurant has no available menu items right now.</p>';
 
-            if (noProductsResults) noProductsResults.hidden = true;
+            if (noMenuResults) noMenuResults.hidden = true;
             return;
         }
 
-        productsProductsGrid.innerHTML = productss.map(products => {
-            const name = escapeHTML(products.name || "Product");
-            const description = escapeHTML(products.description || "");
-            const categoryName = String(products.category_name || "Other");
+        menuFoodGrid.innerHTML = foods.map(food => {
+            const name = escapeHTML(food.name || "Food item");
+            const description = escapeHTML(food.description || "");
+            const categoryName = String(food.category_name || "Other");
             const category = escapeHTML(normalizeCategory(categoryName));
-            const price = escapeHTML(formatPrice(products.price));
+            const price = escapeHTML(formatPrice(food.price));
             const image = escapeHTML(
-                getImageUrl(products.image_url, FOOD_PLACEHOLDER)
+                getImageUrl(food.image_url, FOOD_PLACEHOLDER)
             );
-            const id = escapeHTML(products.id);
-            const available = normalizeBoolean(products.is_available, true);
+            const id = escapeHTML(food.id);
+            const available = normalizeBoolean(food.is_available, true);
 
             return `
                 <article
-                    class="products-products-card"
-                    data-products-name="${name}"
+                    class="menu-food-card"
+                    data-food-name="${name}"
                     data-category="${category}"
-                    data-products-id="${id}"
+                    data-food-id="${id}"
                 >
-                    <div class="products-products-image">
+                    <div class="menu-food-image">
                         <img
                             src="${image}"
                             alt="${name}"
@@ -431,16 +431,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         />
                     </div>
 
-                    <div class="products-products-info">
+                    <div class="menu-food-info">
                         <h3>${name}</h3>
                         <p>${description}</p>
 
-                        <div class="products-products-bottom">
+                        <div class="menu-food-bottom">
                             <strong>${price}</strong>
                             <button
                                 type="button"
-                                class="add-products-button"
-                                data-products-id="${id}"
+                                class="add-food-button"
+                                data-food-id="${id}"
                                 ${available ? "" : "disabled"}
                             >${available ? "Add" : "Unavailable"}</button>
                         </div>
@@ -449,59 +449,59 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }).join("");
 
-        productsProductsGrid.querySelectorAll("img[data-fallback]").forEach(image => {
+        menuFoodGrid.querySelectorAll("img[data-fallback]").forEach(image => {
             image.addEventListener("error", () => {
                 image.onerror = null;
                 image.removeAttribute("data-fallback");
-                image.alt = `${image.alt || "Products image"} (image unavailable)`;
+                image.alt = `${image.alt || "Food image"} (image unavailable)`;
                 image.style.display = "none";
                 image.parentElement?.classList.add("image-unavailable");
             }, { once: true });
         });
 
-        filterProducts();
+        filterMenu();
     }
 
-    async function loadProductss(marketId) {
-        const result = await fetchJSON(`${API_BASE}/productss?restaurant_id=${encodeURIComponent(marketId)}`);
+    async function loadFoods(restaurantId) {
+        const result = await fetchJSON(`${API_BASE}/foods?restaurant_id=${encodeURIComponent(restaurantId)}`);
 
-        const responseData = result.data?.productss ?? result.productss ?? result.data;
-        let productsList;
+        const responseData = result.data?.foods ?? result.foods ?? result.data;
+        let foodList;
 
         // Accommodate a plain array or a paginated/list object.
         if (Array.isArray(responseData)) {
-            productsList = responseData;
-        } else if (Array.isArray(responseData?.productss)) {
-            productsList = responseData.productss;
+            foodList = responseData;
+        } else if (Array.isArray(responseData?.foods)) {
+            foodList = responseData.foods;
         } else {
-            throw new Error("The API response did not contain a products list.");
+            throw new Error("The API response did not contain a food list.");
         }
 
-        productss = productsList.filter(products =>
-            products &&
-            String(products.restaurant_id) === String(marketId) &&
-            normalizeBoolean(products.is_available, true)
+        foods = foodList.filter(food =>
+            food &&
+            String(food.restaurant_id) === String(restaurantId) &&
+            normalizeBoolean(food.is_available, true)
         );
 
         buildCategoryButtons();
-        renderProductss();
+        renderFoods();
     }
 
     /* =====================================================
        SEARCH AND FILTERS
     ===================================================== */
 
-    function filterProducts() {
-        if (!productsProductsGrid) return;
+    function filterMenu() {
+        if (!menuFoodGrid) return;
 
-        const searchTerm = productsSearch
-            ? productsSearch.value.trim().toLowerCase()
+        const searchTerm = menuSearch
+            ? menuSearch.value.trim().toLowerCase()
             : "";
 
         let visibleCount = 0;
 
-        productsProductsGrid.querySelectorAll(".products-products-card").forEach(card => {
-            const name = (card.dataset.productsName || "").toLowerCase();
+        menuFoodGrid.querySelectorAll(".menu-food-card").forEach(card => {
+            const name = (card.dataset.foodName || "").toLowerCase();
             const text = card.textContent.toLowerCase();
             const category = normalizeCategory(card.dataset.category);
 
@@ -520,58 +520,58 @@ document.addEventListener("DOMContentLoaded", () => {
             if (visible) visibleCount++;
         });
 
-        if (noProductsResults) {
-            noProductsResults.hidden = visibleCount !== 0;
+        if (noMenuResults) {
+            noMenuResults.hidden = visibleCount !== 0;
         }
     }
 
-    if (productsSearchForm) {
-        productsSearchForm.addEventListener("submit", event => {
+    if (menuSearchForm) {
+        menuSearchForm.addEventListener("submit", event => {
             event.preventDefault();
-            filterProducts();
+            filterMenu();
         });
     }
 
-    if (productsSearch) {
-        productsSearch.addEventListener("input", filterProducts);
+    if (menuSearch) {
+        menuSearch.addEventListener("input", filterMenu);
     }
 
-    if (productsCategories) {
-        productsCategories.addEventListener("click", event => {
-            const button = event.target.closest(".products-category");
+    if (menuCategories) {
+        menuCategories.addEventListener("click", event => {
+            const button = event.target.closest(".menu-category");
             if (!button) return;
 
             selectedCategory =
                 normalizeCategory(button.dataset.category || "all");
 
-            productsCategories.querySelectorAll(".products-category")
+            menuCategories.querySelectorAll(".menu-category")
                 .forEach(item => item.classList.remove("active"));
 
             button.classList.add("active");
-            filterProducts();
+            filterMenu();
         });
     }
 
     /* =====================================================
        ADD-TO-CART EVENTS
-       Delegation works for products cards loaded dynamically.
+       Delegation works for menu cards loaded dynamically.
     ===================================================== */
 
-    if (productsProductsGrid) {
-        productsProductsGrid.addEventListener("click", event => {
-            const button = event.target.closest(".add-products-button");
+    if (menuFoodGrid) {
+        menuFoodGrid.addEventListener("click", event => {
+            const button = event.target.closest(".add-food-button");
             if (!button || button.disabled) return;
 
-            const products = productss.find(
-                item => String(item.id) === String(button.dataset.productsId)
+            const food = foods.find(
+                item => String(item.id) === String(button.dataset.foodId)
             );
 
-            if (!products) {
-                console.error("Could not find product for cart:", button.dataset.productsId);
+            if (!food) {
+                console.error("Could not find food item for cart:", button.dataset.foodId);
                 return;
             }
 
-            addToCart(products, button);
+            addToCart(food, button);
         });
     }
 
@@ -583,39 +583,39 @@ document.addEventListener("DOMContentLoaded", () => {
     async function initializePage() {
         updateCartCount();
 
-        const id = getMarketId();
+        const id = getRestaurantId();
 
         if (!id || !/^[1-9]\d*$/.test(id)) {
-            if (marketName) marketName.textContent = "Market not found";
+            if (restaurantName) restaurantName.textContent = "Restaurant not found";
 
-            if (productsProductsGrid) {
-                productsProductsGrid.innerHTML = '<p class="home-message">Please return to the markets page and select a market.</p>';
+            if (menuFoodGrid) {
+                menuFoodGrid.innerHTML = '<p class="home-message">Please return to the restaurants page and select a restaurant.</p>';
             }
-            const hero = document.querySelector(".market-details-card");
+            const hero = document.querySelector(".restaurant-details-card");
             if (hero) hero.hidden = true;
 
-            console.error("Missing or invalid market ID in page URL.");
+            console.error("Missing or invalid restaurant ID in page URL.");
             return;
         }
 
         try {
-            await loadMarket(id);
-            await loadMarketReviews(id);
+            await loadRestaurant(id);
+            await loadRestaurantReviews(id);
         } catch (error) {
-            console.error("Failed to load market details:", error);
-            if (marketName) marketName.textContent = "Market unavailable";
-            if (marketDescription) marketDescription.textContent = "We could not load this market. Return to the market list and try again.";
-            if (productsProductsGrid) productsProductsGrid.innerHTML = '<p class="home-message">Market details could not be loaded. <a href="markets.html">Back to markets</a>.</p>';
+            console.error("Failed to load restaurant details:", error);
+            if (restaurantName) restaurantName.textContent = "Restaurant unavailable";
+            if (restaurantDescription) restaurantDescription.textContent = "We could not load this restaurant. Return to the restaurant list and try again.";
+            if (menuFoodGrid) menuFoodGrid.innerHTML = '<p class="home-message">Market details could not be loaded. <a href="restaurants.html">Back to restaurants</a>.</p>';
             return;
         }
 
         try {
-            await loadProductss(id);
+            await loadFoods(id);
         } catch (error) {
-            console.error("Failed to load market page:", error);
+            console.error("Failed to load restaurant page:", error);
 
-            if (productsProductsGrid) {
-                productsProductsGrid.innerHTML = '<p class="home-message">We could not load this products. Please refresh and try again, or <a href="markets.html">choose another market</a>.</p>';
+            if (menuFoodGrid) {
+                menuFoodGrid.innerHTML = '<p class="home-message">We could not load this menu. Please refresh and try again, or <a href="restaurants.html">choose another restaurant</a>.</p>';
             }
         }
     }
