@@ -256,7 +256,7 @@ async function getAdminById(id) {
         SELECT ${ADMIN_COLUMNS}
         FROM users
         WHERE id = $1
-          AND role = 'admin'
+          AND role IN ('admin', 'super_admin')
         LIMIT 1
         `,
         [adminId]
