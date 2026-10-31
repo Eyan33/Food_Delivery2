@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tabs = document.querySelectorAll(".admin-restaurant-tab");
 
-  const addButton = document.getElementById("addMarketButton");
-  const exportButton = document.getElementById("exportMarketsButton");
+  const addButton = document.getElementById("addRestaurantButton");
+  const exportButton = document.getElementById("exportRestaurantsButton");
 
   const messageBox = document.getElementById("adminMessage");
 
@@ -23,11 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const approvalFilter = document.getElementById("restaurantApprovalFilter");
 
   const applyFilterButton = document.getElementById(
-    "applyMarketFiltersButton",
+    "applyRestaurantFiltersButton",
   );
 
   const resetFilterButton = document.getElementById(
-    "resetMarketFiltersButton",
+    "resetRestaurantFiltersButton",
   );
 
   const showingText = document.getElementById("restaurantShowingText");
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     approval: "all",
     totalPages: 1,
     totalItems: 0,
-    markets: [],
+    restaurants: [],
   };
 
   let searchTimer = null;
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * =========================================================
    */
 
-  const marketsApi = {
+  const restaurantsApi = {
     async list(params = {}) {
       const query = new URLSearchParams();
 
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const suffix = query.toString() ? `?${query.toString()}` : "";
 
-      return API.request(`/markets/admin${suffix}`, {
+      return API.request(`/restaurants/admin${suffix}`, {
         method: "GET",
         authenticated: true,
       });
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async get(restaurantId) {
       return API.request(
-        `/markets/admin/${encodeURIComponent(restaurantId)}`,
+        `/restaurants/admin/${encodeURIComponent(restaurantId)}`,
         {
           method: "GET",
           authenticated: true,
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     async create(data) {
-      return API.request("/markets/admin", {
+      return API.request("/restaurants/admin", {
         method: "POST",
         body: data,
         authenticated: true,
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async update(restaurantId, data) {
       return API.request(
-        `/markets/admin/${encodeURIComponent(restaurantId)}`,
+        `/restaurants/admin/${encodeURIComponent(restaurantId)}`,
         {
           method: "PUT",
           body: data,
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async approve(restaurantId) {
       return API.request(
-        `/markets/admin/${encodeURIComponent(restaurantId)}/approve`,
+        `/restaurants/admin/${encodeURIComponent(restaurantId)}/approve`,
         {
           method: "PATCH",
           authenticated: true,
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async reject(restaurantId, reason) {
       return API.request(
-        `/markets/admin/${encodeURIComponent(restaurantId)}/reject`,
+        `/restaurants/admin/${encodeURIComponent(restaurantId)}/reject`,
         {
           method: "PATCH",
           body: {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async activate(restaurantId) {
       return API.request(
-        `/markets/admin/${encodeURIComponent(restaurantId)}/activate`,
+        `/restaurants/admin/${encodeURIComponent(restaurantId)}/activate`,
         {
           method: "PATCH",
           authenticated: true,
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async deactivate(restaurantId) {
       return API.request(
-        `/markets/admin/${encodeURIComponent(restaurantId)}/deactivate`,
+        `/restaurants/admin/${encodeURIComponent(restaurantId)}/deactivate`,
         {
           method: "PATCH",
           authenticated: true,
@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * =========================================================
    */
 
-  async function loadMarkets() {
+  async function loadRestaurants() {
     tableBody.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align:center; padding:35px;">
@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
     try {
-      const response = await marketsApi.list({
+      const response = await restaurantsApi.list({
         search: state.search,
         status: state.status,
         open: state.open,
@@ -315,8 +315,8 @@ document.addEventListener("DOMContentLoaded", () => {
         limit: state.limit,
       });
 
-      state.markets = Array.isArray(response?.markets)
-        ? response.markets
+      state.restaurants = Array.isArray(response?.restaurants)
+        ? response.restaurants
         : [];
 
       state.totalItems = Number(response?.pagination?.totalItems || 0);
@@ -329,19 +329,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (state.page > state.totalPages) {
         state.page = state.totalPages;
 
-        return loadMarkets();
+        return loadRestaurants();
       }
 
-      renderMarkets();
+      renderRestaurants();
       renderPagination();
       renderStatistics(response?.statistics || {});
     } catch (error) {
-      console.error("Failed to load markets:", error);
+      console.error("Failed to load restaurants:", error);
 
       tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" style="text-align:center; padding:35px;">
-                        Could not load markets.
+                        Could not load restaurants.
                     </td>
                 </tr>
             `;
@@ -352,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderPagination();
 
       showMessage(
-        error?.message || "Could not load markets. Please try again.",
+        error?.message || "Could not load restaurants. Please try again.",
         "error",
       );
     }
@@ -364,8 +364,8 @@ document.addEventListener("DOMContentLoaded", () => {
    * =========================================================
    */
 
-  function renderMarkets() {
-    if (!state.markets.length) {
+  function renderRestaurants() {
+    if (!state.restaurants.length) {
       tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" style="text-align:center; padding:35px;">
@@ -380,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tableBody.innerHTML = "";
 
-    state.markets.forEach((restaurant) => {
+    state.restaurants.forEach((restaurant) => {
       const row = document.createElement("tr");
 
       const status = restaurantDisplayStatus(restaurant);
@@ -464,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
 
                 <td>
-                    ${escapeHtml(restaurant.location_name || `${String(restaurant.name || "Market").trim().split(/\s+/)[0]} Location`)}
+                    ${escapeHtml(restaurant.location_name || `${String(restaurant.name || "Restaurant").trim().split(/\s+/)[0]} Location`)}
                 </td>
 
                 <td>
@@ -503,8 +503,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             type="button"
                             class="admin-table-action edit-button"
                             data-id="${escapeHtml(restaurant.id)}"
-                            aria-label="Edit restaurant"
-                            title="Edit restaurant"
+                            aria-label="Edit market"
+                            title="Edit market"
                         >
                             ✎
                         </button>
@@ -543,31 +543,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (button.classList.contains("view-button")) {
-      await openMarketModal(restaurantId);
+      await openRestaurantModal(restaurantId);
 
       return;
     }
 
     if (button.classList.contains("edit-button")) {
-      await openMarketModal(restaurantId);
+      await openRestaurantModal(restaurantId);
 
       return;
     }
 
     if (button.classList.contains("approve-button")) {
-      await handleApproveMarket(restaurantId);
+      await handleApproveRestaurant(restaurantId);
 
       return;
     }
 
     if (button.classList.contains("activate-button")) {
-      await handleActivateMarket(restaurantId);
+      await handleActivateRestaurant(restaurantId);
 
       return;
     }
 
     if (button.classList.contains("deactivate-button")) {
-      await handleDeactivateMarket(restaurantId);
+      await handleDeactivateRestaurant(restaurantId);
     }
     if (button.classList.contains("permanent-delete-button")) {
       window.location.href = "deleted-accounts.html?type=restaurant&id=" + encodeURIComponent(restaurantId);
@@ -645,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       state.page = currentPage - 1;
 
-      loadMarkets();
+      loadRestaurants();
     });
 
     const pageNumbers = buildPageNumbers(currentPage, totalPages);
@@ -669,7 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
         () => {
           state.page = page;
 
-          loadMarkets();
+          loadRestaurants();
         },
         page === currentPage,
       );
@@ -682,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       state.page = currentPage + 1;
 
-      loadMarkets();
+      loadRestaurants();
     });
   }
 
@@ -739,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const total = state.totalItems;
 
     if (!total) {
-      showingText.textContent = "Showing 0–0 of 0 markets";
+      showingText.textContent = "Showing 0–0 of 0 restaurants";
 
       return;
     }
@@ -750,7 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     showingText.textContent = `Showing ${start}–${end} of ${formatNumber(
       total,
-    )} markets`;
+    )} restaurants`;
   }
 
   /*
@@ -802,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       approvalFilter.value = state.approval;
 
-      loadMarkets();
+      loadRestaurants();
     });
   });
 
@@ -820,7 +820,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       state.page = 1;
 
-      loadMarkets();
+      loadRestaurants();
     }, 350);
   });
 
@@ -861,7 +861,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filterButton.setAttribute("aria-expanded", "false");
 
-    loadMarkets();
+    loadRestaurants();
   });
 
   resetFilterButton.addEventListener("click", () => {
@@ -887,7 +887,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filterButton.setAttribute("aria-expanded", "false");
 
-    loadMarkets();
+    loadRestaurants();
   });
 
   /*
@@ -928,7 +928,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="admin-modal-close"
-                    id="closeMarketModal"
+                    id="closeRestaurantModal"
                     aria-label="Close modal"
                 >
                     ×
@@ -955,7 +955,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     class="admin-form-field admin-form-field-full"
                 >
                     <label for="restaurantName">
-                        Market name <span>*</span>
+                        Restaurant name <span>*</span>
                     </label>
 
                     <input
@@ -989,14 +989,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 <div class="admin-form-field admin-form-field-full">
-                    <label for="restaurantImage">Market image <span>*</span></label>
+                    <label for="restaurantImage">Restaurant image <span>*</span></label>
                     <input id="restaurantImage" name="restaurantImage" type="file"
                         accept="image/jpeg,image/png,image/webp" />
                     <small class="admin-form-hint">JPEG, PNG or WebP. Maximum 5 MB. Required when creating a restaurant; optional when editing.</small>
                     <div id="restaurantImagePreviewWrap" hidden style="margin-top:10px;">
-                        <img id="restaurantImagePreview" alt="Market image preview"
+                        <img id="restaurantImagePreview" alt="Restaurant image preview"
                             style="display:block;width:100%;max-height:190px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;" />
-                        <button type="button" id="clearMarketImage" class="admin-secondary-button" style="margin-top:8px;">Remove selected image</button>
+                        <button type="button" id="clearRestaurantImage" class="admin-secondary-button" style="margin-top:8px;">Remove selected image</button>
                     </div>
                     <small class="admin-form-error" id="restaurantImageError"></small>
                 </div>
@@ -1004,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="admin-form-field">
 
                     <label for="restaurantPhone">
-                        Market phone
+                        Restaurant phone
                     </label>
 
                     <input
@@ -1022,7 +1022,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="admin-form-field">
 
                     <label for="restaurantEmail">
-                        Market email
+                        Restaurant email
                     </label>
 
                     <input
@@ -1039,7 +1039,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div class="admin-form-field admin-form-field-full">
                     <label for="restaurantLocationButton">
-                        Market location <span>*</span>
+                        Restaurant location <span>*</span>
                     </label>
 
                     <button
@@ -1138,7 +1138,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="admin-form-field">
 
                     <label for="restaurantOpen">
-                        Market open status
+                        Restaurant open status
                     </label>
 
                     <select
@@ -1347,7 +1347,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="admin-secondary-button"
-                    id="cancelMarketModal"
+                    id="cancelRestaurantModal"
                 >
                     Close
                 </button>
@@ -1356,7 +1356,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="admin-secondary-button"
-                    id="rejectMarketButton"
+                    id="rejectRestaurantButton"
                 >
                     Reject
                 </button>
@@ -1365,7 +1365,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="admin-secondary-button"
-                    id="approveMarketButton"
+                    id="approveRestaurantButton"
                 >
                     Approve
                 </button>
@@ -1374,7 +1374,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="admin-secondary-button"
-                    id="deactivateMarketButton"
+                    id="deactivateRestaurantButton"
                 >
                     Deactivate
                 </button>
@@ -1383,7 +1383,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="admin-secondary-button"
-                    id="activateMarketButton"
+                    id="activateRestaurantButton"
                 >
                     Activate
                 </button>
@@ -1392,9 +1392,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="submit"
                     class="admin-primary-button"
-                    id="saveMarketButton"
+                    id="saveRestaurantButton"
                 >
-                    Create Market
+                    Create Restaurant
                 </button>
 
             </div>
@@ -1416,12 +1416,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const restaurantImageInput = modal.querySelector("#restaurantImage");
   const restaurantImagePreviewWrap = modal.querySelector("#restaurantImagePreviewWrap");
   const restaurantImagePreview = modal.querySelector("#restaurantImagePreview");
-  const clearMarketImageButton = modal.querySelector("#clearMarketImage");
+  const clearRestaurantImageButton = modal.querySelector("#clearRestaurantImage");
   const restaurantImageError = modal.querySelector("#restaurantImageError");
   const restaurantLocationButton = modal.querySelector("#restaurantLocationButton");
   const restaurantLocationStatus = modal.querySelector("#restaurantLocationStatus");
   const restaurantLocationError = modal.querySelector("#restaurantLocationError");
-  let selectedMarketImageData = "";
+  let selectedRestaurantImageData = "";
 
   const modalTitle = modal.querySelector("#restaurantModalTitle");
 
@@ -1429,17 +1429,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const modalMessage = modal.querySelector("#restaurantModalMessage");
 
-  const saveButton = modal.querySelector("#saveMarketButton");
+  const saveButton = modal.querySelector("#saveRestaurantButton");
 
-  const cancelButton = modal.querySelector("#cancelMarketModal");
+  const cancelButton = modal.querySelector("#cancelRestaurantModal");
 
-  const approveButton = modal.querySelector("#approveMarketButton");
+  const approveButton = modal.querySelector("#approveRestaurantButton");
 
-  const rejectButton = modal.querySelector("#rejectMarketButton");
+  const rejectButton = modal.querySelector("#rejectRestaurantButton");
 
-  const activateButton = modal.querySelector("#activateMarketButton");
+  const activateButton = modal.querySelector("#activateRestaurantButton");
 
-  const deactivateButton = modal.querySelector("#deactivateMarketButton");
+  const deactivateButton = modal.querySelector("#deactivateRestaurantButton");
 
   const temporaryPasswordNote = modal.querySelector("#temporaryPasswordNote");
 
@@ -1555,7 +1555,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveButton.hidden = false;
     saveButton.disabled = false;
-    saveButton.textContent = "Create Market";
+    saveButton.textContent = "Create Restaurant";
   }
 
   /*
@@ -1620,7 +1620,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     credentialsPassword.value = password;
 
-    modalTitle.textContent = "Market Created";
+    modalTitle.textContent = "Restaurant Created";
 
     modalSubtitle.textContent =
       "Copy the owner's sign-in details before closing.";
@@ -1715,7 +1715,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return true;
   }
 
-  async function captureMarketLocation() {
+  async function captureRestaurantLocation() {
     restaurantLocationError.textContent = "";
     if (!navigator.geolocation) {
       restaurantLocationError.textContent = "This browser does not support live location.";
@@ -1732,7 +1732,7 @@ document.addEventListener("DOMContentLoaded", () => {
       form.elements.restaurantLatitude.value = String(latitude);
       form.elements.restaurantLongitude.value = String(longitude);
       const restaurantName = form.elements.restaurantName.value.trim();
-      const firstName = restaurantName.split(/\s+/)[0] || "Market";
+      const firstName = restaurantName.split(/\s+/)[0] || "Restaurant";
       restaurantLocationStatus.textContent =
         `Saved as ${firstName} Location · ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
       restaurantLocationButton.textContent = "Refresh Live Location";
@@ -1744,27 +1744,27 @@ document.addEventListener("DOMContentLoaded", () => {
           ? "Your current location is unavailable. Check device location services and retry."
           : "Location request timed out. Please try again.";
       restaurantLocationError.textContent = message;
-      restaurantLocationStatus.textContent = "Market location has not been selected.";
+      restaurantLocationStatus.textContent = "Restaurant location has not been selected.";
       restaurantLocationButton.textContent = "Use Live Location";
       restaurantLocationButton.disabled = false;
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
   }
 
-  restaurantLocationButton.addEventListener("click", captureMarketLocation);
+  restaurantLocationButton.addEventListener("click", captureRestaurantLocation);
 
-  function validateMarketForm() {
+  function validateRestaurantForm() {
     clearFormErrors();
 
     let valid = true;
 
     valid =
-      validateRequiredInput("restaurantName", "Market name", 2) && valid;
+      validateRequiredInput("restaurantName", "Restaurant name", 2) && valid;
 
     if (
       !form.elements.restaurantLatitude.value ||
       !form.elements.restaurantLongitude.value
     ) {
-      restaurantLocationError.textContent = "Market location is required. Select Use Live Location and allow location access.";
+      restaurantLocationError.textContent = "Restaurant location is required. Select Use Live Location and allow location access.";
       valid = false;
     }
 
@@ -1776,7 +1776,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     valid = validateEmailInput("ownerEmail", "Owner email") && valid;
 
-    if (restaurantModal.mode === "add" && !selectedMarketImageData) {
+    if (restaurantModal.mode === "add" && !selectedRestaurantImageData) {
       restaurantImageError.textContent = "Choose a restaurant image before creating the restaurant.";
       valid = false;
     }
@@ -1784,7 +1784,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const restaurantEmail = modal.querySelector("#restaurantEmail");
 
     if (restaurantEmail.value.trim() && !restaurantEmail.validity.valid) {
-      showFieldError(restaurantEmail, "Market email must be valid.");
+      showFieldError(restaurantEmail, "Restaurant email must be valid.");
 
       valid = false;
     }
@@ -1798,11 +1798,11 @@ document.addEventListener("DOMContentLoaded", () => {
    * =========================================================
    */
 
-  function populateMarketForm(restaurant) {
+  function populateRestaurantForm(restaurant) {
     setInputValue("restaurantName", restaurant.name);
 
     setInputValue("restaurantDescription", restaurant.description);
-    selectedMarketImageData = "";
+    selectedRestaurantImageData = "";
     restaurantImageInput.value = "";
     restaurantImagePreviewWrap.hidden = true;
     if (restaurant.logo_url && /^data:image\/(jpeg|png|webp);base64,/i.test(restaurant.logo_url)) {
@@ -1875,7 +1875,7 @@ document.addEventListener("DOMContentLoaded", () => {
     restaurantLocationButton.textContent = "Use Live Location";
     restaurantLocationButton.disabled = false;
     restaurantLocationError.textContent = "";
-    selectedMarketImageData = "";
+    selectedRestaurantImageData = "";
     restaurantImagePreview.removeAttribute("src");
     restaurantImagePreviewWrap.hidden = true;
     restaurantImageError.textContent = "";
@@ -1888,7 +1888,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modalSubtitle.textContent = "Create a new restaurant and owner account.";
 
-    saveButton.textContent = "Create Market";
+    saveButton.textContent = "Create Restaurant";
 
     saveButton.hidden = false;
 
@@ -1919,12 +1919,12 @@ document.addEventListener("DOMContentLoaded", () => {
     clearFormErrors();
     clearModalMessage();
 
-    modalTitle.textContent = "View / Update Market";
+    modalTitle.textContent = "View / Update Restaurant";
 
     modalSubtitle.textContent =
       "Review and update restaurant and owner information.";
 
-    saveButton.textContent = "Update Market";
+    saveButton.textContent = "Update Restaurant";
 
     saveButton.hidden = false;
     saveButton.disabled = false;
@@ -1932,7 +1932,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setFieldVisible(temporaryPasswordNote, false);
 
-    populateMarketForm(restaurant);
+    populateRestaurantForm(restaurant);
 
     configureActionButtons(restaurant);
 
@@ -1981,14 +1981,14 @@ document.addEventListener("DOMContentLoaded", () => {
    * =========================================================
    */
 
-  async function openMarketModal(restaurantId) {
+  async function openRestaurantModal(restaurantId) {
     configureAddModal();
 
     restaurantModal.mode = "edit";
 
     restaurantModal.restaurantId = restaurantId;
 
-    modalTitle.textContent = "View / Update Market";
+    modalTitle.textContent = "View / Update Restaurant";
 
     modalSubtitle.textContent = "Loading restaurant details...";
 
@@ -2011,7 +2011,7 @@ document.addEventListener("DOMContentLoaded", () => {
     openDialog();
 
     try {
-      const response = await marketsApi.get(restaurantId);
+      const response = await restaurantsApi.get(restaurantId);
 
       const restaurant = response?.restaurant || null;
 
@@ -2029,7 +2029,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       saveButton.disabled = false;
 
-      saveButton.textContent = "Update Market";
+      saveButton.textContent = "Update Restaurant";
     }
   }
 
@@ -2046,7 +2046,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!validateMarketForm()) {
+    if (!validateRestaurantForm()) {
       return;
     }
 
@@ -2065,7 +2065,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         description: form.elements.restaurantDescription.value.trim() || null,
 
-        logo_url: selectedMarketImageData || restaurantModal.restaurant?.logo_url || null,
+        logo_url: selectedRestaurantImageData || restaurantModal.restaurant?.logo_url || null,
 
         phone: form.elements.restaurantPhone.value.trim() || null,
 
@@ -2111,7 +2111,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         basePayload.password = temporaryPassword;
 
-        const response = await marketsApi.create(basePayload);
+        const response = await restaurantsApi.create(basePayload);
 
         const restaurant = response?.restaurant || null;
 
@@ -2123,9 +2123,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         state.page = 1;
 
-        await loadMarkets();
+        await loadRestaurants();
 
-        showMessage("Market created successfully.");
+        showMessage("Restaurant created successfully.");
 
         showCredentials(basePayload.owner_email, temporaryPassword);
 
@@ -2142,15 +2142,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!restaurantId) {
         throw new Error(
-          "Market ID is missing. Please close the modal and try again.",
+          "Restaurant ID is missing. Please close the modal and try again.",
         );
       }
 
-      const response = await marketsApi.update(restaurantId, basePayload);
+      const response = await restaurantsApi.update(restaurantId, basePayload);
 
-      const updatedMarket = response?.restaurant || null;
+      const updatedRestaurant = response?.restaurant || null;
 
-      if (!updatedMarket) {
+      if (!updatedRestaurant) {
         throw new Error(
           "Updated restaurant details were not returned by the server.",
         );
@@ -2159,23 +2159,23 @@ document.addEventListener("DOMContentLoaded", () => {
       /*
        * Store the fresh restaurant returned by the backend.
        */
-      restaurantModal.restaurant = updatedMarket;
+      restaurantModal.restaurant = updatedRestaurant;
 
       /*
        * Repopulate the modal with the server's
        * actual saved values.
        */
-      populateMarketForm(updatedMarket);
+      populateRestaurantForm(updatedRestaurant);
 
-      configureActionButtons(updatedMarket);
+      configureActionButtons(updatedRestaurant);
 
       /*
        * Refresh the restaurant table without
        * closing the update modal.
        */
-      await loadMarkets();
+      await loadRestaurants();
 
-      showModalMessage("Market updated successfully.", "success");
+      showModalMessage("Restaurant updated successfully.", "success");
     } catch (error) {
       console.error("Failed to save restaurant:", error);
 
@@ -2187,8 +2187,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       saveButton.textContent =
         restaurantModal.mode === "add"
-          ? "Create Market"
-          : "Update Market";
+          ? "Create Restaurant"
+          : "Update Restaurant";
     }
   });
 
@@ -2224,11 +2224,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       rejectButton.disabled = true;
 
-      await marketsApi.reject(restaurantId, trimmedReason);
+      await restaurantsApi.reject(restaurantId, trimmedReason);
 
-      await openMarketModal(restaurantId);
+      await openRestaurantModal(restaurantId);
 
-      await loadMarkets();
+      await loadRestaurants();
 
       showMessage("Market rejected successfully.");
     } catch (error) {
@@ -2256,11 +2256,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       activateButton.disabled = true;
 
-      await marketsApi.activate(restaurantId);
+      await restaurantsApi.activate(restaurantId);
 
-      await openMarketModal(restaurantId);
+      await openRestaurantModal(restaurantId);
 
-      await loadMarkets();
+      await loadRestaurants();
 
       showMessage("Market activated successfully.");
     } catch (error) {
@@ -2296,11 +2296,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       deactivateButton.disabled = true;
 
-      await marketsApi.deactivate(restaurantId);
+      await restaurantsApi.deactivate(restaurantId);
 
-      await openMarketModal(restaurantId);
+      await openRestaurantModal(restaurantId);
 
-      await loadMarkets();
+      await loadRestaurants();
 
       showMessage("Market deactivated successfully.");
     } catch (error) {
@@ -2327,7 +2327,7 @@ document.addEventListener("DOMContentLoaded", () => {
   cancelButton.addEventListener("click", closeDialog);
 
   modal
-    .querySelector("#closeMarketModal")
+    .querySelector("#closeRestaurantModal")
     .addEventListener("click", closeDialog);
 
   modal.addEventListener("cancel", (event) => {
@@ -2350,7 +2350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     restaurantImageError.textContent = "";
     const file = restaurantImageInput.files?.[0];
     if (!file) {
-      selectedMarketImageData = "";
+      selectedRestaurantImageData = "";
       restaurantImagePreviewWrap.hidden = true;
       restaurantImagePreview.removeAttribute("src");
       return;
@@ -2358,34 +2358,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
       restaurantImageInput.value = "";
-      selectedMarketImageData = "";
+      selectedRestaurantImageData = "";
       restaurantImageError.textContent = "Use a JPEG, PNG or WebP image.";
       restaurantImagePreviewWrap.hidden = true;
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       restaurantImageInput.value = "";
-      selectedMarketImageData = "";
+      selectedRestaurantImageData = "";
       restaurantImageError.textContent = "Image must be 5 MB or smaller.";
       restaurantImagePreviewWrap.hidden = true;
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
-      selectedMarketImageData = String(reader.result || "");
-      restaurantImagePreview.src = selectedMarketImageData;
+      selectedRestaurantImageData = String(reader.result || "");
+      restaurantImagePreview.src = selectedRestaurantImageData;
       restaurantImagePreviewWrap.hidden = false;
     };
     reader.onerror = () => {
-      selectedMarketImageData = "";
+      selectedRestaurantImageData = "";
       restaurantImageError.textContent = "Could not read the selected image. Please try again.";
     };
     reader.readAsDataURL(file);
   });
 
-  clearMarketImageButton.addEventListener("click", () => {
+  clearRestaurantImageButton.addEventListener("click", () => {
     restaurantImageInput.value = "";
-    selectedMarketImageData = "";
+    selectedRestaurantImageData = "";
     restaurantImagePreview.removeAttribute("src");
     restaurantImagePreviewWrap.hidden = true;
     restaurantImageError.textContent = restaurantModal.mode === "add"
@@ -2420,7 +2420,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let totalPages = 1;
 
       do {
-        const response = await marketsApi.list({
+        const response = await restaurantsApi.list({
           search: state.search,
 
           status: state.status,
@@ -2434,8 +2434,8 @@ document.addEventListener("DOMContentLoaded", () => {
           limit: 100,
         });
 
-        if (Array.isArray(response?.markets)) {
-          allRows.push(...response.markets);
+        if (Array.isArray(response?.restaurants)) {
+          allRows.push(...response.restaurants);
         }
 
         totalPages = Number(response?.pagination?.totalPages || 1);
@@ -2445,11 +2445,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const headers = [
         "ID",
-        "Market",
+        "Restaurant",
         "Owner",
         "Owner Email",
         "Owner Phone",
-        "Market Location",
+        "Restaurant Location",
         "Orders",
         "Rating",
         "Approval Status",
@@ -2469,7 +2469,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         restaurant.owner_phone || "",
 
-        restaurant.location_name || `${String(restaurant.name || "Market").trim().split(/\s+/)[0]} Location`,
+        restaurant.location_name || `${String(restaurant.name || "Restaurant").trim().split(/\s+/)[0]} Location`,
 
         restaurant.orders_count || 0,
 
@@ -2506,7 +2506,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       link.href = url;
 
-      link.download = "markets.csv";
+      link.download = "restaurants.csv";
 
       document.body.appendChild(link);
 
@@ -2516,15 +2516,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       URL.revokeObjectURL(url);
 
-      showMessage("Market export downloaded successfully.");
+      showMessage("Restaurant export downloaded successfully.");
     } catch (error) {
-      console.error("Market export failed:", error);
+      console.error("Restaurant export failed:", error);
 
-      showMessage(error?.message || "Could not export markets.", "error");
+      showMessage(error?.message || "Could not export restaurants.", "error");
     } finally {
       exportButton.disabled = false;
 
-      exportButton.textContent = "Export Markets";
+      exportButton.textContent = "Export Restaurants";
     }
   });
 
@@ -2534,5 +2534,5 @@ document.addEventListener("DOMContentLoaded", () => {
    * =========================================================
    */
 
-  loadMarkets();
+  loadRestaurants();
 });
