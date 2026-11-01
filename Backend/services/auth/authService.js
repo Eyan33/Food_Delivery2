@@ -646,7 +646,7 @@ async function loginWithGoogleCredential(credential) {
     let newGoogleAccount = false;
     if (existing.rows.length) {
         user = existing.rows[0];
-        if (user.role === "super_admin2") {
+        if (["super_admin", "super_admin2"].includes(user.role)) {
             throw new Error("Super-admin accounts must sign in with their email and password.");
         }
         if (!user.is_active) throw new Error("This account has been deactivated");
