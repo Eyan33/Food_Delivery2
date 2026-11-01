@@ -18,6 +18,7 @@ function destinationForRole(role) {
         rider: "../rider/dashboard.html",
         admin: "../admin/dashboard.html",
         super_admin: "../admin/super-admin-dashboard.html",
+        super_admin2: "../admin/super-admin-dashboard.html",
     };
 
     return destinations[String(role || "").toLowerCase()] || "../../index.html";
