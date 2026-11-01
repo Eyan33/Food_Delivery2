@@ -20,6 +20,7 @@ const jwt = require("jsonwebtoken");
 const users = new Map([
     [1, { id: 1, first_name: "Ada", last_name: "Admin", email: "admin@example.com", phone: null, role: "admin", is_active: true, must_change_password: false, tokens_valid_after: null }],
     [2, { id: 2, first_name: "Sam", last_name: "Super", email: "super@example.com", phone: null, role: "super_admin", is_active: true, must_change_password: false, tokens_valid_after: null }],
+    [3, { id: 3, first_name: "Food", last_name: "Super Admin", email: "food-super@example.com", phone: null, role: "super_admin", is_active: true, must_change_password: false, tokens_valid_after: null }],
 ]);
 
 const fakePool = {
@@ -84,6 +85,11 @@ const SUPER_ADMIN = 2;
 test("every /api/admins route requires a signed-in admin", async () => {
     const res = await call("GET", "/api/admins/dashboard");
     assert.equal(res.status, 401);
+});
+
+test("Food Delivery super_admin is not authorized in Market Delivery", async () => {
+    assert.equal((await call("GET", "/api/admins/dashboard", 3)).status, 403);
+    assert.equal((await call("GET", "/api/admins/audit-logs", 3)).status, 403);
 });
 
 test("regular admins cannot permanently delete accounts", async () => {
