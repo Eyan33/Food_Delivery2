@@ -30,12 +30,13 @@
       const last = String(admin.last_name || admin.lastName || "").trim();
       const name = String(admin.name || admin.full_name || [first, last].filter(Boolean).join(" ") || admin.email || "Administrator").trim();
       const normalizedRole = String(admin.role || "admin").toLowerCase();
-      const role = normalizedRole === "super_admin"
+      const isSuperAdmin = ["super_admin", "super_admin2"].includes(normalizedRole);
+      const role = isSuperAdmin
         ? "Super Admin"
         : normalizedRole === "admin"
           ? "Administrator"
           : String(admin.role || "Administrator");
-      if (normalizedRole === "super_admin") {
+      if (isSuperAdmin) {
         document.querySelectorAll('a[href="dashboard.html"]').forEach((link) => {
           link.setAttribute("href", "super-admin-dashboard.html");
         });
