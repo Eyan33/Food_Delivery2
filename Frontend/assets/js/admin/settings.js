@@ -149,11 +149,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Apply the saved platform name to the visible admin branding as well
-    // as the input field. Persisting a preference alone does not update the UI.
+    // Apply the saved platform name to the visible admin branding.
+    // Empty / missing values fall back to "Market Delivery".
+    // Uses the shared platform-name module when available so the cache stays in sync.
     function applyPlatformName(value) {
-        const platformName = String(value || "").trim();
-        if (!platformName) return;
+        const platformName =
+            String(value || "").trim() ||
+            (window.FoodDeliveryPlatform && window.FoodDeliveryPlatform.DEFAULT_NAME) ||
+            "Market Delivery";
+
+        if (window.FoodDeliveryPlatform && typeof window.FoodDeliveryPlatform.apply === "function") {
+            window.FoodDeliveryPlatform.apply(platformName);
+            // Keep the public cache in sync after an admin save
+            try {
+                sessionStorage.setItem(
+                    "fd_platform_name",
+                    JSON.stringify({ name: platformName, fetchedAt: Date.now() })
+                );
+            } catch (_) { /* ignore */ }
+            return;
+        }
 
         const logo = document.querySelector(".admin-logo");
         if (logo) {
@@ -161,10 +176,11 @@ document.addEventListener("DOMContentLoaded", () => {
             logo.setAttribute("aria-label", platformName);
         }
 
-        document.title = document.title.replace(
-            /^(?:Settings|Dashboard|Customers|Restaurants|Riders|Orders|Payments|Reports|Operations)\s*\|\s*.*$/i,
-            (title) => title.split("|")[0].trim() + " | " + platformName + " Admin"
-        );
+        const title = document.title || "";
+        if (title.includes("|")) {
+            const pagePart = title.split("|")[0].trim();
+            document.title = pagePart + " | " + platformName + " Admin";
+        }
     }
 
     /* =====================================================
@@ -487,7 +503,7 @@ function restoreSectionValues(section) {
                     else field.value = value;
                 });
                 if (name === "general") {
-                    applyPlatformName(saved.platformName || getField("platformName")?.value);
+                    applyPlatformName(saved.platformName || getField("platformName")?.value || "");
                 }
                 rememberSectionValues(section);
             });
@@ -510,9 +526,10 @@ function restoreSectionValues(section) {
             });
             if (sectionName === "general") {
                 // Confirm the server returned persisted data before showing the
-                // updated platform name as applied.
+                // updated platform name as applied. Empty value → default.
                 const savedName = result?.settings?.general?.platformName
-                    || values.platformName;
+                    || values.platformName
+                    || "";
                 applyPlatformName(savedName);
             }
             rememberSectionValues(section);
@@ -570,317 +587,7 @@ function restoreSectionValues(section) {
         }
     });
 
-    /* =====================================================
-       PASSWORD MODAL
-       
-       No secure current-password verification endpoint
-       exists in the supplied backend. Do not send a new
-       password to PUT /admins/:id because that endpoint
-       does not verify the current password.
-    ===================================================== */
-
-    function injectPasswordModalStyles() {
-        if (getField("admin-change-password-styles")) return;
-
-        const style = document.createElement("style");
-        style.id = "admin-change-password-styles";
-
-        style.textContent = `
-            .admin-modal-overlay {
-                position: fixed;
-                inset: 0;
-                background: rgba(15, 15, 20, 0.55);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                padding: 1rem;
-            }
-
-            .admin-modal-overlay.hidden {
-                display: none;
-            }
-
-            .admin-modal {
-                background: var(--admin-card-bg, #fff);
-                color: var(--admin-text, #1a1a1a);
-                width: 100%;
-                max-width: 440px;
-                max-height: 90vh;
-                overflow-y: auto;
-                border-radius: 12px;
-                padding: 1.5rem;
-                box-shadow: 0 20px 50px rgba(0,0,0,.25);
-            }
-
-            .admin-modal-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 1.25rem;
-            }
-
-            .admin-modal-header h3 {
-                margin: 0;
-                font-size: 1.1rem;
-            }
-
-            .admin-modal-close {
-                background: none;
-                border: none;
-                font-size: 1.4rem;
-                cursor: pointer;
-                color: inherit;
-            }
-
-            .admin-form-group {
-                margin-bottom: 1rem;
-                display: flex;
-                flex-direction: column;
-                gap: .4rem;
-            }
-
-            .admin-form-group label {
-                font-size: .85rem;
-                font-weight: 600;
-            }
-
-            .admin-form-group input {
-                padding: .6rem .75rem;
-                border: 1px solid var(--admin-border, #ddd);
-                border-radius: 8px;
-                font: inherit;
-                background: var(--admin-input-bg, #fff);
-                color: inherit;
-            }
-
-            .admin-form-error {
-                font-size: .78rem;
-                color: #d64545;
-                display: none;
-            }
-
-            .admin-form-error.visible {
-                display: block;
-            }
-
-            .admin-modal-actions {
-                display: flex;
-                justify-content: flex-end;
-                gap: .75rem;
-                margin-top: 1.5rem;
-            }
-        `;
-
-        document.head.appendChild(style);
-    }
-
-    function buildPasswordModal() {
-        injectPasswordModalStyles();
-
-        const overlay = document.createElement("div");
-        overlay.className = "admin-modal-overlay hidden";
-        overlay.id = "adminChangePasswordOverlay";
-
-        overlay.innerHTML = `
-            <div
-                class="admin-modal"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="changePasswordTitle"
-            >
-                <div class="admin-modal-header">
-                    <h3 id="changePasswordTitle">Change Password</h3>
-                    <button
-                        type="button"
-                        class="admin-modal-close"
-                        aria-label="Close"
-                    >×</button>
-                </div>
-
-                <form id="adminChangePasswordForm" novalidate>
-                    <div class="admin-form-group">
-                        <label for="currentPassword">Current Password</label>
-                        <input
-                            type="password"
-                            id="currentPassword"
-                            name="currentPassword"
-                            autocomplete="current-password"
-                            required
-                        />
-                        <span class="admin-form-error"
-                            data-error-for="currentPassword">
-                            Enter your current password.
-                        </span>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="newPassword">New Password</label>
-                        <input
-                            type="password"
-                            id="newPassword"
-                            name="newPassword"
-                            autocomplete="new-password"
-                            minlength="8"
-                            required
-                        />
-                        <span class="admin-form-error"
-                            data-error-for="newPassword">
-                            Password must contain at least 8 characters.
-                        </span>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="confirmPassword">Confirm New Password</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            autocomplete="new-password"
-                            required
-                        />
-                        <span class="admin-form-error"
-                            data-error-for="confirmPassword">
-                            Passwords do not match.
-                        </span>
-                    </div>
-
-                    <p>
-                        Password changing will become available after
-                        the secure backend endpoint is implemented.
-                    </p>
-
-                    <div class="admin-modal-actions">
-                        <button
-                            type="button"
-                            class="admin-secondary-button"
-                            id="adminChangePasswordCancel"
-                        >Cancel</button>
-
-                        <button
-                            type="submit"
-                            class="admin-primary-button"
-                        >Update Password</button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        document.body.appendChild(overlay);
-        return overlay;
-    }
-
-    function closePasswordModal() {
-        if (!passwordModal) return;
-
-        passwordModal.classList.add("hidden");
-
-        const form = getField("adminChangePasswordForm");
-        form?.reset();
-
-        form?.querySelectorAll(".admin-form-error").forEach((error) => {
-            error.classList.remove("visible");
-        });
-    }
-
-    function openPasswordModal() {
-        if (!passwordModal) {
-            passwordModal = buildPasswordModal();
-
-            passwordModal.querySelector(
-                ".admin-modal-close"
-            )?.addEventListener("click", closePasswordModal);
-
-            getField("adminChangePasswordCancel")
-                ?.addEventListener("click", closePasswordModal);
-
-            passwordModal.addEventListener("click", (event) => {
-                if (event.target === passwordModal) {
-                    closePasswordModal();
-                }
-            });
-
-            getField("adminChangePasswordForm")
-                ?.addEventListener("submit", (event) => {
-                    event.preventDefault();
-
-                    const form = event.currentTarget;
-                    const current = form.currentPassword.value;
-                    const next = form.newPassword.value;
-                    const confirm = form.confirmPassword.value;
-
-                    const errors = {
-                        currentPassword: !current.trim(),
-                        newPassword: next.length < 8,
-                        confirmPassword:
-                            !confirm || next !== confirm
-                    };
-
-                    Object.entries(errors).forEach(([name, invalid]) => {
-                        form.querySelector(
-                            `[data-error-for="${name}"]`
-                        )?.classList.toggle("visible", invalid);
-                    });
-
-                    if (Object.values(errors).some(Boolean)) return;
-
-                    const submit = form.querySelector('[type="submit"]');
-                    const originalText = submit.textContent;
-                    submit.disabled = true;
-                    submit.textContent = "Updating…";
-                    apiRequest("/auth/me/password", {
-                        method: "PATCH",
-                        body: { currentPassword: current, newPassword: next }
-                    }).then(() => {
-                        showMessage("Password changed successfully.", "success");
-                        closePasswordModal();
-                    }).catch((error) => {
-                        showMessage(getErrorMessage(error, "Could not change password."), "danger");
-                    }).finally(() => {
-                        submit.disabled = false;
-                        submit.textContent = originalText;
-                    });
-                });
-        }
-
-        passwordModal.classList.remove("hidden");
-
-        getField("currentPassword")?.focus();
-    }
-
-    document.addEventListener("keydown", (event) => {
-        if (
-            event.key === "Escape" &&
-            passwordModal &&
-            !passwordModal.classList.contains("hidden")
-        ) {
-            closePasswordModal();
-        }
-    });
-
-    const securitySection = getField("settings-security");
-
-    const changePasswordButton = securitySection?.querySelector(
-        ".admin-settings-security-block .admin-save-button"
-    );
-
-    changePasswordButton?.addEventListener(
-        "click",
-        openPasswordModal
-    );
-
-    const securitySaveButton = securitySection?.querySelector(
-        ".admin-settings-footer .admin-save-button"
-    );
-
-    securitySaveButton?.addEventListener("click", (event) => {
-        savePreferenceSection("security", event.currentTarget);
-    });
-
-    /* =====================================================
-       INITIALIZATION
-    ===================================================== */
-
+    // Boot
     loadAdminProfile();
     loadPlatformSettings();
 });
