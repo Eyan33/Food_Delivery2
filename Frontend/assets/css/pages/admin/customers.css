@@ -1073,3 +1073,137 @@ body.modal-open {
         padding: 20px 16px !important;
     }
 }
+
+
+/* Final modal layout: fixed viewport overlay, centered card, independently
+   scrollable content and a visible action row. Overrides earlier experiments. */
+#addCustomerModal.admin-modal,
+#viewCustomerModal.admin-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 5000 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    overflow: auto !important;
+    background: rgba(0, 21, 18, .56) !important;
+    box-sizing: border-box !important;
+}
+#addCustomerModal.admin-modal.is-open,
+#viewCustomerModal.admin-modal.is-open {
+    display: flex !important;
+}
+#addCustomerModal .admin-modal-backdrop,
+#viewCustomerModal .admin-modal-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+}
+#addCustomerModal .admin-modal-dialog,
+#viewCustomerModal .admin-modal-dialog {
+    position: relative !important;
+    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: min(720px, 100%) !important;
+    max-width: 720px !important;
+    max-height: calc(100dvh - 48px) !important;
+    margin: auto !important;
+    padding: 28px !important;
+    overflow: hidden !important;
+    border: 1px solid #e1e8e3 !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+    box-shadow: 0 24px 70px rgba(0, 21, 18, .28) !important;
+    box-sizing: border-box !important;
+}
+#addCustomerModal .admin-modal-header,
+#viewCustomerModal .admin-modal-header {
+    flex: 0 0 auto !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+}
+#addCustomerModal .admin-customer-form,
+#viewCustomerModal .admin-customer-form {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+#addCustomerModal .admin-form-grid,
+#viewCustomerModal .admin-form-grid {
+    flex: 0 0 auto !important;
+    gap: 18px 16px !important;
+}
+#addCustomerModal .admin-modal-actions,
+#viewCustomerModal .admin-modal-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    flex: 0 0 auto !important;
+    margin-top: 16px !important;
+    padding: 16px 0 0 !important;
+    border-top: 1px solid #e5e7eb !important;
+    background: #fff !important;
+}
+@media (max-width: 640px) {
+    #addCustomerModal.admin-modal,
+    #viewCustomerModal.admin-modal {
+        align-items: flex-start !important;
+        padding: 10px !important;
+    }
+    #addCustomerModal .admin-modal-dialog,
+    #viewCustomerModal .admin-modal-dialog {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: calc(100dvh - 20px) !important;
+        margin: auto !important;
+        padding: 20px 16px !important;
+        border-radius: 14px !important;
+    }
+    #addCustomerModal .admin-modal-header,
+    #viewCustomerModal .admin-modal-header {
+        padding-bottom: 14px !important;
+        gap: 10px !important;
+    }
+    #addCustomerModal .admin-modal-header h2,
+    #viewCustomerModal .admin-modal-header h2 {
+        font-size: 21px !important;
+    }
+    #addCustomerModal .admin-customer-form,
+    #viewCustomerModal .admin-customer-form {
+        padding-top: 16px !important;
+    }
+    #addCustomerModal .admin-form-grid,
+    #viewCustomerModal .admin-form-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 14px !important;
+    }
+    #addCustomerModal .admin-form-field-full,
+    #viewCustomerModal .admin-form-field-full {
+        grid-column: auto !important;
+    }
+    #addCustomerModal .admin-modal-actions,
+    #viewCustomerModal .admin-modal-actions {
+        flex-direction: column-reverse !important;
+        gap: 10px !important;
+        padding-top: 14px !important;
+    }
+    #addCustomerModal .admin-modal-actions > button,
+    #viewCustomerModal .admin-modal-actions > button {
+        width: 100% !important;
+        min-height: 44px !important;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    #addCustomerModal *,
+    #viewCustomerModal * {
+        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+    }
+}
