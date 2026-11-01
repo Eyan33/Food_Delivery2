@@ -1,15 +1,31 @@
 <!doctype html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 	<title>Orders | Market Delivery</title>
+
+	<!-- =========================
+          GLOBAL STYLES
+    ========================== -->
 	<link rel="stylesheet" href="../../assets/css/style.css" />
-	<link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
+
+	<!-- =========================
+          ADMIN ORDERS STYLES
+    ========================== -->
 	<link rel="stylesheet" href="../../assets/css/pages/admin/orders.css" />
+<link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
+    <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
 </head>
+
 <body>
-    <aside class="admin-sidebar" id="adminSidebar">
+	<!-- =========================
+         ADMIN SIDEBAR
+    ========================== -->
+
+	<aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-header">
             <a href="dashboard.html" class="admin-logo">Market Delivery</a>
             <button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button>
@@ -64,13 +80,21 @@
         </div>
     </aside>
 
-    <main class="admin-main">
-        <header class="admin-topbar">
+	<!-- =========================
+         MAIN AREA
+    ========================== -->
+
+	<main class="admin-main">
+		<!-- =========================
+             TOPBAR
+        ========================== -->
+
+		<header class="admin-topbar">
         <div class="admin-topbar-left">
             <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
             <div class="admin-page-heading">
                 <h1>Orders</h1>
-                <p>View and manage platform orders.</p>
+                <p>Manage all platform orders.</p>
             </div>
         </div>
         <div class="admin-topbar-right">
@@ -88,42 +112,17 @@
         </div>
     </header>
 
-        <section class="admin-content">
-            <div class="admin-page-header">
-                <div>
-                    <h2>Order Management</h2>
-                    <p>Monitor and manage all platform orders.</p>
-                </div>
-            </div>
+		<!-- =========================
+             CONTENT
+        ========================== -->
+
+		<section class="admin-content">
+			<!-- The full order management UI is rendered by orders.js -->
+			<div id="ordersRoot"></div>
             <div id="adminMessage" class="admin-message" role="alert" aria-live="polite"></div>
-            <div class="admin-content-card">
-                <div class="admin-card-header">
-                    <div>
-                        <h3>All Orders</h3>
-                        <p>Filter and review orders across the platform.</p>
-                    </div>
-                </div>
-                <div class="admin-table-wrapper">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Customer</th>
-                                <th>Market</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="7">Loading orders…</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
+		</section>
+	</main>
+
 	<script src="../../assets/js/api-config.js"></script>
     <script src="../../assets/js/core/platform-name.js"></script>
 	<script src="../../assets/js/main.js"></script>
@@ -132,4 +131,5 @@
     <script src="../../assets/js/admin/admin-notifications.js" defer></script>
 	<script src="../../assets/js/admin/orders.js"></script>
 </body>
+
 </html>
