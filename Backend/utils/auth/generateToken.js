@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const PRIVILEGED_ROLES = new Set(["admin", "super_admin2"]);
+const PRIVILEGED_ROLES = new Set(["admin", "super_admin", "super_admin2"]);
 
 /*
  * Admin and super-admin sessions are short lived: a stolen privileged token
