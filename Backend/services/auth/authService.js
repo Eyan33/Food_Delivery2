@@ -261,6 +261,10 @@ async function loginUser({
         );
     }
 
+    if (user.role === "super_admin") {
+        throw new Error("This super-admin account belongs to Food Delivery and cannot access Market Delivery.");
+    }
+
 
     /*
      * Only someone who proved they know the password learns the account is
