@@ -13,7 +13,7 @@ function authorizeRoles(...allowedRoles) {
         // explicitly allow "admin", without inheriting other portal roles.
         const roleIsAllowed =
             allowedRoles.includes(req.user.role) ||
-            (["super_admin", "super_admin2"].includes(req.user.role) && allowedRoles.includes("admin"));
+            (req.user.role === "super_admin2" && allowedRoles.includes("admin"));
 
         if (!roleIsAllowed) {
             return res.status(403).json({
@@ -22,7 +22,7 @@ function authorizeRoles(...allowedRoles) {
             });
         }
 
-        if (["admin", "super_admin", "super_admin2"].includes(req.user.role)) {
+        if (["admin", "super_admin2"].includes(req.user.role)) {
             return auditAdminAction(req, res, next);
         }
 
