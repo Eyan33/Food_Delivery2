@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Earnings | DeRon Market Deliveries</title>
+    <title>Earnings | FoodDelivery</title>
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="../../assets/css/style.css" />
@@ -15,7 +15,6 @@
 
     <!-- Earnings CSS -->
     <link rel="stylesheet" href="../../assets/css/pages/restaurant/earnings.css" />
-    <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
 </head>
 
 <body>
@@ -29,17 +28,17 @@
         ================================================== -->
 
         <aside class="restaurant-sidebar" id="restaurantSidebar">
-  <div class="restaurant-sidebar-header"><a href="dashboard.html" class="restaurant-logo">DeRon<span>Market Deliveries</span></a></div>
+  <div class="restaurant-sidebar-header"><a href="dashboard.html" class="restaurant-logo">Food<span>Delivery</span></a></div>
   <div class="restaurant-profile-mini">
     <div class="restaurant-avatar" id="restaurantSidebarAvatar">R</div>
-    <div class="restaurant-profile-info"><strong id="restaurantSidebarName">Loading market…</strong><span>market</span></div>
+    <div class="restaurant-profile-info"><strong id="restaurantSidebarName">Loading restaurant…</strong><span>Restaurant</span></div>
   </div>
   <nav class="restaurant-navigation">
     <p class="restaurant-nav-title">MAIN MENU</p>
     <a href="dashboard.html" class="restaurant-nav-link"><span class="nav-icon">▦</span><span>Dashboard</span></a>
 <a href="orders.html" class="restaurant-nav-link"><span class="nav-icon">▤</span><span>Orders</span><span class="nav-badge" hidden>0</span></a>
 <a href="earnings.html" class="restaurant-nav-link active" aria-current="page"><span class="nav-icon">▥</span><span>Earnings</span></a>
-<a href="restaurant-profile.html" class="restaurant-nav-link"><span class="nav-icon">◉</span><span>Market Profile</span></a>
+<a href="restaurant-profile.html" class="restaurant-nav-link"><span class="nav-icon">◉</span><span>Restaurant Profile</span></a>
 <a href="settings.html" class="restaurant-nav-link"><span class="nav-icon">⚙</span><span>Settings</span></a>
   </nav>
   <div class="restaurant-sidebar-bottom"><a href="../../pages/auth/login.html" class="restaurant-nav-link logout-link"><span class="nav-icon">↪</span><span>Logout</span></a></div>
@@ -59,20 +58,20 @@
     <button type="button" class="restaurant-menu-button" id="restaurantMenuButton" aria-label="Open menu">☰</button>
     <div class="restaurant-page-heading">
       <h1>Earnings</h1>
-      <p>Track products revenue, configured platform fees, and net earnings. Delivery fees are excluded.</p>
+      <p>Track food revenue, configured platform fees, and net earnings. Delivery fees are excluded.</p>
     </div>
   </div>
   <div class="restaurant-topbar-right">
     <button type="button" class="restaurant-status" id="restaurantStatusButton" aria-live="polite">
       <span class="status-dot"></span>
-      <span class="status-text"><small>Market Status</small><strong id="restaurantStatusText">Loading…</strong></span>
+      <span class="status-text"><small>Restaurant Status</small><strong id="restaurantStatusText">Loading…</strong></span>
     </button>
     <button type="button" class="restaurant-notification-button" aria-label="Notifications">
       <span>♧</span><span class="notification-badge" hidden>0</span>
     </button>
     <button type="button" class="restaurant-topbar-profile" aria-label="Restaurant profile">
       <span class="topbar-avatar" id="restaurantTopbarAvatar">R</span>
-      <span class="topbar-profile-text"><strong id="restaurantTopbarName">Loading market…</strong><small>market</small></span>
+      <span class="topbar-profile-text"><strong id="restaurantTopbarName">Loading restaurant…</strong><small>Restaurant</small></span>
       <span class="profile-arrow">⌄</span>
     </button>
   </div>
@@ -91,7 +90,7 @@
                     <div>
                         <h2>Earnings Overview</h2>
 
-                        <p>products revenue excludes delivery fees. Platform fees are calculated only on the products portion of completed orders.</p>
+                        <p>Food revenue excludes delivery fees. Platform fees are calculated only on the food portion of completed orders.</p>
                     </div>
 
                     <div class="earnings-period-selector">
@@ -144,7 +143,7 @@
 
                             <strong>Loading…</strong>
 
-                            <small>products revenue less configured platform fee</small>
+                            <small>Food revenue less configured platform fee</small>
                         </div>
                     </div>
 
@@ -178,7 +177,7 @@
 
                             <strong>Loading…</strong>
 
-                            <small>Average products value; delivery fee excluded</small>
+                            <small>Average food value; delivery fee excluded</small>
                         </div>
                     </div>
                 </div>
@@ -187,12 +186,12 @@
                     <div class="dashboard-card-header">
                         <div>
                             <h3 id="platformFeeCalculationTitle">Platform Fees Calculation</h3>
-                            <p>How the platform fee is deducted from products revenue for the selected period.</p>
+                            <p>How the platform fee is deducted from food revenue for the selected period.</p>
                         </div>
                     </div>
                     <div class="payout-details" id="platformFeeCalculationDetails" aria-live="polite">
                         <div class="payout-detail-row">
-                            <span>products revenue (delivery fee excluded)</span>
+                            <span>Food revenue (delivery fee excluded)</span>
                             <strong>Loading…</strong>
                         </div>
                         <div class="payout-detail-row">
@@ -208,7 +207,7 @@
                             <strong>Loading…</strong>
                         </div>
                         <div class="payout-detail-row">
-                            <span>Net products earnings after fee</span>
+                            <span>Net food earnings after fee</span>
                             <strong>Loading…</strong>
                         </div>
                     </div>
@@ -228,7 +227,7 @@
                             <div>
                                 <h3>Revenue Overview</h3>
 
-                                <p>Completed products revenue in the selected period; delivery fees excluded.</p>
+                                <p>Completed food revenue in the selected period; delivery fees excluded.</p>
                             </div>
 
                             <div class="chart-legend">
@@ -354,7 +353,7 @@
 
                                     <th>Date</th>
 
-                                    <th>products Revenue</th>
+                                    <th>Food Revenue</th>
 
                                     <th>Fees</th>
 

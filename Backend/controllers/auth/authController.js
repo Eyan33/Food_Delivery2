@@ -169,15 +169,17 @@ async function changePassword(req, res) {
     try {
         const { currentPassword, newPassword } = req.body || {};
 
-        await authService.changeCurrentUserPassword(
+        const result = await authService.changeCurrentUserPassword(
             req.user.id,
             currentPassword,
             newPassword
         );
 
+        // Admin accounts get a fresh token because their old sessions end.
         return res.status(200).json({
             success: true,
-            message: "Password changed successfully"
+            message: "Password changed successfully",
+            ...(result && result.token ? { data: { token: result.token } } : {})
         });
     } catch (error) {
         console.error("Change password error:", error);

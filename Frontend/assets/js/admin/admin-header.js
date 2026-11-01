@@ -29,12 +29,17 @@
       const first = String(admin.first_name || admin.firstName || "").trim();
       const last = String(admin.last_name || admin.lastName || "").trim();
       const name = String(admin.name || admin.full_name || [first, last].filter(Boolean).join(" ") || admin.email || "Administrator").trim();
-      const roleKey = String(admin.role || "admin").toLowerCase();
-      const role = /^super_admin[12]?$/.test(roleKey)
-        ? "Super Administrator"
-        : /^admin[12]?$/.test(roleKey)
+      const normalizedRole = String(admin.role || "admin").toLowerCase();
+      const role = normalizedRole === "super_admin"
+        ? "Super Admin"
+        : normalizedRole === "admin"
           ? "Administrator"
           : String(admin.role || "Administrator");
+      if (normalizedRole === "super_admin") {
+        document.querySelectorAll('a[href="dashboard.html"]').forEach((link) => {
+          link.setAttribute("href", "super-admin-dashboard.html");
+        });
+      }
 
       nameNodes.forEach((node) => { node.textContent = name; });
       roleNodes.forEach((node) => { node.textContent = role; });

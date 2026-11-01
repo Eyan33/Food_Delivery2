@@ -1,23 +1,4 @@
-"use strict";
-
 const auditAdminAction = require("../adminAuditMiddleware");
-
-function getSystemRoles() {
-    const system = String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase();
-
-    if (system === "market") {
-        return { admin: "admin2", superAdmin: "super_admin2" };
-    }
-
-    if (system === "food") {
-        return { admin: "admin1", superAdmin: "super_admin1" };
-    }
-
-    // Backward compatibility for deployments that have not yet migrated
-    // to the independent role scheme. Suffixed roles fail closed without
-    // an explicit PLATFORM_SYSTEM setting.
-    return { admin: "admin", superAdmin: "super_admin" };
-}
 
 function authorizeRoles(...allowedRoles) {
     return (req, res, next) => {
@@ -28,14 +9,11 @@ function authorizeRoles(...allowedRoles) {
             });
         }
 
-        const { admin, superAdmin } = getSystemRoles();
-        // A super admin is a superset of an admin: any route open to "admin"
-        // is also open to this system's super admin.
+        // Super Admin inherits regular Admin permissions on routes that
+        // explicitly allow "admin", without inheriting other portal roles.
         const roleIsAllowed =
             allowedRoles.includes(req.user.role) ||
-            (allowedRoles.includes("admin") &&
-                (req.user.role === admin || req.user.role === superAdmin)) ||
-            (allowedRoles.includes("super_admin") && req.user.role === superAdmin);
+            (req.user.role === "super_admin" && allowedRoles.includes("admin"));
 
         if (!roleIsAllowed) {
             return res.status(403).json({
@@ -44,8 +22,8 @@ function authorizeRoles(...allowedRoles) {
             });
         }
 
-        if (req.user.role === admin || req.user.role === superAdmin) {
-            auditAdminAction(req, res, () => {});
+        if (req.user.role === "admin" || req.user.role === "super_admin") {
+            return auditAdminAction(req, res, next);
         }
 
         return next();

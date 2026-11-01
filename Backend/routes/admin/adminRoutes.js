@@ -9,8 +9,9 @@ const requireSuperAdmin = require("../../middleware/auth/superAdminMiddleware");
 
 const router = express.Router();
 
-// authorizeRoles already attaches the admin audit hook for admin and super
-// admin requests; adding auditAdminAction here would write each entry twice.
+// authorizeRoles already attaches the audit hook for admin and super-admin
+// requests. Do not attach auditAdminAction again here, or requests to this
+// router can create duplicate audit records.
 router.use(
     authenticateToken,
     authorizeRoles("admin", "super_admin")
@@ -22,13 +23,20 @@ router.patch("/me/avatar", adminController.updateMyAvatar);
 router.get("/dashboard", adminController.getDashboard);
 router.get("/reports", adminController.getReports);
 router.get("/settings", adminController.getSettings);
+// Regular admins can save the settings exposed in the admin settings page.
+// Super-admin-only account management, audit history, and permanent deletion
+// remain protected by requireSuperAdmin below.
 router.put("/settings", adminController.updateSettings);
 router.get("/notifications", adminController.getNotifications);
 router.patch("/notifications/read-all", adminController.markAllNotificationsRead);
 router.patch("/notifications/:id/read", adminController.markNotificationRead);
-router.get("/audit-logs", adminController.getAuditLogs);
+router.get("/audit-logs", requireSuperAdmin, adminController.getAuditLogs);
 router.get("/deleted-accounts", deletedAccountsController.listDeletedAccounts);
-router.delete("/deleted-accounts/:type/:id", permanentAccountDeletionController.permanentlyDeleteAccount);
+router.delete(
+    "/deleted-accounts/:type/:id",
+    requireSuperAdmin,
+    permanentAccountDeletionController.permanentlyDeleteAccount
+);
 router.get("/reviews", adminController.getReviews);
 router.patch("/reviews/:id/visibility", adminController.updateReviewVisibility);
 

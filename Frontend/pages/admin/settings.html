@@ -20,9 +20,7 @@
          ADMIN SETTINGS STYLES
     ========================== -->
     <link rel="stylesheet" href="../../assets/css/pages/admin/settings.css" />
-      <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
-    <link rel="stylesheet" href="../../assets/css/pages/admin/ui-overrides.css" />
-</head>
+  </head>
 
   <body>
     <!-- =========================
@@ -200,9 +198,9 @@
                       <option value="" selected disabled>Loading saved setting…</option>
                       <option value="KES">Kenyan Shilling (KSh)</option>
 
-                      <option value="USD">US Dollar (USD)</option>
+                      <option>US Dollar (USD)</option>
 
-                      <option value="EUR">Euro (EUR)</option>
+                      <option>Euro (EUR)</option>
                     </select>
                   </div>
 
@@ -214,9 +212,9 @@
                       <option value="" selected disabled>Loading saved setting…</option>
                       <option value="Africa/Nairobi">Africa/Nairobi</option>
 
-                      <option value="Africa/Kampala">Africa/Kampala</option>
+                      <option>Africa/Kampala</option>
 
-                      <option value="Africa/Dar_es_Salaam">Africa/Dar_es_Salaam</option>
+                      <option>Africa/Dar_es_Salaam</option>
                     </select>
                   </div>
 
@@ -651,46 +649,14 @@
                   <button
                     type="button"
                     class="admin-primary-button admin-save-button"
-                    data-open-password-modal
                   >
                     Change Password
                   </button>
                 </div>
 
-                <!-- Two Factor -->
-                <div class="admin-settings-security-block">
-                  <div>
-                    <strong> Two-Factor Authentication </strong>
-
-                    <span>
-                      Add another layer of security to your administrator
-                      account.
-                    </span>
-                  </div>
-
-                  <label class="admin-toggle">
-                    <input type="checkbox" id="twoFactorRequired" />
-
-                    <span class="admin-toggle-slider"></span>
-                  </label>
-                </div>
-
-                <!-- Login Alerts -->
-                <div class="admin-settings-security-block">
-                  <div>
-                    <strong> Login Alerts </strong>
-
-                    <span>
-                      Receive an alert whenever your account is accessed.
-                    </span>
-                  </div>
-
-                  <label class="admin-toggle">
-                    <input type="checkbox" id="loginAlerts" />
-
-                    <span class="admin-toggle-slider"></span>
-                  </label>
-                </div>
+                <!-- Two-factor authentication and login alerts were removed: nothing
+                     enforced them, so the toggles implied protection that
+                     did not exist. -->
 
                 <!-- Session Timeout -->
                 <div class="admin-settings-form">
@@ -698,16 +664,16 @@
                     <label for="sessionTimeout"> Session Timeout </label>
 
                     <select id="sessionTimeout">
-                      <option value="15 Minutes">15 Minutes</option>
+                      <option>15 Minutes</option>
 
                       <option value="" selected disabled>Loading saved setting…</option>
                       <option value="30">30 Minutes</option>
 
-                      <option value="1 Hour">1 Hour</option>
+                      <option>1 Hour</option>
 
-                      <option value="4 Hours">4 Hours</option>
+                      <option>4 Hours</option>
 
-                      <option value="Never">Never</option>
+                      <option>Never</option>
                     </select>
                   </div>
                 </div>
@@ -732,43 +698,10 @@
       </main>
     </div>
 
-    <!-- Accessible password-change dialog -->
-    <div class="admin-settings-modal" id="changePasswordModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="changePasswordTitle">
-      <div class="admin-settings-modal-card">
-        <div class="admin-card-header">
-          <div>
-            <h3 id="changePasswordTitle">Change Password</h3>
-            <p>Confirm your current password before choosing a new one.</p>
-          </div>
-          <button type="button" class="admin-secondary-button" data-close-password-modal aria-label="Close password dialog">Close</button>
-        </div>
-        <form id="changePasswordForm" novalidate>
-          <div class="admin-settings-field">
-            <label for="currentPassword">Current password</label>
-            <input id="currentPassword" type="password" autocomplete="current-password" required />
-          </div>
-          <div class="admin-settings-field">
-            <label for="newPassword">New password</label>
-            <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required />
-          </div>
-          <div class="admin-settings-field">
-            <label for="confirmNewPassword">Confirm new password</label>
-            <input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" required />
-          </div>
-          <p id="changePasswordMessage" role="status" aria-live="polite"></p>
-          <div class="admin-settings-footer">
-            <button type="button" class="admin-secondary-button" data-close-password-modal>Cancel</button>
-            <button type="submit" class="admin-primary-button">Update Password</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
     <!-- =========================
          GLOBAL JAVASCRIPT
     ========================== -->
     <script src="../../assets/js/api-config.js"></script>
-    <script src="../../assets/js/core/platform-name.js"></script>
     <script src="../../assets/js/auth/auth-api.js"></script>
     <script src="../../assets/js/admin/admin-header.js" defer></script>
     <script src="../../assets/js/admin/admin-notifications.js" defer></script>

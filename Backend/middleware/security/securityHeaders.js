@@ -16,8 +16,10 @@
 
 const BASE_DIRECTIVES = [
     "default-src 'self'",
-    "script-src 'self' https://unpkg.com https://accounts.google.com/gsi/client https://accounts.google.com",
-    "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com https://accounts.google.com",
+    // unpkg.com serves any npm package, so allowing the whole host would let an
+    // attacker-published package pass the CSP. Only Leaflet (rider map) is used.
+    "script-src 'self' https://unpkg.com/leaflet@1.9.4/ https://accounts.google.com/gsi/client https://accounts.google.com",
+    "style-src 'self' 'unsafe-inline' https://unpkg.com/leaflet@1.9.4/ https://fonts.googleapis.com https://accounts.google.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https:",
     "connect-src 'self' https://router.project-osrm.org https://nominatim.openstreetmap.org https://accounts.google.com https://www.googleapis.com https://food-delivery-ljy7.onrender.com",

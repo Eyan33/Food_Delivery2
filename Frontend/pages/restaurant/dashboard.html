@@ -5,14 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Market Dashboard | DeRon</title>
+    <title>Restaurant Dashboard | FoodDelivery</title>
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="../../assets/css/style.css">
 
-    <!-- Market Dashboard CSS -->
+    <!-- Restaurant Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/pages/restaurant/restaurant.css">
-    <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
 </head>
 
 <body>
@@ -28,17 +27,17 @@
         ========================== -->
 
         <aside class="restaurant-sidebar" id="restaurantSidebar">
-  <div class="restaurant-sidebar-header"><a href="dashboard.html" class="restaurant-logo">DeRon<span>Market Deliveries</span></a></div>
+  <div class="restaurant-sidebar-header"><a href="dashboard.html" class="restaurant-logo">Food<span>Delivery</span></a></div>
   <div class="restaurant-profile-mini">
     <div class="restaurant-avatar" id="restaurantSidebarAvatar">R</div>
-    <div class="restaurant-profile-info"><strong id="restaurantSidebarName">Loading market…</strong><span>market</span></div>
+    <div class="restaurant-profile-info"><strong id="restaurantSidebarName">Loading restaurant…</strong><span>Restaurant</span></div>
   </div>
   <nav class="restaurant-navigation">
     <p class="restaurant-nav-title">MAIN MENU</p>
     <a href="dashboard.html" class="restaurant-nav-link active" aria-current="page"><span class="nav-icon">▦</span><span>Dashboard</span></a>
 <a href="orders.html" class="restaurant-nav-link"><span class="nav-icon">▤</span><span>Orders</span><span class="nav-badge" hidden>0</span></a>
 <a href="earnings.html" class="restaurant-nav-link"><span class="nav-icon">▥</span><span>Earnings</span></a>
-<a href="restaurant-profile.html" class="restaurant-nav-link"><span class="nav-icon">◉</span><span>Market Profile</span></a>
+<a href="restaurant-profile.html" class="restaurant-nav-link"><span class="nav-icon">◉</span><span>Restaurant Profile</span></a>
 <a href="settings.html" class="restaurant-nav-link"><span class="nav-icon">⚙</span><span>Settings</span></a>
   </nav>
   <div class="restaurant-sidebar-bottom"><a href="../../pages/auth/login.html" class="restaurant-nav-link logout-link"><span class="nav-icon">↪</span><span>Logout</span></a></div>
@@ -60,20 +59,20 @@
     <button type="button" class="restaurant-menu-button" id="restaurantMenuButton" aria-label="Open menu">☰</button>
     <div class="restaurant-page-heading">
       <h1>Dashboard</h1>
-      <p>Monitor orders, market status, and daily performance.</p>
+      <p>Monitor orders, restaurant status, and daily performance.</p>
     </div>
   </div>
   <div class="restaurant-topbar-right">
     <button type="button" class="restaurant-status" id="restaurantStatusButton" aria-live="polite">
       <span class="status-dot"></span>
-      <span class="status-text"><small>Market Status</small><strong id="restaurantStatusText">Loading…</strong></span>
+      <span class="status-text"><small>Restaurant Status</small><strong id="restaurantStatusText">Loading…</strong></span>
     </button>
     <button type="button" class="restaurant-notification-button" aria-label="Notifications">
       <span>♧</span><span class="notification-badge" hidden>0</span>
     </button>
     <button type="button" class="restaurant-topbar-profile" aria-label="Restaurant profile">
       <span class="topbar-avatar" id="restaurantTopbarAvatar">R</span>
-      <span class="topbar-profile-text"><strong id="restaurantTopbarName">Loading market…</strong><small>market</small></span>
+      <span class="topbar-profile-text"><strong id="restaurantTopbarName">Loading restaurant…</strong><small>Restaurant</small></span>
       <span class="profile-arrow">⌄</span>
     </button>
   </div>
@@ -93,8 +92,8 @@
                 <div class="restaurant-welcome">
 
                     <div>
-                        <h2 id="restaurantWelcomeHeading">Your market overview</h2>
-                        <p>Here's what's happening with your market today.</p>
+                        <h2 id="restaurantWelcomeHeading">Your restaurant overview</h2>
+                        <p>Here's what's happening with your restaurant today.</p>
                     </div>
 
                     <div class="dashboard-date"><span>Today</span><strong id="dashboardCurrentDate">Loading date…</strong></div>
@@ -195,17 +194,17 @@
                                 ☷
                             </div>
 
-                            <span class="stat-change neutral">products</span>
+                            <span class="stat-change neutral">Menu</span>
 
                         </div>
 
                         <div class="stat-card-content">
 
-                            <span>products Items</span>
+                            <span>Menu Items</span>
 
                             <strong>—</strong>
 
-                            <small>Loading products availability</small>
+                            <small>Loading menu availability</small>
 
                         </div>
 
@@ -276,7 +275,7 @@
                         <div class="dashboard-card-header">
 
                             <div>
-                                <h3>Market Status</h3>
+                                <h3>Restaurant Status</h3>
                                 <p>Manage your availability</p>
                             </div>
 
@@ -292,7 +291,7 @@
                             <div class="status-panel-content">
 
                                 <strong id="statusPanelTitle">
-                                    Your market is open
+                                    Your restaurant is open
                                 </strong>
 
                                 <p id="statusPanelDescription">
@@ -306,7 +305,7 @@
 
                         <button type="button" class="dashboard-status-button" id="toggleRestaurantStatus">
 
-                            Close Market
+                            Close Restaurant
 
                         </button>
 
@@ -351,7 +350,7 @@
 
                             <div>
                                 <h3>Quick Actions</h3>
-                                <p>Common market tasks</p>
+                                <p>Common restaurant tasks</p>
                             </div>
 
                         </div>
@@ -381,8 +380,8 @@
                                 </span>
 
                                 <span>
-                                    <strong>Edit Market</strong>
-                                    <small>Update market details</small>
+                                    <strong>Edit Restaurant</strong>
+                                    <small>Update restaurant details</small>
                                 </span>
 
                             </a>
@@ -414,7 +413,7 @@
     </div>
 
 
-    <!-- Market Dashboard JavaScript -->
+    <!-- Restaurant Dashboard JavaScript -->
     <!-- Shared authentication and API helper -->
     <script src="../../assets/js/api-config.js"></script>
     <script src="../../assets/js/auth/auth-api.js"></script>
@@ -422,7 +421,7 @@
     <!-- Existing global JavaScript -->
     <script src="../../assets/js/main.js"></script>
 
-    <!-- Market Dashboard -->
+    <!-- Restaurant Dashboard -->
     <script src="../../assets/js/restaurant/notifications.js"></script>
     <script src="../../assets/js/restaurant/dashboard.js"></script>
 

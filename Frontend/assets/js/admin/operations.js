@@ -11,6 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const request = (path, options = {}) =>
         API.request(path, { ...options, authenticated: true });
 
+    // Regular admins can manage platform fees. Administrator account management
+    // and audit history remain super-admin-only in both UI and API.
+    const signedInUser = API.getCurrentUser?.();
+    if (signedInUser?.role !== "super_admin") {
+        ["admins", "audit"].forEach((panelName) => {
+            const tab = document.querySelector(`.operations-tabs [data-panel="${panelName}"]`);
+            const panel = byId(`panel-${panelName}`);
+            if (tab) tab.hidden = true;
+            if (panel) panel.hidden = true;
+        });
+    }
+
     const showMessage = (text, error = false) => {
         if (!message) return;
 
@@ -943,6 +955,54 @@ form.reset();
             );
 
             const actions = document.createElement("td");
+
+            actions.append(
+                button("Edit", async () => {
+                    const firstName = window.prompt("First name:", admin.first_name || "");
+                    if (firstName === null) return;
+                    const lastName = window.prompt("Last name:", admin.last_name || "");
+                    if (lastName === null) return;
+                    const email = window.prompt("Email address:", admin.email || "");
+                    if (email === null) return;
+                    const phone = window.prompt("Phone number (optional):", admin.phone || "");
+                    if (phone === null) return;
+                    try {
+                        await request(`/admins/${encodeURIComponent(admin.id)}`, {
+                            method: "PUT",
+                            body: {
+                                first_name: firstName.trim(),
+                                last_name: lastName.trim(),
+                                email: email.trim(),
+                                phone: phone.trim() || null
+                            }
+                        });
+                        await loadAdmins();
+                        showMessage("Administrator details updated.");
+                    } catch (error) {
+                        showMessage(error.message || "Could not update administrator.", true);
+                    }
+                }, true)
+            );
+
+            actions.append(
+                button("Reset password", async () => {
+                    const password = window.prompt("Enter a new temporary password (at least 8 characters):");
+                    if (password === null) return;
+                    if (password.length < 8) {
+                        showMessage("Temporary password must contain at least 8 characters.", true);
+                        return;
+                    }
+                    try {
+                        await request(`/admins/${encodeURIComponent(admin.id)}`, {
+                            method: "PUT",
+                            body: { password }
+                        });
+                        showMessage("Password reset. The administrator must change it at next sign-in.");
+                    } catch (error) {
+                        showMessage(error.message || "Could not reset administrator password.", true);
+                    }
+                }, true)
+            );
 
             if (admin.is_active) {
                 const isSelf =

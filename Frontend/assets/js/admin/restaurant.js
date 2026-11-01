@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tableBody.innerHTML = `
             <tr>
                 <td colspan="7" style="text-align:center; padding:35px;">
-                    Loading markets...
+                    Loading restaurants...
                 </td>
             </tr>
         `;
@@ -369,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tableBody.innerHTML = `
                 <tr>
                     <td colspan="7" style="text-align:center; padding:35px;">
-                        No markets found.
+                        No restaurants found.
                     </td>
                 </tr>
             `;
@@ -503,8 +503,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             type="button"
                             class="admin-table-action edit-button"
                             data-id="${escapeHtml(restaurant.id)}"
-                            aria-label="Edit market"
-                            title="Edit market"
+                            aria-label="Edit restaurant"
+                            title="Edit restaurant"
                         >
                             ✎
                         </button>
@@ -569,8 +569,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (button.classList.contains("deactivate-button")) {
       await handleDeactivateRestaurant(restaurantId);
     }
+
     if (button.classList.contains("permanent-delete-button")) {
-      window.location.href = "deleted-accounts.html?type=restaurant&id=" + encodeURIComponent(restaurantId);
+      const restaurant = state.restaurants?.find((item) => String(item.id) === String(restaurantId));
+      const name = restaurant?.name || ("restaurant #" + restaurantId);
+      const reason = window.prompt("Enter the reason for permanently deleting " + name + ":");
+      if (reason === null) return;
+      if (reason.trim().length < 3) { showMessage("A deletion reason of at least 3 characters is required.", "error"); return; }
+      if (!window.confirm("Permanently delete " + name + "? This cannot be undone.")) return;
+      if (button.disabled) return;
+      button.disabled = true; button.textContent = "Deleting...";
+      try {
+        const result = await API.request("/admins/deleted-accounts/restaurant/" + encodeURIComponent(restaurantId), {
+          method: "DELETE", authenticated: true, body: { reason: reason.trim() },
+        });
+        showMessage(result?.message || "Restaurant deleted and archived.", "success");
+        await loadRestaurants();
+      } catch (error) {
+        showMessage(error?.message || "Could not delete this restaurant.", "error");
+      } finally { button.disabled = false; button.textContent = "Delete"; }
+      return;
     }
   });
 
@@ -916,11 +934,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     </p>
 
                     <h2 id="restaurantModalTitle">
-                        Add Market
+                        Add Restaurant
                     </h2>
 
                     <p id="restaurantModalSubtitle">
-                        Create a market account for the platform.
+                        Create a restaurant account for the platform.
                     </p>
 
                 </div>
@@ -1884,7 +1902,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearModalMessage();
     resetCredentialsView();
 
-    modalTitle.textContent = "Add Market";
+    modalTitle.textContent = "Add Restaurant";
 
     modalSubtitle.textContent = "Create a new restaurant and owner account.";
 
@@ -2016,7 +2034,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const restaurant = response?.restaurant || null;
 
       if (!restaurant) {
-        throw new Error("Market details were not returned by the server.");
+        throw new Error("Restaurant details were not returned by the server.");
       }
 
       restaurantModal.restaurant = restaurant;
@@ -2230,7 +2248,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await loadRestaurants();
 
-      showMessage("Market rejected successfully.");
+      showMessage("Restaurant rejected successfully.");
     } catch (error) {
       console.error("Failed to reject restaurant:", error);
 
@@ -2262,7 +2280,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await loadRestaurants();
 
-      showMessage("Market activated successfully.");
+      showMessage("Restaurant activated successfully.");
     } catch (error) {
       console.error("Failed to activate restaurant:", error);
 
@@ -2302,7 +2320,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await loadRestaurants();
 
-      showMessage("Market deactivated successfully.");
+      showMessage("Restaurant deactivated successfully.");
     } catch (error) {
       console.error("Failed to deactivate restaurant:", error);
 

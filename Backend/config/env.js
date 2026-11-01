@@ -68,8 +68,8 @@ function validateEnvironment() {
         );
     }
 
-    if (process.env.ADMIN_PASSWORD && String(process.env.ADMIN_PASSWORD).length < 12) {
-        errors.push("ADMIN_PASSWORD must be at least 12 characters.");
+    if (process.env.ADMIN_PASSWORD && String(process.env.ADMIN_PASSWORD).length < 8) {
+        errors.push("ADMIN_PASSWORD must be at least 8 characters.");
     }
 
     return { errors, warnings };

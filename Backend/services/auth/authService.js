@@ -8,9 +8,30 @@ const {
     normalizeEmail,
     isValidEmail,
     isValidPassword,
+    isPrivilegedRole,
+    isValidPasswordForRole,
+    passwordRequirementMessage,
     isValidName,
     isValidPhone
 } = require("../../utils/auth/validators");
+
+
+/*
+ * A real bcrypt hash to compare against when no account matches the email,
+ * so unknown and known emails take about the same time to reject.
+ */
+let dummyHashPromise = null;
+
+function getDummyPasswordHash() {
+    if (!dummyHashPromise) {
+        dummyHashPromise = bcrypt.hash(
+            crypto.randomBytes(24).toString("hex"),
+            12
+        );
+    }
+
+    return dummyHashPromise;
+}
 
 
 async function registerUser({
@@ -138,6 +159,7 @@ async function registerUser({
             phone,
             role,
             is_active,
+            must_change_password,
             created_at,
             updated_at
         `,
@@ -188,6 +210,12 @@ async function loginUser({
         );
     }
 
+    if (typeof password !== "string") {
+        throw new Error(
+            "Invalid email or password"
+        );
+    }
+
 
     /*
      * Find user by email.
@@ -214,38 +242,33 @@ async function loginUser({
     );
 
 
-    if (result.rows.length === 0) {
+    const user = result.rows[0] || null;
+
+
+    /*
+     * Always run one bcrypt comparison, even when the email is unknown, so
+     * response time does not reveal which emails have accounts.
+     */
+    const passwordMatches = await bcrypt.compare(
+        password,
+        user ? user.password_hash : await getDummyPasswordHash()
+    );
+
+
+    if (!user || !passwordMatches) {
         throw new Error(
             "Invalid email or password"
         );
     }
 
 
-    const user = result.rows[0];
-
-
     /*
-     * Check whether account is active.
+     * Only someone who proved they know the password learns the account is
+     * deactivated; otherwise this would reveal which emails exist.
      */
     if (!user.is_active) {
         throw new Error(
             "This account has been deactivated"
-        );
-    }
-
-
-    /*
-     * Compare supplied password with bcrypt hash.
-     */
-    const passwordMatches = await bcrypt.compare(
-        password,
-        user.password_hash
-    );
-
-
-    if (!passwordMatches) {
-        throw new Error(
-            "Invalid email or password"
         );
     }
 
@@ -312,7 +335,7 @@ async function getCurrentUser(userId) {
 
 
 async function updateCurrentUser(userId, input = {}) {
-    const allowedFields = ["first_name", "last_name", "email", "phone"];
+    const allowedFields = ["first_name", "last_name", "email", "phone", "current_password"];
 
     if (!input || typeof input !== "object" || Array.isArray(input)) {
         throw new Error("Request body must be a JSON object");
@@ -321,6 +344,39 @@ async function updateCurrentUser(userId, input = {}) {
     for (const field of Object.keys(input)) {
         if (!allowedFields.includes(field)) {
             throw new Error(`Field "${field}" is not allowed`);
+        }
+    }
+
+    /*
+     * Admin and super-admin email addresses are the target of password
+     * resets, so changing one requires the current password. Otherwise a
+     * briefly stolen session could be turned into permanent account takeover.
+     */
+    if (Object.prototype.hasOwnProperty.call(input, "email")) {
+        const current = await pool.query(
+            "SELECT role, email, password_hash FROM users WHERE id = $1 LIMIT 1",
+            [userId]
+        );
+
+        if (!current.rows.length) {
+            throw new Error("User not found");
+        }
+
+        const { role, email: currentEmail, password_hash: currentHash } = current.rows[0];
+
+        if (
+            isPrivilegedRole(role) &&
+            normalizeEmail(input.email) !== normalizeEmail(currentEmail)
+        ) {
+            if (typeof input.current_password !== "string" || !input.current_password) {
+                throw new Error("Enter your current password to change your email address");
+            }
+
+            const matches = await bcrypt.compare(input.current_password, currentHash);
+
+            if (!matches) {
+                throw new Error("Your current password is incorrect");
+            }
         }
     }
 
@@ -405,7 +461,7 @@ async function changeCurrentUserPassword(userId, currentPassword, newPassword) {
         throw new Error("Current password is required");
     }
 
-    if (!isValidPassword(newPassword)) {
+    if (typeof newPassword !== "string" || newPassword.length < 8) {
         throw new Error("New password must contain at least 8 characters");
     }
 
@@ -414,12 +470,18 @@ async function changeCurrentUserPassword(userId, currentPassword, newPassword) {
     }
 
     const result = await pool.query(
-        `SELECT password_hash FROM users WHERE id = $1 LIMIT 1`,
+        `SELECT id, role, password_hash FROM users WHERE id = $1 LIMIT 1`,
         [userId]
     );
 
     if (!result.rows.length) {
         throw new Error("User not found");
+    }
+
+    const { role } = result.rows[0];
+
+    if (!isValidPasswordForRole(newPassword, role)) {
+        throw new Error(passwordRequirementMessage(role));
     }
 
     const matches = await bcrypt.compare(
@@ -432,16 +494,30 @@ async function changeCurrentUserPassword(userId, currentPassword, newPassword) {
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 12);
+    const privileged = isPrivilegedRole(role);
 
+    /*
+     * For admin and super-admin accounts every session issued before this
+     * moment stops working, so changing a password also logs out a thief.
+     * The caller gets a fresh token below so their own session continues.
+     */
     await pool.query(
         `UPDATE users
-         SET password_hash = $1, password_changed_at = CURRENT_TIMESTAMP,
-             must_change_password = FALSE, updated_at = CURRENT_TIMESTAMP
+         SET password_hash = $1, password_changed_at = CURRENT_TIMESTAMP, must_change_password = FALSE, updated_at = CURRENT_TIMESTAMP,
+             tokens_valid_after = CASE WHEN $3::boolean THEN $4::timestamptz ELSE tokens_valid_after END
          WHERE id = $2`,
-        [passwordHash, userId]
+        [passwordHash, userId, privileged, new Date()]
+    );
+    await pool.query(
+        `INSERT INTO admin_audit_logs (admin_id, admin_role, action, resource, status_code)
+         SELECT id, role, 'PASSWORD', '/auth/me/password', 200
+         FROM users WHERE id = $1 AND role IN ('admin', 'super_admin')`,
+        [userId]
     );
 
-    return true;
+    return privileged
+        ? { token: generateToken({ id: result.rows[0].id, role }) }
+        : {};
 }
 
 
@@ -494,7 +570,7 @@ async function resetPasswordWithToken(token, newPassword) {
         await client.query("BEGIN");
         const tokenHash = hashResetToken(token);
         const found = await client.query(
-            `SELECT prt.user_id
+            `SELECT prt.user_id, u.role
              FROM password_reset_tokens prt
              JOIN users u ON u.id = prt.user_id
              WHERE prt.token_hash = $1
@@ -509,13 +585,26 @@ async function resetPasswordWithToken(token, newPassword) {
         }
 
         const userId = found.rows[0].user_id;
+
+        if (!isValidPasswordForRole(newPassword, found.rows[0].role)) {
+            throw new Error(passwordRequirementMessage(found.rows[0].role));
+        }
+
         const passwordHash = await bcrypt.hash(newPassword, 12);
+        // A reset ends every existing session for the account.
         await client.query(
             `UPDATE users
              SET password_hash = $1, password_changed_at = CURRENT_TIMESTAMP,
-                 updated_at = CURRENT_TIMESTAMP
+                 must_change_password = FALSE, updated_at = CURRENT_TIMESTAMP,
+                 tokens_valid_after = $3::timestamptz
              WHERE id = $2`,
-            [passwordHash, userId]
+            [passwordHash, userId, new Date()]
+        );
+        await client.query(
+            `INSERT INTO admin_audit_logs (admin_id, admin_role, action, resource, status_code)
+             SELECT id, role, 'RESET', '/auth/password-reset', 200
+             FROM users WHERE id = $1 AND role IN ('admin', 'super_admin')`,
+            [userId]
         );
         await client.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [userId]);
         await client.query("COMMIT");
@@ -551,12 +640,15 @@ async function loginWithGoogleCredential(credential) {
         !(claims.email_verified === true || claims.email_verified === "true") || !claims.email) throw new Error("Google returned an invalid or unverified identity");
     const email = normalizeEmail(claims.email);
     if (!isValidEmail(email)) throw new Error("Google did not provide a valid email address");
-    const selectByEmail = () => pool.query(`SELECT id, first_name, last_name, email, phone, role, is_active, google_password_setup_pending, created_at, updated_at FROM users WHERE email = $1 LIMIT 1`, [email]);
+    const selectByEmail = () => pool.query(`SELECT id, first_name, last_name, email, phone, role, is_active, must_change_password, google_password_setup_pending, created_at, updated_at FROM users WHERE email = $1 LIMIT 1`, [email]);
     const existing = await selectByEmail();
     let user;
     let newGoogleAccount = false;
     if (existing.rows.length) {
         user = existing.rows[0];
+        if (user.role === "super_admin") {
+            throw new Error("Super-admin accounts must sign in with their email and password.");
+        }
         if (!user.is_active) throw new Error("This account has been deactivated");
         newGoogleAccount = user.google_password_setup_pending === true;
     } else {
@@ -568,7 +660,7 @@ async function loginWithGoogleCredential(credential) {
         try {
             const created = await pool.query(`INSERT INTO users (first_name, last_name, email, phone, password_hash, role, google_password_setup_pending)
                 VALUES ($1, $2, $3, NULL, $4, 'customer', TRUE)
-                RETURNING id, first_name, last_name, email, phone, role, is_active, created_at, updated_at`, [firstName, lastName, email, unusablePasswordHash]);
+                RETURNING id, first_name, last_name, email, phone, role, is_active, must_change_password, created_at, updated_at`, [firstName, lastName, email, unusablePasswordHash]);
             user = created.rows[0];
             newGoogleAccount = true;
         } catch (error) {

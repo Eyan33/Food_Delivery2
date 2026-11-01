@@ -18,11 +18,14 @@
     button.disabled = true;
     message.textContent = "Updating password…";
     try {
-      await api.request("/auth/me/password", {
+      const result = await api.request("/auth/me/password", {
         method: "PATCH",
         body: { currentPassword, newPassword },
         authenticated: true
       });
+      // Admin sessions end on a password change; keep this one alive with the
+      // fresh token the server returns.
+      if (result && result.token && api.replaceToken) api.replaceToken(result.token);
       const user = api.getCurrentUser();
       if (user) {
         user.must_change_password = false;
@@ -30,7 +33,8 @@
         sessionStorage.setItem("foodDeliveryUser", JSON.stringify(user));
       }
       message.textContent = "Password changed. Redirecting to your portal…";
-      window.setTimeout(() => window.location.replace("../admin/dashboard.html"), 700);
+      const destination = user && user.role === "super_admin" ? "../admin/super-admin-dashboard.html" : user && user.role === "admin" ? "../admin/dashboard.html" : "../../index.html";
+      window.setTimeout(() => window.location.replace(destination), 700);
     } catch (error) {
       message.textContent = error.message || "Could not change the password.";
       button.disabled = false;

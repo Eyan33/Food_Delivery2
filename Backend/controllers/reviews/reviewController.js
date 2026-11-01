@@ -121,7 +121,7 @@ const deleteReview = async (req, res) => {
         // Ensure user owns the review or is an admin
         if (
             reviewCheck.rows[0].customer_id !== userId &&
-            req.user.role !== "admin"
+            !["admin", "super_admin"].includes(req.user.role)
         ) {
             return res
                 .status(403)

@@ -2,9 +2,7 @@
     const normalizeBaseUrl = (value) => String(value || "").trim().replace(/\/+$/, "");
     const hostname = window.location.hostname;
     const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(hostname);
-    // This frontend belongs to Food_Delivery2, so production requests must go
-    // to its own backend rather than the original Food_Delivery deployment.
-    const productionApiBase = normalizeBaseUrl("https://food-delivery2-c8m3.onrender.com/api");
+    const productionApiBase = normalizeBaseUrl("https://food-delivery-tcwn.onrender.com/api");
 
     const servedByExpress = window.location.port === "5000";
     const resolvedBase = normalizeBaseUrl(
@@ -15,6 +13,40 @@
     );
 
     window.FOOD_DELIVERY_API_BASE = resolvedBase;
+
+    // Public branding is read from the saved platform settings so the
+    // customer-facing pages, authentication screens and admin portals stay
+    // consistent without requiring a signed-in session.
+    const applyPlatformName = (value) => {
+        const name = String(value || "").trim();
+        if (!name) return;
+        document.querySelectorAll(".logo, .admin-logo").forEach((element) => {
+            element.textContent = name;
+            element.setAttribute("aria-label", name);
+        });
+        if (document.title) {
+            const parts = document.title.split("|");
+            document.title = parts.length > 1
+                ? `${parts[0].trim()} | ${name}`
+                : name;
+        }
+        document.querySelectorAll(".footer p, footer p").forEach((element) => {
+            element.textContent = element.textContent.replace(/Food\s*Delivery/gi, name);
+        });
+        document.documentElement.dataset.platformName = name;
+    };
+
+    window.applyFoodDeliveryPlatformName = applyPlatformName;
+    window.addEventListener("platform-name-updated", (event) => {
+        applyPlatformName(event.detail?.platformName);
+    });
+
+    fetch(`${resolvedBase}/public/settings`, { headers: { Accept: "application/json" } })
+        .then((response) => response.ok ? response.json() : null)
+        .then((result) => applyPlatformName(result?.data?.platformName))
+        .catch(() => {
+            // Keep the built-in fallback branding if public settings are unavailable.
+        });
 })();
 
 /*

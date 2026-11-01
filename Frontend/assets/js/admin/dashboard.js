@@ -67,21 +67,22 @@
 
             setText(
                 valueNode,
-                isMoney ? formatMoney(value) : formatNumber(value)
+                value === null || value === undefined || value === ""
+                    ? "—"
+                    : (isMoney ? formatMoney(value) : formatNumber(value))
             );
 
             const small = card.querySelector(".admin-stat-content small");
-
             if (small) {
                 small.replaceChildren();
-
-                const changeNode = document.createElement("b");
-                changeNode.textContent = String(change ?? "");
-
-                small.append(
-                    changeNode,
-                    document.createTextNode(` ${description || ""}`)
-                );
+                const parts = [];
+                if (change !== null && change !== undefined && change !== "") {
+                    const changeNode = document.createElement("b");
+                    changeNode.textContent = String(change);
+                    parts.push(changeNode);
+                }
+                if (description) parts.push(document.createTextNode(String(description)));
+                small.append(...parts);
             }
         }
 
@@ -120,6 +121,17 @@
             const maximum = Math.max(1, ...values);
 
             area.replaceChildren();
+            const yAxisNode = document.querySelector(".admin-chart-y-axis");
+            if (labels.length === 0) {
+                if (yAxisNode) {
+                    yAxisNode.replaceChildren(...Array.from({ length: 5 }, () => {
+                        const item = document.createElement("span");
+                        item.textContent = "—";
+                        return item;
+                    }));
+                }
+                return;
+            }
 
             labels.forEach((label, index) => {
                 const column = document.createElement("div");
@@ -395,8 +407,42 @@ function renderPlatformSummary(summary) {
             });
         }
 
+        function resetDashboard() {
+            document.querySelectorAll(".admin-stats-grid .admin-stat-content strong")
+                .forEach(node => { node.textContent = "—"; });
+            document.querySelectorAll(".admin-stats-grid .admin-stat-content small")
+                .forEach(node => node.replaceChildren());
+
+            const bars = document.querySelector(".admin-chart-bars");
+            if (bars) bars.replaceChildren();
+            const yAxis = document.querySelector(".admin-chart-y-axis");
+            if (yAxis) {
+                yAxis.replaceChildren(...Array.from({ length: 5 }, () => {
+                    const item = document.createElement("span");
+                    item.textContent = "—";
+                    return item;
+                }));
+            }
+
+            const total = document.querySelector(".admin-status-total strong");
+            if (total) total.textContent = "—";
+            document.querySelectorAll(".admin-status-list .admin-status-item strong")
+                .forEach(node => { node.textContent = "—"; });
+
+            const tbody = document.querySelector(".admin-bottom-grid .admin-table tbody");
+            if (tbody) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 5;
+                cell.textContent = "Dashboard data is unavailable.";
+                row.append(cell);
+                tbody.replaceChildren(row);
+            }
+        }
+
         async function loadDashboard() {
             if (!API || typeof API.request !== "function") {
+                resetDashboard();
                 showMessage(
                     "Dashboard API client did not load. Please refresh the page.",
                     "error"
@@ -425,6 +471,7 @@ function renderPlatformSummary(summary) {
                 renderDashboard(data);
             } catch (error) {
                 console.error("Admin dashboard error:", error);
+                resetDashboard();
 
                 showMessage(
                     error?.message ||
@@ -440,6 +487,7 @@ function renderPlatformSummary(summary) {
             periodSelect.addEventListener("change", loadDashboard);
         }
 
+        resetDashboard();
         loadDashboard();
     });
 })();

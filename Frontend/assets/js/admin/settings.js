@@ -149,38 +149,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Apply the saved platform name to the visible admin branding.
-    // Empty / missing values fall back to "Market Delivery".
-    // Uses the shared platform-name module when available so the cache stays in sync.
+    // Apply the saved platform name to the visible admin branding as well
+    // as the input field. Persisting a preference alone does not update the UI.
     function applyPlatformName(value) {
-        const platformName =
-            String(value || "").trim() ||
-            (window.FoodDeliveryPlatform && window.FoodDeliveryPlatform.DEFAULT_NAME) ||
-            "Market Delivery";
+        const platformName = String(value || "").trim();
+        if (!platformName) return;
 
-        if (window.FoodDeliveryPlatform && typeof window.FoodDeliveryPlatform.apply === "function") {
-            window.FoodDeliveryPlatform.apply(platformName);
-            // Keep the public cache in sync after an admin save
-            try {
-                sessionStorage.setItem(
-                    "fd_platform_name",
-                    JSON.stringify({ name: platformName, fetchedAt: Date.now() })
-                );
-            } catch (_) { /* ignore */ }
-            return;
+        if (typeof window.applyFoodDeliveryPlatformName === "function") {
+            window.applyFoodDeliveryPlatformName(platformName);
+        } else {
+            const logo = document.querySelector(".admin-logo");
+            if (logo) {
+                logo.textContent = platformName;
+                logo.setAttribute("aria-label", platformName);
+            }
         }
 
-        const logo = document.querySelector(".admin-logo");
-        if (logo) {
-            logo.textContent = platformName;
-            logo.setAttribute("aria-label", platformName);
-        }
-
-        const title = document.title || "";
-        if (title.includes("|")) {
-            const pagePart = title.split("|")[0].trim();
-            document.title = pagePart + " | " + platformName + " Admin";
-        }
+        window.dispatchEvent(new CustomEvent("platform-name-updated", {
+            detail: { platformName }
+        }));
     }
 
     /* =====================================================
@@ -245,11 +232,7 @@ function restoreSectionValues(section) {
         setFieldValue("adminPhone", admin.phone || "");
         setFieldValue(
             "adminRole",
-            /^super_admin[12]?$/.test(String(admin.role || "").toLowerCase())
-                ? "Super Administrator"
-                : /^admin[12]?$/.test(String(admin.role || "").toLowerCase())
-                    ? "Administrator"
-                    : admin.role || ""
+            admin.role === "admin" ? "Administrator" : admin.role || ""
         );
 
         const profileCard = document.querySelector(
@@ -408,33 +391,50 @@ function restoreSectionValues(section) {
 
         if (!payload) return;
 
+        // Changing the email address of an admin account needs the current
+        // password, so a stolen session cannot redirect password resets.
+        const emailChanged =
+            payload.email.toLowerCase() !==
+            String(currentAdmin.email || "").trim().toLowerCase();
+
+        if (emailChanged) {
+            const password = window.prompt(
+                "Enter your current password to change your email address."
+            );
+
+            if (!password) {
+                showMessage(
+                    "Your email address was not changed because the current password was not entered.",
+                    "danger"
+                );
+                return;
+            }
+
+            payload.current_password = password;
+        }
+
         const originalText = button.textContent;
 
         button.disabled = true;
         button.textContent = "Saving…";
 
         try {
-            const result = await apiRequest(
-                `/admins/${encodeURIComponent(currentAdmin.id)}`,
-                {
-                    method: "PUT",
-                    body: payload
-                }
-            );
+            // Own profile: /auth/me (PUT /admins/:id is only for the super
+            // admin managing other administrators).
+            const result = await apiRequest("/auth/me", {
+                method: "PUT",
+                body: payload
+            });
 
-            const updatedAdmin =
-                result?.admin ||
-                result?.data?.admin ||
-                result;
+            const user = result?.user || result?.data?.user;
 
-            if (
-                !updatedAdmin ||
-                updatedAdmin.id === undefined
-            ) {
+            if (!user || user.id === undefined) {
                 throw new Error(
                     "The server did not return the updated administrator profile."
                 );
             }
+
+            const updatedAdmin = { ...currentAdmin, ...user };
 
             currentAdmin = updatedAdmin;
             renderAdminProfile(updatedAdmin);
@@ -479,121 +479,36 @@ function restoreSectionValues(section) {
         const values = {};
         section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
             if (field.type === "file" || field.disabled) return;
-            const raw = field.value.trim();
             values[field.id] = field.type === "checkbox"
                 ? field.checked
                 : field.type === "number"
-                    ? (raw === "" ? null : Number(raw))
-                    : raw;
+                    ? Number(field.value)
+                    : field.value.trim();
         });
         return values;
-    }
-
-    function validatePreferenceSection(sectionName, values) {
-        const section = getField(`settings-${sectionName}`);
-        if (!section) return false;
-
-        const invalid = (id, message) => {
-            markInvalid(getField(id), true);
-            showMessage(message, "danger");
-            getField(id)?.focus();
-            return false;
-        };
-
-        section.querySelectorAll("input, textarea, select").forEach((field) => markInvalid(field, false));
-
-        if (sectionName === "general") {
-            if (!values.platformName || values.platformName.length > 120) {
-                return invalid("platformName", "Platform name is required and must be 120 characters or fewer.");
-            }
-            if (values.supportEmail && !isValidEmail(values.supportEmail)) {
-                return invalid("supportEmail", "Enter a valid support email address.");
-            }
-            if (!values.currency) return invalid("currency", "Choose a platform currency.");
-            if (!values.timezone) return invalid("timezone", "Choose a platform timezone.");
-        }
-
-        const numericFields = {
-            payments: { transactionFee: { min: 0, max: 100, label: "Transaction fee" } },
-            delivery: {
-                maxDistance: { min: 1, label: "Maximum delivery distance" },
-                minimumOrder: { min: 0, label: "Minimum order amount" },
-                deliveryTime: { min: 1, label: "Estimated delivery time" }
-            }
-        };
-        for (const [id, rule] of Object.entries(numericFields[sectionName] || {})) {
-            const value = values[id];
-            if (value === null || !Number.isFinite(value) || value < rule.min || (rule.max !== undefined && value > rule.max)) {
-                return invalid(id, `${rule.label} must be ${rule.max !== undefined ? `between ${rule.min} and ${rule.max}` : `at least ${rule.min}`}.`);
-            }
-        }
-
-        if (sectionName === "security" && !["15 Minutes", "30 Minutes", "1 Hour", "4 Hours", "Never"].includes(values.sessionTimeout)) {
-            return invalid("sessionTimeout", "Choose a valid session timeout.");
-        }
-
-        return true;
     }
 
     async function loadPlatformSettings() {
         try {
             const result = await apiRequest("/admins/settings");
             const settings = result?.settings || result?.data?.settings || {};
-            const defaults = {
-                general: { platformName: "Market Delivery", currency: "KES", timezone: "Africa/Nairobi" },
-                security: { sessionTimeout: "30 Minutes" }
-            };
             preferenceSections.forEach((name) => {
                 const section = getField(`settings-${name}`);
-                const saved = { ...(defaults[name] || {}), ...(settings[name] || {}) };
+                const saved = settings[name] || {};
                 if (!section) return;
-
-                section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
-                    if (field.type === "file" || field.disabled) return;
-                    if (Object.prototype.hasOwnProperty.call(saved, field.id)) {
-                        const value = saved[field.id];
-                        if (field.type === "checkbox") {
-                            field.checked = value === true || value === "true";
-                        } else if (value !== null && value !== undefined) {
-                            let normalizedValue = String(value);
-                            if (field.id === "currency") {
-                                const currencyAliases = {
-                                    "US Dollar (USD)": "USD",
-                                    "Euro (EUR)": "EUR",
-                                    "Kenyan Shilling (KSh)": "KES"
-                                };
-                                normalizedValue = currencyAliases[normalizedValue] || normalizedValue;
-                            }
-                            if (field.id === "sessionTimeout") {
-                                const timeoutAliases = {
-                                    "15": "15 Minutes",
-                                    "30": "30 Minutes",
-                                    "60": "1 Hour",
-                                    "240": "4 Hours",
-                                    "0": "Never"
-                                };
-                                normalizedValue = timeoutAliases[normalizedValue] || normalizedValue;
-                            }
-                            field.value = normalizedValue;
-                        }
-                    }
-                    // Remove stale "Loading saved setting…" placeholders from selects.
-                    if (field.tagName === "SELECT" && field.value === "" && field.options.length) {
-                        const placeholder = field.options[0];
-                        if (placeholder.disabled && /loading saved setting/i.test(placeholder.textContent)) {
-                            placeholder.hidden = true;
-                        }
-                    }
+                Object.entries(saved).forEach(([id, value]) => {
+                    const field = getField(id);
+                    if (!field) return;
+                    if (field.type === "checkbox") field.checked = Boolean(value);
+                    else field.value = value;
                 });
-
                 if (name === "general") {
-                    applyPlatformName(saved.platformName || getField("platformName")?.value || "");
+                    applyPlatformName(saved.platformName || getField("platformName")?.value);
                 }
                 rememberSectionValues(section);
             });
         } catch (error) {
-            console.error("Failed to load platform settings:", error);
-            showMessage(getErrorMessage(error, "Could not load platform settings. Check your connection and try again."), "danger");
+            showMessage(getErrorMessage(error, "Could not load platform settings."), "danger");
         }
     }
 
@@ -605,15 +520,15 @@ function restoreSectionValues(section) {
         button.textContent = "Saving…";
         try {
             const values = readSection(section);
-            if (!validatePreferenceSection(sectionName, values)) return;
-
             const result = await apiRequest("/admins/settings", {
                 method: "PUT",
                 body: { [sectionName]: values }
             });
-            const persistedSettings = result?.settings || result?.data?.settings || {};
             if (sectionName === "general") {
-                const savedName = persistedSettings?.general?.platformName ?? values.platformName;
+                // Confirm the server returned persisted data before showing the
+                // updated platform name as applied.
+                const savedName = result?.settings?.general?.platformName
+                    || values.platformName;
                 applyPlatformName(savedName);
             }
             rememberSectionValues(section);
@@ -672,99 +587,314 @@ function restoreSectionValues(section) {
     });
 
     /* =====================================================
-       PASSWORD CHANGE
+       PASSWORD MODAL
+       
+       No secure current-password verification endpoint
+       exists in the supplied backend. Do not send a new
+       password to PUT /admins/:id because that endpoint
+       does not verify the current password.
     ===================================================== */
 
-    function openPasswordModal() {
-        const modal = getField("changePasswordModal");
-        if (!modal) {
-            showMessage("The password-change form is unavailable. Refresh the page and try again.", "danger");
-            return;
-        }
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
-        getField("currentPassword")?.focus();
+    function injectPasswordModalStyles() {
+        if (getField("admin-change-password-styles")) return;
+
+        const style = document.createElement("style");
+        style.id = "admin-change-password-styles";
+
+        style.textContent = `
+            .admin-modal-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 15, 20, 0.55);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 1rem;
+            }
+
+            .admin-modal-overlay.hidden {
+                display: none;
+            }
+
+            .admin-modal {
+                background: var(--admin-card-bg, #fff);
+                color: var(--admin-text, #1a1a1a);
+                width: 100%;
+                max-width: 440px;
+                max-height: 90vh;
+                overflow-y: auto;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 20px 50px rgba(0,0,0,.25);
+            }
+
+            .admin-modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1.25rem;
+            }
+
+            .admin-modal-header h3 {
+                margin: 0;
+                font-size: 1.1rem;
+            }
+
+            .admin-modal-close {
+                background: none;
+                border: none;
+                font-size: 1.4rem;
+                cursor: pointer;
+                color: inherit;
+            }
+
+            .admin-form-group {
+                margin-bottom: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: .4rem;
+            }
+
+            .admin-form-group label {
+                font-size: .85rem;
+                font-weight: 600;
+            }
+
+            .admin-form-group input {
+                padding: .6rem .75rem;
+                border: 1px solid var(--admin-border, #ddd);
+                border-radius: 8px;
+                font: inherit;
+                background: var(--admin-input-bg, #fff);
+                color: inherit;
+            }
+
+            .admin-form-error {
+                font-size: .78rem;
+                color: #d64545;
+                display: none;
+            }
+
+            .admin-form-error.visible {
+                display: block;
+            }
+
+            .admin-modal-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: .75rem;
+                margin-top: 1.5rem;
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+    function buildPasswordModal() {
+        injectPasswordModalStyles();
+
+        const overlay = document.createElement("div");
+        overlay.className = "admin-modal-overlay hidden";
+        overlay.id = "adminChangePasswordOverlay";
+
+        overlay.innerHTML = `
+            <div
+                class="admin-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="changePasswordTitle"
+            >
+                <div class="admin-modal-header">
+                    <h3 id="changePasswordTitle">Change Password</h3>
+                    <button
+                        type="button"
+                        class="admin-modal-close"
+                        aria-label="Close"
+                    >×</button>
+                </div>
+
+                <form id="adminChangePasswordForm" novalidate>
+                    <div class="admin-form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input
+                            type="password"
+                            id="currentPassword"
+                            name="currentPassword"
+                            autocomplete="current-password"
+                            required
+                        />
+                        <span class="admin-form-error"
+                            data-error-for="currentPassword">
+                            Enter your current password.
+                        </span>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="newPassword">New Password</label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            name="newPassword"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                        />
+                        <span class="admin-form-error"
+                            data-error-for="newPassword">
+                            Password must contain at least 8 characters.
+                        </span>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            autocomplete="new-password"
+                            required
+                        />
+                        <span class="admin-form-error"
+                            data-error-for="confirmPassword">
+                            Passwords do not match.
+                        </span>
+                    </div>
+
+                    <p>
+                        Password changing will become available after
+                        the secure backend endpoint is implemented.
+                    </p>
+
+                    <div class="admin-modal-actions">
+                        <button
+                            type="button"
+                            class="admin-secondary-button"
+                            id="adminChangePasswordCancel"
+                        >Cancel</button>
+
+                        <button
+                            type="submit"
+                            class="admin-primary-button"
+                        >Update Password</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        return overlay;
     }
 
     function closePasswordModal() {
-        const modal = getField("changePasswordModal");
-        if (!modal) return;
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden", "true");
-        getField("changePasswordForm")?.reset();
-        const feedback = getField("changePasswordMessage");
-        if (feedback) feedback.textContent = "";
+        if (!passwordModal) return;
+
+        passwordModal.classList.add("hidden");
+
+        const form = getField("adminChangePasswordForm");
+        form?.reset();
+
+        form?.querySelectorAll(".admin-form-error").forEach((error) => {
+            error.classList.remove("visible");
+        });
     }
 
-    document.querySelectorAll("[data-open-password-modal]").forEach((button) => {
-        button.addEventListener("click", openPasswordModal);
-    });
-    document.querySelectorAll("[data-close-password-modal]").forEach((button) => {
-        button.addEventListener("click", closePasswordModal);
-    });
+    function openPasswordModal() {
+        if (!passwordModal) {
+            passwordModal = buildPasswordModal();
 
-    const passwordForm = getField("changePasswordForm");
-    passwordForm?.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const currentPassword = getField("currentPassword")?.value || "";
-        const newPassword = getField("newPassword")?.value || "";
-        const confirmPassword = getField("confirmNewPassword")?.value || "";
-        const feedback = getField("changePasswordMessage");
-        const submit = passwordForm.querySelector('button[type="submit"]');
+            passwordModal.querySelector(
+                ".admin-modal-close"
+            )?.addEventListener("click", closePasswordModal);
 
-        if (feedback) feedback.textContent = "";
-        if (newPassword.length < 8) {
-            if (feedback) feedback.textContent = "New password must contain at least 8 characters.";
-            getField("newPassword")?.focus();
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            if (feedback) feedback.textContent = "The new passwords do not match.";
-            getField("confirmNewPassword")?.focus();
-            return;
-        }
-        if (newPassword === currentPassword) {
-            if (feedback) feedback.textContent = "Choose a new password different from your current password.";
-            getField("newPassword")?.focus();
-            return;
-        }
+            getField("adminChangePasswordCancel")
+                ?.addEventListener("click", closePasswordModal);
 
-        const originalText = submit?.textContent || "Change Password";
-        if (submit) {
-            submit.disabled = true;
-            submit.textContent = "Updating…";
-        }
-        try {
-            await apiRequest("/auth/me/password", {
-                method: "PATCH",
-                body: { currentPassword, newPassword }
+            passwordModal.addEventListener("click", (event) => {
+                if (event.target === passwordModal) {
+                    closePasswordModal();
+                }
             });
-            closePasswordModal();
-            showMessage("Password changed successfully.", "success");
-        } catch (error) {
-            if (feedback) feedback.textContent = getErrorMessage(error, "Could not change password.");
-        } finally {
-            if (submit) {
-                submit.disabled = false;
-                submit.textContent = originalText;
-            }
-        }
-    });
 
-    getField("changePasswordModal")?.addEventListener("click", (event) => {
-        if (event.target === event.currentTarget) closePasswordModal();
-    });
+            getField("adminChangePasswordForm")
+                ?.addEventListener("submit", (event) => {
+                    event.preventDefault();
+
+                    const form = event.currentTarget;
+                    const current = form.currentPassword.value;
+                    const next = form.newPassword.value;
+                    const confirm = form.confirmPassword.value;
+
+                    const errors = {
+                        currentPassword: !current.trim(),
+                        newPassword: next.length < 8,
+                        confirmPassword:
+                            !confirm || next !== confirm
+                    };
+
+                    Object.entries(errors).forEach(([name, invalid]) => {
+                        form.querySelector(
+                            `[data-error-for="${name}"]`
+                        )?.classList.toggle("visible", invalid);
+                    });
+
+                    if (Object.values(errors).some(Boolean)) return;
+
+                    const submit = form.querySelector('[type="submit"]');
+                    const originalText = submit.textContent;
+                    submit.disabled = true;
+                    submit.textContent = "Updating…";
+                    apiRequest("/auth/me/password", {
+                        method: "PATCH",
+                        body: { currentPassword: current, newPassword: next }
+                    }).then((result) => {
+                        // Admin sessions end on a password change; the server
+                        // returns a fresh token so this one keeps working.
+                        if (result?.token) API.replaceToken?.(result.token);
+                        showMessage("Password changed successfully.", "success");
+                        closePasswordModal();
+                    }).catch((error) => {
+                        showMessage(getErrorMessage(error, "Could not change password."), "danger");
+                    }).finally(() => {
+                        submit.disabled = false;
+                        submit.textContent = originalText;
+                    });
+                });
+        }
+
+        passwordModal.classList.remove("hidden");
+
+        getField("currentPassword")?.focus();
+    }
 
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && getField("changePasswordModal")?.classList.contains("is-open")) {
+        if (
+            event.key === "Escape" &&
+            passwordModal &&
+            !passwordModal.classList.contains("hidden")
+        ) {
             closePasswordModal();
         }
     });
 
     const securitySection = getField("settings-security");
-    securitySection
-        ?.querySelector(".admin-settings-security-block .admin-save-button")
-        ?.setAttribute("data-open-password-modal", "");
+
+    const changePasswordButton = securitySection?.querySelector(
+        ".admin-settings-security-block .admin-save-button"
+    );
+
+    changePasswordButton?.addEventListener(
+        "click",
+        openPasswordModal
+    );
+
+    const securitySaveButton = securitySection?.querySelector(
+        ".admin-settings-footer .admin-save-button"
+    );
+
+    securitySaveButton?.addEventListener("click", (event) => {
+        savePreferenceSection("security", event.currentTarget);
+    });
 
     /* =====================================================
        INITIALIZATION

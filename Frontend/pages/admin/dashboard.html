@@ -5,12 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Admin Dashboard | Market Delivery</title>
+    <title>Admin Dashboard | FoodDelivery</title>
 
     <link rel="stylesheet" href="../../assets/css/style.css" />
     <link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
-    <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
-    <link rel="stylesheet" href="../../assets/css/pages/admin/ui-overrides.css" />
 </head>
 
 <body>
@@ -20,7 +18,7 @@
 
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-header">
-            <a href="dashboard.html" class="admin-logo">Market Delivery</a>
+            <a href="dashboard.html" class="admin-logo">Food<span>Delivery</span></a>
             <button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button>
         </div>
         <div class="admin-profile">
@@ -45,7 +43,7 @@
             </a>
             <a href="restaurants.html" class="admin-nav-link">
                 <span class="admin-nav-icon">⌂</span>
-                <span>markets</span>
+                <span>Restaurants</span>
             </a>
             <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
             <a href="deleted-accounts.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
@@ -87,7 +85,7 @@
             <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
             <div class="admin-page-heading">
                 <h1>Admin Dashboard</h1>
-                <p>Manage your products delivery platform.</p>
+                <p>Manage your food delivery platform.</p>
             </div>
         </div>
         <div class="admin-topbar-right">
@@ -140,7 +138,7 @@
 
                         <strong>—</strong>
 
-                        <small> <b>+12.5%</b> from last month </small>
+                        <small></small>
                     </div>
                 </div>
 
@@ -154,7 +152,7 @@
 
                         <strong>—</strong>
 
-                        <small> <b>+8.4%</b> from last month </small>
+                        <small></small>
                     </div>
                 </div>
 
@@ -178,7 +176,7 @@
                     <div class="admin-stat-icon restaurants">▦</div>
 
                     <div class="admin-stat-content">
-                        <span> markets </span>
+                        <span> Restaurants </span>
 
                         <strong>—</strong>
 
@@ -219,13 +217,13 @@
                         <!-- Y AXIS -->
 
                         <div class="admin-chart-y-axis">
-                            <span> 200K </span>
+                            <span>—</span>
 
-                            <span> 150K </span>
+                            <span>—</span>
 
-                            <span> 100K </span>
+                            <span>—</span>
 
-                            <span> 50K </span>
+                            <span>—</span>
 
                             <span>— </span>
                         </div>
@@ -247,43 +245,43 @@
 
                             <div class="admin-chart-bars">
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 48%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Mon </span>
                                 </div>
 
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 62%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Tue </span>
                                 </div>
 
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 55%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Wed </span>
                                 </div>
 
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 72%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Thu </span>
                                 </div>
 
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 66%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Fri </span>
                                 </div>
 
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 84%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Sat </span>
                                 </div>
 
                                 <div class="admin-bar-column">
-                                    <div class="admin-bar" style="height: 76%"></div>
+                                    <div class="admin-bar" style="height: 0%"></div>
 
                                     <span> Sun </span>
                                 </div>
@@ -399,7 +397,7 @@
 
                                     <th>Customer</th>
 
-                                    <th>market</th>
+                                    <th>Restaurant</th>
 
                                     <th>Amount</th>
 
@@ -444,9 +442,9 @@
                         <span class="admin-action-icon"> ▦ </span>
 
                         <span>
-                            <strong> markets </strong>
+                            <strong> Restaurants </strong>
 
-                            <small> Manage market accounts </small>
+                            <small> Manage restaurant accounts </small>
                         </span>
                     </a>
 
@@ -474,7 +472,6 @@
         </section>
     </main>
     <script src="../../assets/js/api-config.js"></script>
-    <script src="../../assets/js/core/platform-name.js"></script>
     <script src="../../assets/js/main.js"></script>
     <script src="../../assets/js/auth/auth-api.js"></script>
     <script src="../../assets/js/admin/admin-notifications.js" defer></script>

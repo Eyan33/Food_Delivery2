@@ -120,8 +120,6 @@ async function ensureSchema() {
 }
 
 async function seedAdmin() {
-    const system = String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase();
-    const adminRole = system === "market" ? "admin2" : system === "food" ? "admin1" : "admin";
     const email = normalizeEmail(process.env.ADMIN_EMAIL);
     const password = process.env.ADMIN_PASSWORD;
 
@@ -138,8 +136,8 @@ async function seedAdmin() {
         throw new Error("ADMIN_EMAIL is not a valid email address");
     }
 
-    if (password.length < 12) {
-        throw new Error("ADMIN_PASSWORD must be at least 12 characters");
+    if (password.length < 8) {
+        throw new Error("ADMIN_PASSWORD must be at least 8 characters");
     }
 
     const existing = await pool.query(
@@ -148,7 +146,7 @@ async function seedAdmin() {
     );
 
     if (existing.rows.length > 0) {
-        if (existing.rows[0].role !== adminRole) {
+        if (existing.rows[0].role !== "admin") {
             log(`account ${email} already exists and is not an admin, leaving it unchanged`);
         } else {
             log("admin account already exists, nothing to do");
@@ -162,7 +160,7 @@ async function seedAdmin() {
     await pool.query(
         `
         INSERT INTO users (first_name, last_name, email, phone, password_hash, role)
-        VALUES ($1, $2, $3, $4, $5, '${adminRole}')
+        VALUES ($1, $2, $3, $4, $5, 'admin')
         `,
         [
             (process.env.ADMIN_FIRST_NAME || "Platform").trim(),
@@ -195,6 +193,8 @@ async function ensureAdminSupportSchema() {
     await pool.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url text;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS must_change_password boolean NOT NULL DEFAULT false;
+        -- Tokens issued before this moment are rejected (admin credential changes).
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS tokens_valid_after timestamptz;
 
         CREATE TABLE IF NOT EXISTS admin_settings (
             id smallint PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -229,8 +229,16 @@ async function ensureAdminSupportSchema() {
             action varchar(12) NOT NULL,
             resource text NOT NULL,
             status_code integer NOT NULL,
+            admin_role varchar(30),
             created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
+
+        ALTER TABLE admin_audit_logs
+            ADD COLUMN IF NOT EXISTS admin_role varchar(30);
+
+        -- What the request changed (secrets redacted); see adminAuditMiddleware.
+        ALTER TABLE admin_audit_logs
+            ADD COLUMN IF NOT EXISTS details jsonb;
 
         CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created
             ON admin_audit_logs (created_at DESC);
@@ -443,93 +451,105 @@ async function ensureDeletedAccountsSchema() {
 }
 
 async function ensureSuperAdminRoleSchema() {
-    // Preserve legacy values while allowing both isolated role families.
-    // Do not rewrite existing user roles during application startup.
+    // Older production data may contain the historical typo "super_admin1".
+    // Normalize that one known alias before role validation so login, route
+    // authorization, audit checks, and the single-super-admin index all use
+    // the canonical role. Refuse to merge two privileged accounts.
+    const privilegedCount = await pool.query(
+        "SELECT COUNT(*)::int AS count FROM public.users WHERE role IN ('super_admin', 'super_admin1')",
+    );
+    if (privilegedCount.rows[0].count > 1) {
+        throw new Error("Multiple super-admin accounts were found across canonical and legacy roles. Resolve duplicates before startup.");
+    }
+    await pool.query(
+        "UPDATE public.users SET role = 'super_admin' WHERE role = 'super_admin1'",
+    );
+
+    // Only canonical roles plus unrelated legacy values already in the
+    // database are retained in the role constraint.
+    const canonicalRoles = ["customer", "restaurant", "rider", "admin", "super_admin"];
+    const existingRoles = await pool.query(
+        "SELECT DISTINCT role FROM public.users WHERE role IS NOT NULL",
+    );
+    const legacyRoles = existingRoles.rows
+        .map((row) => String(row.role))
+        .filter((role) => !canonicalRoles.includes(role));
+    if (legacyRoles.length) {
+        log(`non-standard user roles found and kept so startup succeeds: ${legacyRoles.join(", ")}. Migrate these accounts to a standard role.`);
+    }
+    const allowedRoles = [...new Set([...canonicalRoles, ...legacyRoles])];
+    const roleList = allowedRoles
+        .map((role) => "'" + role.replace(/'/g, "''") + "'")
+        .join(", ");
+
+    const superAdminCount = await pool.query(
+        "SELECT COUNT(*)::int AS count FROM public.users WHERE role = 'super_admin'",
+    );
+    if (superAdminCount.rows[0].count > 1) {
+        throw new Error("Only one super_admin account is supported. Remove duplicate super-admin rows before startup.");
+    }
+
     await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_single_super_admin
+            ON public.users (role)
+            WHERE role = 'super_admin';
+
         ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
         ALTER TABLE public.users
             ADD CONSTRAINT users_role_check
-            CHECK (role IN (
-                'customer', 'restaurant', 'rider', 'admin', 'super_admin',
-                'customer1', 'restaurant1', 'rider1', 'admin1', 'super_admin1',
-                'customer2', 'market_owner2', 'rider2', 'admin2', 'super_admin2'
-            ));
+            CHECK (role IN (${roleList}));
     `);
 }
 
 async function seedSuperAdmin() {
-    // The legacy global seed account must not be created in either isolated
-    // deployment. Project-specific Super Admins are provisioned separately.
-    if (["food", "market"].includes(String(process.env.PLATFORM_SYSTEM || "").trim().toLowerCase())) {
-        log("project-specific Super Admin provisioning is managed separately; skipping legacy global seed.");
-        return;
-    }
-
     const email = normalizeEmail(process.env.SUPER_ADMIN_EMAIL);
     const password = process.env.SUPER_ADMIN_PASSWORD;
-
     if (!email && !password) return;
-    if (!email || !password) {
-        throw new Error("SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD must both be set to create the super admin.");
-    }
+    if (!email || !password) throw new Error("SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD must both be set to create the super admin.");
     if (!isValidEmail(email)) throw new Error("SUPER_ADMIN_EMAIL is not a valid email address.");
     if (password.length < 16) throw new Error("SUPER_ADMIN_PASSWORD must be at least 16 characters.");
+    const forcePasswordReset = String(process.env.SUPER_ADMIN_FORCE_PASSWORD_RESET || "").toLowerCase() === "true";
 
-    const existing = await pool.query(
-        "SELECT id, role FROM public.users WHERE email = $1 LIMIT 1",
-        [email]
-    );
-
-    if (existing.rows.length) {
-        if (existing.rows[0].role !== "super_admin") {
-            throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
-        }
-
-        const otherSuperAdmin = await pool.query(
-            "SELECT id FROM public.users WHERE role = 'super_admin' AND id <> $1 LIMIT 1",
-            [existing.rows[0].id]
-        );
-        if (otherSuperAdmin.rows.length) {
-            throw new Error("More than one super_admin account exists. Resolve the duplicate accounts before starting the service.");
-        }
-
-        log("super admin account already exists; leaving it unchanged.");
+    // If the super admin changed their email after the first start, the
+    // environment variables no longer match. That must not stop the server
+    // from booting (a crash loop in production); leave the account alone.
+    const currentSuperAdmin = await pool.query("SELECT id, email FROM public.users WHERE role = 'super_admin' LIMIT 1");
+    if (currentSuperAdmin.rows.length && normalizeEmail(currentSuperAdmin.rows[0].email) !== email) {
+        log("a super admin account already exists with a different email than SUPER_ADMIN_EMAIL; leaving it unchanged. Remove SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD from the environment, or set SUPER_ADMIN_EMAIL to the account's current email to use SUPER_ADMIN_FORCE_PASSWORD_RESET.");
         return;
     }
 
-    // The platform must have exactly one super admin. Never silently promote
-    // an existing account or create a second super-admin identity.
-    const existingSuperAdmin = await pool.query(
-        "SELECT id FROM public.users WHERE role = 'super_admin' LIMIT 1"
-    );
-    if (existingSuperAdmin.rows.length) {
-        throw new Error("A super_admin account already exists with a different email. No second super admin was created.");
+    const existing = await pool.query("SELECT id, role FROM public.users WHERE email = $1 LIMIT 1", [email]);
+    if (existing.rows.length) {
+        if (existing.rows[0].role !== "super_admin") throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
+        const other = await pool.query("SELECT id FROM public.users WHERE role = 'super_admin' AND id <> $1 LIMIT 1", [existing.rows[0].id]);
+        if (other.rows.length) throw new Error("More than one super_admin account exists. Resolve duplicate accounts before startup.");
+        if (forcePasswordReset) {
+            const hash = await bcrypt.hash(password, 12);
+            await pool.query(
+                `UPDATE public.users
+                 SET password_hash = $1, must_change_password = TRUE,
+                     password_changed_at = NULL, updated_at = CURRENT_TIMESTAMP
+                 WHERE id = $2 AND role = 'super_admin'`,
+                [hash, existing.rows[0].id],
+            );
+            log("super admin password rotated and marked for mandatory change. Remove SUPER_ADMIN_FORCE_PASSWORD_RESET from the environment now.");
+        } else {
+            log("super admin account already exists; leaving its credentials unchanged. Set SUPER_ADMIN_FORCE_PASSWORD_RESET=true for an intentional one-time rotation, then remove the flag.");
+        }
+        return;
     }
-
-    // Repair a potentially stale users.id sequence before inserting, so the
-    // initial super-admin ID is higher than every existing account ID.
-    await pool.query(
-        `SELECT setval(
-            pg_get_serial_sequence('public.users', 'id'),
-            GREATEST(COALESCE((SELECT MAX(id) FROM public.users), 1), 1),
-            TRUE
-        )`
-    );
-
-    const passwordHash = await bcrypt.hash(password, 12);
-    const result = await pool.query(
-        `INSERT INTO public.users (first_name, last_name, email, phone, password_hash, role, is_active)
-         VALUES ($1, $2, $3, $4, $5, 'super_admin', TRUE)
-         RETURNING id`,
-        [
-            String(process.env.SUPER_ADMIN_FIRST_NAME || "Platform").trim().slice(0, 100),
-            String(process.env.SUPER_ADMIN_LAST_NAME || "Super Admin").trim().slice(0, 100),
-            email,
-            process.env.SUPER_ADMIN_PHONE ? String(process.env.SUPER_ADMIN_PHONE).trim().slice(0, 30) : null,
-            passwordHash
-        ]
-    );
-    log(`super admin account created (user ID ${result.rows[0].id}). Remove SUPER_ADMIN_PASSWORD from the environment after successful creation.`);
+    const other = await pool.query("SELECT id FROM public.users WHERE role = 'super_admin' LIMIT 1");
+    if (other.rows.length) throw new Error("A super_admin account already exists with a different email. No second super admin was created.");
+    await pool.query(`SELECT setval(pg_get_serial_sequence('public.users', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM public.users), 1), 1), TRUE)`);
+    const hash = await bcrypt.hash(password, 12);
+    const result = await pool.query(`INSERT INTO public.users (first_name,last_name,email,phone,password_hash,role,is_active,must_change_password)
+      VALUES ($1,$2,$3,$4,$5,'super_admin',TRUE,TRUE) RETURNING id`, [
+      String(process.env.SUPER_ADMIN_FIRST_NAME || "Platform").trim().slice(0,100),
+      String(process.env.SUPER_ADMIN_LAST_NAME || "Super Admin").trim().slice(0,100),
+      email, process.env.SUPER_ADMIN_PHONE ? String(process.env.SUPER_ADMIN_PHONE).trim().slice(0,30) : null, hash
+    ]);
+    log(`super admin account created (user ID ${result.rows[0].id}). Remove SUPER_ADMIN_PASSWORD after successful creation.`);
 }
 
 async function initializeDatabase() {
@@ -554,4 +574,6 @@ module.exports = {
     initializeDatabase,
     prepareSchemaSql,
     resolveSchemaPath,
+    ensureSuperAdminRoleSchema,
+    seedSuperAdmin,
 };

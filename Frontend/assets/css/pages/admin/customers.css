@@ -820,11 +820,14 @@
 .admin-modal {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 10000;
+    isolation: isolate;
     display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .admin-modal.is-open {
@@ -834,11 +837,13 @@
 .admin-modal-backdrop {
     position: absolute;
     inset: 0;
+    z-index: 0;
     background: rgba(15, 23, 42, 0.55);
 }
 
-.admin-modal-dialog {
+ .admin-modal-dialog {
     position: relative;
+    z-index: 1;
     width: min(100%, 620px);
     max-height: calc(100vh - 40px);
     overflow-y: auto;
@@ -995,13 +1000,14 @@ body.modal-open {
 .admin-table-wrapper { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .admin-table-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .admin-search input, .admin-customer-form input, .admin-customer-form select, .admin-customer-form textarea { min-width: 0; max-width: 100%; box-sizing: border-box; }
-.admin-modal-backdrop { padding: 12px; overflow-y: auto; }
-.admin-modal-dialog { width: min(680px,100%); max-width: 100%; max-height: calc(100dvh - 24px); overflow-y: auto; box-sizing: border-box; }
+ .admin-modal-backdrop { padding: 0; overflow: hidden; }
+.admin-modal-dialog { width: min(680px,100%); max-width: 100%; max-height: calc(100dvh - 40px); overflow-y: auto; box-sizing: border-box; }
 .admin-form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 @media (max-width: 600px) {
  .admin-page-actions, .admin-card-header { flex-wrap: wrap; }
  .admin-search { width: 100%; max-width: 100%; }
- .admin-modal-backdrop { padding: 8px; }
+ .admin-modal-backdrop { padding: 0; }
+ .admin-modal { padding: 8px; }
  .admin-modal-dialog { max-height: calc(100dvh - 16px); }
  .admin-form-grid { grid-template-columns: minmax(0,1fr); }
  .admin-form-field-full { grid-column: auto; }
@@ -1009,201 +1015,81 @@ body.modal-open {
  .admin-modal-actions > button { width: 100%; }
 }
 
-/* Targeted fix: keep customer modals above the page and fully inside viewport.
-   The page loads ui-overrides.css after this file, so these selectors are scoped
-   and use !important only for modal geometry/layering to prevent clipping. */
-#addCustomerModal.admin-modal,
-#viewCustomerModal.admin-modal {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 5000 !important;
+ 
+/* =========================================================
+   CUSTOMER MODAL OVERLAY — CENTERED + VIEWPORT SAFE
+   ========================================================= */
+
+.admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
     display: none;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 16px !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    box-sizing: border-box !important;
-}
-#addCustomerModal.admin-modal.is-open,
-#viewCustomerModal.admin-modal.is-open {
-    display: flex !important;
-}
-#addCustomerModal .admin-modal-backdrop,
-#viewCustomerModal .admin-modal-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 0 !important;
-    background: rgba(15, 23, 42, .56) !important;
-}
-#addCustomerModal .admin-modal-dialog,
-#viewCustomerModal .admin-modal-dialog {
-    position: relative !important;
-    z-index: 1 !important;
-    flex: 0 0 auto !important;
-    width: min(680px, 100%) !important;
-    max-width: 100% !important;
-    max-height: calc(100dvh - 32px) !important;
-    margin: auto !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    overscroll-behavior: contain !important;
-    -webkit-overflow-scrolling: touch !important;
-    box-sizing: border-box !important;
-}
-#addCustomerModal .admin-modal-actions,
-#viewCustomerModal .admin-modal-actions {
-    position: sticky !important;
-    bottom: 0 !important;
-    z-index: 2 !important;
-    background: #fff !important;
-    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
-}
-@media (max-width: 600px) {
-    #addCustomerModal.admin-modal,
-    #viewCustomerModal.admin-modal {
-        align-items: flex-start !important;
-        padding: 8px !important;
-    }
-    #addCustomerModal .admin-modal-dialog,
-    #viewCustomerModal .admin-modal-dialog {
-        width: 100% !important;
-        max-height: calc(100dvh - 16px) !important;
-        border-radius: 14px !important;
-        padding: 20px 16px !important;
-    }
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    overflow: hidden;
+    isolation: isolate;
+    background: transparent;
 }
 
+.admin-modal.is-open {
+    display: flex;
+}
 
-/* Final modal layout: fixed viewport overlay, centered card, independently
-   scrollable content and a visible action row. Overrides earlier experiments. */
-#addCustomerModal.admin-modal,
-#viewCustomerModal.admin-modal {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 5000 !important;
+.admin-modal[aria-hidden="true"] {
     display: none;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 24px !important;
-    overflow: auto !important;
-    background: rgba(0, 21, 18, .56) !important;
-    box-sizing: border-box !important;
 }
-#addCustomerModal.admin-modal.is-open,
-#viewCustomerModal.admin-modal.is-open {
-    display: flex !important;
+
+.admin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: rgba(15, 23, 42, .58);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
-#addCustomerModal .admin-modal-backdrop,
-#viewCustomerModal .admin-modal-backdrop {
-    position: absolute !important;
-    inset: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background: transparent !important;
+
+.admin-modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(680px, 100%);
+    max-width: 100%;
+    max-height: calc(100dvh - 48px);
+    margin: auto;
+    padding: 28px 32px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(226, 232, 240, .9);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
 }
-#addCustomerModal .admin-modal-dialog,
-#viewCustomerModal .admin-modal-dialog {
-    position: relative !important;
-    z-index: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    width: min(720px, 100%) !important;
-    max-width: 720px !important;
-    max-height: calc(100dvh - 48px) !important;
-    margin: auto !important;
-    padding: 28px !important;
-    overflow: hidden !important;
-    border: 1px solid #e1e8e3 !important;
-    border-radius: 18px !important;
-    background: #fff !important;
-    box-shadow: 0 24px 70px rgba(0, 21, 18, .28) !important;
-    box-sizing: border-box !important;
+
+.admin-modal-dialog::-webkit-scrollbar {
+    width: 8px;
 }
-#addCustomerModal .admin-modal-header,
-#viewCustomerModal .admin-modal-header {
-    flex: 0 0 auto !important;
-    align-items: flex-start !important;
-    gap: 16px !important;
+
+.admin-modal-dialog::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: #cbd5e1;
 }
-#addCustomerModal .admin-customer-form,
-#viewCustomerModal .admin-customer-form {
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 0 !important;
-    overflow: auto !important;
-    overscroll-behavior: contain !important;
-    -webkit-overflow-scrolling: touch !important;
-}
-#addCustomerModal .admin-form-grid,
-#viewCustomerModal .admin-form-grid {
-    flex: 0 0 auto !important;
-    gap: 18px 16px !important;
-}
-#addCustomerModal .admin-modal-actions,
-#viewCustomerModal .admin-modal-actions {
-    position: sticky !important;
-    bottom: 0 !important;
-    flex: 0 0 auto !important;
-    margin-top: 16px !important;
-    padding: 16px 0 0 !important;
-    border-top: 1px solid #e5e7eb !important;
-    background: #fff !important;
-}
+
 @media (max-width: 640px) {
-    #addCustomerModal.admin-modal,
-    #viewCustomerModal.admin-modal {
-        align-items: flex-start !important;
-        padding: 10px !important;
+    .admin-modal {
+        padding: 10px;
     }
-    #addCustomerModal .admin-modal-dialog,
-    #viewCustomerModal .admin-modal-dialog {
-        width: 100% !important;
-        max-width: 100% !important;
-        max-height: calc(100dvh - 20px) !important;
-        margin: auto !important;
-        padding: 20px 16px !important;
-        border-radius: 14px !important;
-    }
-    #addCustomerModal .admin-modal-header,
-    #viewCustomerModal .admin-modal-header {
-        padding-bottom: 14px !important;
-        gap: 10px !important;
-    }
-    #addCustomerModal .admin-modal-header h2,
-    #viewCustomerModal .admin-modal-header h2 {
-        font-size: 21px !important;
-    }
-    #addCustomerModal .admin-customer-form,
-    #viewCustomerModal .admin-customer-form {
-        padding-top: 16px !important;
-    }
-    #addCustomerModal .admin-form-grid,
-    #viewCustomerModal .admin-form-grid {
-        grid-template-columns: minmax(0, 1fr) !important;
-        gap: 14px !important;
-    }
-    #addCustomerModal .admin-form-field-full,
-    #viewCustomerModal .admin-form-field-full {
-        grid-column: auto !important;
-    }
-    #addCustomerModal .admin-modal-actions,
-    #viewCustomerModal .admin-modal-actions {
-        flex-direction: column-reverse !important;
-        gap: 10px !important;
-        padding-top: 14px !important;
-    }
-    #addCustomerModal .admin-modal-actions > button,
-    #viewCustomerModal .admin-modal-actions > button {
-        width: 100% !important;
-        min-height: 44px !important;
+
+    .admin-modal-dialog {
+        width: 100%;
+        max-height: calc(100dvh - 20px);
+        padding: 22px 18px;
+        border-radius: 13px;
     }
 }
-@media (prefers-reduced-motion: reduce) {
-    #addCustomerModal *,
-    #viewCustomerModal * {
-        scroll-behavior: auto !important;
-        animation: none !important;
-        transition: none !important;
-    }
-}
+

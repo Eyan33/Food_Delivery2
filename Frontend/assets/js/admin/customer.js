@@ -876,8 +876,23 @@
             ),
         );
 
-        row.querySelector(".admin-permanent-delete-button")?.addEventListener("click", () => {
-          window.location.href = "deleted-accounts.html?type=customer&id=" + encodeURIComponent(customer.id);
+        row.querySelector(".admin-permanent-delete-button")?.addEventListener("click", async (event) => {
+          const button = event.currentTarget;
+          const reason = window.prompt("Enter the reason for permanently deleting this customer account:");
+          if (reason === null) return;
+          if (reason.trim().length < 3) { showMessage("A deletion reason of at least 3 characters is required.", "error"); return; }
+          if (!window.confirm("Permanently delete " + name + " (ID #" + customer.id + ")? This cannot be undone.")) return;
+          if (button.disabled) return;
+          button.disabled = true; button.textContent = "Deleting...";
+          try {
+            const result = await API.request("/admins/deleted-accounts/customer/" + encodeURIComponent(customer.id), {
+              method: "DELETE", authenticated: true, body: { reason: reason.trim() },
+            });
+            showMessage(result?.message || "Customer account deleted and archived.", "success");
+            await loadCustomers();
+          } catch (error) {
+            showMessage(error?.message || "Could not delete this customer account.", "error");
+          } finally { button.disabled = false; button.textContent = "Delete permanently"; }
         });
 
         tableBody.appendChild(

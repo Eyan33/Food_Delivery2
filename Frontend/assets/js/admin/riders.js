@@ -2187,12 +2187,29 @@ async function deactivateRider(riderId, options = {}) {
                     break;
 
                 case "delete":
-                    await deleteRider(riderId);
+                case "permanent-delete": {
+                    const rider = state.riders.find((item) => String(item.id) === String(riderId));
+                    const name = rider ? getFullName(rider) : `Rider #${riderId}`;
+                    const reason = window.prompt(`Enter the reason for permanently deleting ${name}:`);
+                    if (reason === null) break;
+                    if (reason.trim().length < 3) { showMessage("A deletion reason of at least 3 characters is required.", "error"); break; }
+                    if (!window.confirm(`Permanently delete ${name}? This cannot be undone.`)) break;
+                    const actionButton = event.target.closest("button");
+                    if (actionButton) {
+                        if (actionButton.disabled) break;
+                        actionButton.disabled = true; actionButton.textContent = "Deleting...";
+                    }
+                    try {
+                        const result = await authApi.request(`/admins/deleted-accounts/rider/${encodeURIComponent(riderId)}`, {
+                            method: "DELETE", authenticated: true, body: { reason: reason.trim() },
+                        });
+                        await reloadData();
+                        showMessage(result?.message || "Rider account deleted and archived.", "success");
+                    } finally {
+                        if (actionButton) { actionButton.disabled = false; actionButton.textContent = "Delete permanently"; }
+                    }
                     break;
-
-                case "permanent-delete":
-                    window.location.href = `deleted-accounts.html?type=rider&id=${encodeURIComponent(riderId)}`;
-                    break;
+                }
 
                 default:
                     console.warn("Unknown rider action:", action);

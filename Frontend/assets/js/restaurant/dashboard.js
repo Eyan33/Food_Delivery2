@@ -214,14 +214,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function checkRestaurantSession() {
         if (!api || !api.getToken || !api.getToken()) {
-            showMessage("Please log in with your market account to view this dashboard.");
+            showMessage("Please log in with your restaurant account to view this dashboard.");
             return false;
         }
 
         const user = api.getCurrentUser ? api.getCurrentUser() : null;
 
         if (user && user.role && user.role !== "restaurant") {
-            showMessage("This page is only available to market accounts.");
+            showMessage("This page is only available to restaurant accounts.");
             return false;
         }
 
@@ -243,30 +243,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const name = profileInfo.querySelector("strong");
             const subtitle = profileInfo.querySelector("span");
 
-            if (name) name.textContent = restaurant.name || "My Market";
-            if (subtitle) subtitle.textContent = "Market";
+            if (name) name.textContent = restaurant.name || "My Restaurant";
+            if (subtitle) subtitle.textContent = "Restaurant";
         }
 
         const avatar = document.querySelector(".restaurant-avatar");
-        if (avatar) avatar.textContent = getInitials(restaurant.name || "Market");
+        if (avatar) avatar.textContent = getInitials(restaurant.name || "Restaurant");
 
         const topbarAvatar = document.querySelector(".topbar-avatar");
-        if (topbarAvatar) topbarAvatar.textContent = getInitials(restaurant.name || "Market");
+        if (topbarAvatar) topbarAvatar.textContent = getInitials(restaurant.name || "Restaurant");
 
         const sidebarName = document.getElementById("restaurantSidebarName");
-        if (sidebarName) sidebarName.textContent = restaurant.name || "My Market";
+        if (sidebarName) sidebarName.textContent = restaurant.name || "My Restaurant";
         const topbarName = document.getElementById("restaurantTopbarName");
-        if (topbarName) topbarName.textContent = restaurant.name || "My Market";
+        if (topbarName) topbarName.textContent = restaurant.name || "My Restaurant";
 
         const welcomeHeading = document.getElementById("restaurantWelcomeHeading");
         if (welcomeHeading) {
             const hour = new Date().getHours();
             const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-            welcomeHeading.textContent = `${greeting}, ${restaurant.name || "your market"}`;
+            welcomeHeading.textContent = `${greeting}, ${restaurant.name || "your restaurant"}`;
         }
 
         const welcomeBack = document.getElementById("restaurantWelcomeBack");
-        if (welcomeBack) welcomeBack.textContent = `Welcome back, ${restaurant.name || "your market"}`;
+        if (welcomeBack) welcomeBack.textContent = `Welcome back, ${restaurant.name || "your restaurant"}`;
 
         updateRestaurantStatusUI();
     }
@@ -296,8 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (statusPanelTitle) {
             statusPanelTitle.textContent = restaurantIsOpen
-                ? "Your market is open"
-                : "Your market is closed";
+                ? "Your restaurant is open"
+                : "Your restaurant is closed";
         }
 
         if (statusPanelDescription) {
@@ -308,8 +308,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (toggleRestaurantStatus) {
             toggleRestaurantStatus.textContent = restaurantIsOpen
-                ? "Close Market"
-                : "Open Market";
+                ? "Close Restaurant"
+                : "Open Restaurant";
 
             toggleRestaurantStatus.classList.toggle("closed", !restaurantIsOpen);
             toggleRestaurantStatus.disabled = isSavingStatus;

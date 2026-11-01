@@ -120,6 +120,34 @@ function wrapQuery(target) {
 
 wrapQuery(pool);
 
+// Sanitize failures while acquiring a client as well as failures from
+// queries issued after acquisition. The "connect" event only fires after a
+// successful connection, so it cannot catch ECONNREFUSED during pool.connect().
+const originalConnect = pool.connect.bind(pool);
+pool.connect = function connect(...args) {
+    const callbackIndex = args.findIndex((argument) => typeof argument === "function");
+    if (callbackIndex >= 0) {
+        const originalCallback = args[callbackIndex];
+        args[callbackIndex] = function (error, ...rest) {
+            originalCallback(error ? sanitizeDatabaseError(error) : null, ...rest);
+        };
+    }
+
+    let result;
+    try {
+        result = originalConnect(...args);
+    } catch (error) {
+        throw sanitizeDatabaseError(error);
+    }
+
+    if (result && typeof result.then === "function") {
+        return result.catch((error) => {
+            throw sanitizeDatabaseError(error);
+        });
+    }
+    return result;
+};
+
 // Clients checked out with pool.connect() (used for transactions).
 pool.on("connect", (client) => {
     wrapQuery(client);

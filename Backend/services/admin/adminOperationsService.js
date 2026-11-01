@@ -8,12 +8,14 @@ const SETTINGS_FIELDS = {
     platformFees: ["deliveryFeePerKm"],
     delivery: ["maxDistance", "minimumOrder", "deliveryTime"],
     notifications: ["newOrderAlerts", "paymentNotifications", "restaurantRegistration", "riderRegistration", "systemAlerts"],
-    security: ["twoFactorRequired", "loginAlerts", "sessionTimeout"],
+    // twoFactorRequired and loginAlerts were removed: nothing enforced them,
+    // so the settings page implied protection that did not exist.
+    security: ["sessionTimeout"],
 };
 const BOOLEAN_SETTINGS = new Set([
     "mpesaEnabled", "cardEnabled", "cashEnabled", "newOrderAlerts",
     "paymentNotifications", "restaurantRegistration", "riderRegistration",
-    "systemAlerts", "twoFactorRequired", "loginAlerts",
+    "systemAlerts",
 ]);
 const NUMBER_SETTINGS = new Set([
     "transactionFee", "deliveryFeePerKm",
@@ -53,8 +55,15 @@ async function updateSettings(input, adminId) {
             if (BOOLEAN_SETTINGS.has(key) && typeof value !== "boolean") {
                 throw apiError(`${key} must be a boolean`);
             }
-            if (NUMBER_SETTINGS.has(key) && (!Number.isFinite(Number(value)) || Number(value) < 0)) {
-                throw apiError(`${key} must be a non-negative number`);
+            if (NUMBER_SETTINGS.has(key)) {
+                const numericValue = Number(value);
+                if (value === null || value === "" || typeof value === "boolean" ||
+                    !Number.isFinite(numericValue) || numericValue < 0) {
+                    throw apiError(`${key} must be a non-negative number`);
+                }
+                if (key === "transactionFee" && numericValue > 100) {
+                    throw apiError("transactionFee must be between 0 and 100 percent");
+                }
             }
             if (typeof value === "string" && value.length > 2000) {
                 throw apiError(`${key} is too long`);
@@ -70,7 +79,14 @@ async function updateSettings(input, adminId) {
         VALUES (1, $1::jsonb, $2, CURRENT_TIMESTAMP)
         ON CONFLICT (id) DO UPDATE
         SET settings = COALESCE(admin_settings.settings, '{}'::jsonb)
-                       || EXCLUDED.settings,
+                       || jsonb_build_object(
+                            'general', COALESCE(admin_settings.settings->'general', '{}'::jsonb) || COALESCE(EXCLUDED.settings->'general', '{}'::jsonb),
+                            'payments', COALESCE(admin_settings.settings->'payments', '{}'::jsonb) || COALESCE(EXCLUDED.settings->'payments', '{}'::jsonb),
+                            'platformFees', COALESCE(admin_settings.settings->'platformFees', '{}'::jsonb) || COALESCE(EXCLUDED.settings->'platformFees', '{}'::jsonb),
+                            'delivery', COALESCE(admin_settings.settings->'delivery', '{}'::jsonb) || COALESCE(EXCLUDED.settings->'delivery', '{}'::jsonb),
+                            'notifications', COALESCE(admin_settings.settings->'notifications', '{}'::jsonb) || COALESCE(EXCLUDED.settings->'notifications', '{}'::jsonb),
+                            'security', COALESCE(admin_settings.settings->'security', '{}'::jsonb) || COALESCE(EXCLUDED.settings->'security', '{}'::jsonb)
+                       ),
             updated_by = EXCLUDED.updated_by,
             updated_at = CURRENT_TIMESTAMP
         RETURNING settings, updated_at
@@ -196,11 +212,28 @@ async function markAllNotificationsRead() {
     return result.rowCount;
 }
 
-async function recordAuditLog({ adminId, method, resource, statusCode }) {
+async function recordAuditLog({ adminId, adminRole, method, resource, statusCode, details = null }) {
+    const result = await pool.query(
+        `INSERT INTO admin_audit_logs (admin_id, admin_role, action, resource, status_code, details)
+         VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+         RETURNING id`,
+        [
+            adminId || null,
+            adminRole || null,
+            method,
+            resource,
+            statusCode,
+            details ? JSON.stringify(details) : null,
+        ],
+    );
+    if (!result.rows[0]) throw new Error("Admin audit record was not created");
+    return result.rows[0].id;
+}
+
+async function updateAuditLogStatus(id, statusCode) {
     await pool.query(
-        `INSERT INTO admin_audit_logs (admin_id, action, resource, status_code)
-         VALUES ($1, $2, $3, $4)`,
-        [adminId || null, method, resource, statusCode],
+        "UPDATE admin_audit_logs SET status_code = $2 WHERE id = $1",
+        [id, statusCode],
     );
 }
 
@@ -211,7 +244,7 @@ async function getAuditLogs({ page = 1, limit = 25 } = {}) {
 
     const [rows, count] = await Promise.all([
         pool.query(
-            `SELECT l.id, l.action, l.resource, l.status_code, l.created_at,
+            `SELECT l.id, l.admin_role, l.action, l.resource, l.status_code, l.details, l.created_at,
                     CONCAT(u.first_name, ' ', u.last_name) AS admin_name, u.email AS admin_email
              FROM admin_audit_logs l
              LEFT JOIN users u ON u.id = l.admin_id
@@ -297,6 +330,7 @@ module.exports = {
     markNotificationRead,
     markAllNotificationsRead,
     recordAuditLog,
+    updateAuditLogStatus,
     getAuditLogs,
     getReviews,
     setReviewVisibility,

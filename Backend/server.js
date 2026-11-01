@@ -37,8 +37,6 @@ const PORT = Number(process.env.PORT) || 5000;
 const FRONTEND_DIR = path.resolve(__dirname, "..", "Frontend");
 const UPLOADS_DIR = path.resolve(__dirname, "uploads");
 
-const DEFAULT_PLATFORM_NAME = "Market Delivery";
-
 app.disable("x-powered-by");
 app.set("trust proxy", resolveTrustProxy());
 
@@ -200,6 +198,22 @@ const loginAccountLimiter = createRateLimiter({
     message: "Too many failed login attempts for this account. Please try again later.",
 });
 
+/*
+ * Per-account limit regardless of source address. The IP+email limiter above
+ * stops one client, but a spread-out guessing attack on a single account
+ * (for example the super admin) never repeats an IP. The cap is higher than
+ * the per-IP+email one so normal use is unaffected; the trade-off is that
+ * someone can briefly lock an account out by failing logins on purpose.
+ */
+const loginEmailLimiter = createRateLimiter({
+    windowMs: FIFTEEN_MINUTES,
+    max: Number(process.env.LOGIN_EMAIL_MAX || 30),
+    skipSuccessfulRequests: true,
+    keyGenerator: (req) =>
+        `email|${normalizeEmail(req.body && req.body.email).slice(0, 254)}`,
+    message: "Too many failed login attempts for this account. Please try again later.",
+});
+
 const registerLimiter = createRateLimiter({
     windowMs: 60 * 60 * 1000,
     max: Number(process.env.REGISTER_MAX || 20),
@@ -219,7 +233,7 @@ const passwordChangeLimiter = createRateLimiter({
 });
 
 app.use("/api", apiLimiter);
-app.post("/api/auth/login", loginIpLimiter, loginAccountLimiter);
+app.post("/api/auth/login", loginIpLimiter, loginAccountLimiter, loginEmailLimiter);
 app.post("/api/auth/register", registerLimiter);
 app.post("/api/auth/forgot-password", passwordResetRequestLimiter);
 app.patch("/api/auth/me/password", passwordChangeLimiter);
@@ -266,47 +280,34 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/admins", adminRoutes);
 app.use("/api/riders/notifications", riderNotificationRoutes);
 app.use("/api/riders", riderRoutes);
+app.get("/api/public/settings", async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT settings #>> '{general,platformName}' AS \"platformName\" FROM admin_settings WHERE id = 1 LIMIT 1",
+        );
+        const platformName = String(result.rows[0]?.platformName || "").trim();
+        res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+        return res.status(200).json({
+            success: true,
+            data: { platformName: platformName || "Food Delivery" },
+        });
+    } catch (error) {
+        console.error("Could not load public platform name:", error.message);
+        return res.status(500).json({ success: false, message: "Platform settings are temporarily unavailable." });
+    }
+});
 
-/*
- * Public platform branding + support contacts.
- * Used by the frontend to render the platform name everywhere without
- * requiring authentication. Falls back to "Market Delivery" when unset.
- */
 app.get("/api/public/support", async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT
-                settings #>> '{general,platformName}' AS "platformName",
-                settings #>> '{general,supportEmail}' AS "supportEmail",
-                settings #>> '{general,supportPhone}' AS "supportPhone"
-             FROM admin_settings
-             WHERE id = 1
-             LIMIT 1`,
+            "SELECT settings #>> '{general,supportEmail}' AS \"supportEmail\", settings #>> '{general,supportPhone}' AS \"supportPhone\" FROM admin_settings WHERE id = 1 LIMIT 1",
         );
         const settings = result.rows[0] || {};
-        const platformName =
-            String(settings.platformName || "").trim() || DEFAULT_PLATFORM_NAME;
-
         res.set("Cache-Control", "public, max-age=300");
-        return res.status(200).json({
-            success: true,
-            data: {
-                platformName,
-                supportEmail: settings.supportEmail || "",
-                supportPhone: settings.supportPhone || "",
-            },
-        });
+        return res.status(200).json({ success: true, data: { supportEmail: settings.supportEmail || "", supportPhone: settings.supportPhone || "" } });
     } catch (error) {
         console.error("Could not load public support contacts:", error.message);
-        return res.status(500).json({
-            success: false,
-            message: "Support contacts are temporarily unavailable.",
-            data: {
-                platformName: DEFAULT_PLATFORM_NAME,
-                supportEmail: "",
-                supportPhone: "",
-            },
-        });
+        return res.status(500).json({ success: false, message: "Support contacts are temporarily unavailable." });
     }
 });
 
@@ -331,7 +332,7 @@ app.use((req, res) => {
                 '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Page not found</title>' +
                     '<meta name="viewport" content="width=device-width, initial-scale=1"></head>' +
                     '<body style="font-family:sans-serif;text-align:center;padding:4rem 1rem">' +
-                    '<h1>Page not found</h1><p><a href="/">Back to Market Delivery</a></p></body></html>',
+                    '<h1>Page not found</h1><p><a href="/">Back to FoodDelivery</a></p></body></html>',
             );
     }
 
@@ -438,7 +439,7 @@ async function start() {
     }
 
     const server = app.listen(PORT, () => {
-        console.log(`Market Delivery listening on port ${PORT} (${isProduction ? "production" : "development"})`);
+        console.log(`FoodDelivery listening on port ${PORT} (${isProduction ? "production" : "development"})`);
     });
 
     // Longer than the platform proxy's idle timeout, which avoids sporadic 502s.

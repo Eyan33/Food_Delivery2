@@ -43,6 +43,7 @@
             window.clearTimeout(expiryTimer);
             expiryTimer = null;
         }
+        clearInactivityTimer();
     }
 
     function getTokenExpiryMs(token) {
@@ -107,14 +108,12 @@
     }
 
     function parseTimeoutMinutes(value) {
-        const normalized = String(value ?? "").trim().toLowerCase();
-        if (normalized === "never" || normalized === "0") return 0;
-        // Accept both the labels used by the Settings UI and numeric values
-        // returned by older saved settings.
-        if (["15", "15 minutes"].includes(normalized)) return 15;
-        if (["30", "30 minutes"].includes(normalized)) return 30;
-        if (["60", "1 hour", "1 hours"].includes(normalized)) return 60;
-        if (["240", "4 hours"].includes(normalized)) return 240;
+        if (value === "Never") return 0;
+        const match = String(value || "").match(/^\s*(15|30)\s*Minutes\s*$|^\s*(1)\s*Hour\s*$|^\s*(4)\s*Hours\s*$/i);
+        if (!match) return 30;
+        if (match[1]) return Number(match[1]);
+        if (match[2]) return 60;
+        if (match[3]) return 240;
         return 30;
     }
 
@@ -328,6 +327,24 @@
         scheduleSessionExpiryCheck();
     }
 
+    // Swap in a refreshed token (after an admin password change) in the same
+    // storage that already holds the session, so "remember me" is preserved.
+    function replaceToken(token) {
+        if (typeof token !== "string" || !token) return;
+
+        const storage = localStorage.getItem(tokenKey)
+            ? localStorage
+            : sessionStorage.getItem(tokenKey)
+                ? sessionStorage
+                : null;
+
+        if (!storage) return;
+
+        storage.setItem(tokenKey, token);
+        expiryRedirecting = false;
+        scheduleSessionExpiryCheck();
+    }
+
     function getCurrentUser() {
         const raw = localStorage.getItem(userKey) || sessionStorage.getItem(userKey);
 
@@ -414,9 +431,21 @@
     }
     loadAdminSessionTimeout();
 
+    // Logout must invalidate the browser session, not merely navigate to login.
+    // Capture the click so every admin portal logout link uses the same cleanup path.
+    document.addEventListener("click", (event) => {
+        const link = event.target.closest("a.logout-link");
+        if (!link) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        clearSession();
+        window.location.assign(link.href || loginPagePath);
+    }, true);
+
     window.FoodDeliveryAuthApi = {
         request,
         saveSession,
+        replaceToken,
         clearSession,
         getToken,
         getCurrentUser,

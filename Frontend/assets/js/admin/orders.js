@@ -12,10 +12,6 @@
     };
 
     let summaryRequestId = 0;
-    let ordersRequestId = 0;
-    let detailRequestId = 0;
-    let foodRequestId = 0;
-    let createOrderSubmitting = false;
     let modalOpen = false;
 
     const api = window.FoodDeliveryAuthApi;
@@ -1285,7 +1281,7 @@ if (!targetControls) {
             progressBar.style.width = `${percentage}%`;
         }
 
-        showMessage("Daily revenue target saved in this browser only; it is not synced to the platform database.", "error");
+        showMessage("Daily revenue target saved.");
     };
 
     saveButton.addEventListener("click", saveTarget);
@@ -1318,39 +1314,47 @@ if (targetInput && document.activeElement !== targetInput) {
     */
 
     async function loadOrders() {
-        // Ignore stale responses so a newer search/filter/page request wins.
-        const requestId = ++ordersRequestId;
+        if (state.loading) {
+            return;
+        }
+
+        state.loading = true;
 
         try {
-            const response = await ordersApi.getOrders();
-            if (requestId !== ordersRequestId) return;
-            if (response?.success === false) {
-                throw new Error(response.message || "The server could not load orders.");
-            }
+            const data =
+                await ordersApi.getOrders();
 
-            // Support both direct payloads and the standard { success, data } envelope.
-            const data = response?.data && typeof response.data === "object"
-                ? { ...response, ...response.data }
-                : response;
+            renderAdminHeader(
+                data,
+            );
 
-            if (!Array.isArray(data?.orders)) {
-                throw new Error("The orders API returned an unexpected response. Check the deployed API response.");
-            }
+            renderStatistics(
+                data.statistics || {},
+                data.pagination || {},
+            );
 
-            renderAdminHeader(data);
-            renderStatistics(data.statistics || {}, data.pagination || {});
-            renderOrders(data.orders);
-            renderPagination(data.pagination || {});
+            renderOrders(
+                data.orders || [],
+            );
 
+            renderPagination(
+                data.pagination || {},
+            );
+
+            await loadQuickOrderSummary();
         } catch (error) {
             console.error(
                 "Could not load orders:",
                 error,
             );
 
-            if (requestId === ordersRequestId) {
-                showMessage(error.message || "Could not load orders. Please try again.", "error");
-            }
+            showMessage(
+                error.message ||
+                    "Could not load orders. Please try again.",
+                "error",
+            );
+        } finally {
+            state.loading = false;
         }
     }
 
@@ -1455,7 +1459,6 @@ if (targetInput && document.activeElement !== targetInput) {
     }
 
     function closeDetailModal() {
-        detailRequestId += 1;
         const modal =
             document.getElementById(
                 "adminOrderDetailModal",
@@ -1481,7 +1484,6 @@ if (targetInput && document.activeElement !== targetInput) {
     async function openOrderDetail(
         orderId,
     ) {
-        const requestId = ++detailRequestId;
         const modal =
             getOrCreateDetailModal();
 
@@ -1525,10 +1527,13 @@ if (targetInput && document.activeElement !== targetInput) {
         `;
 
         try {
-            const data = await ordersApi.getOrder(orderId);
-            if (requestId !== detailRequestId || !modal.classList.contains("open")) return;
+            const data =
+                await ordersApi.getOrder(
+                    orderId,
+                );
 
-            const order = data?.order;
+            const order =
+                data.order;
 
             if (!order) {
                 throw new Error(
@@ -1541,7 +1546,6 @@ if (targetInput && document.activeElement !== targetInput) {
                 order,
             );
         } catch (error) {
-            if (requestId !== detailRequestId || !modal.classList.contains("open")) return;
             body.innerHTML = `
                 <div
                     style="
@@ -2165,22 +2169,17 @@ if (targetInput && document.activeElement !== targetInput) {
     */
 
     function ensureCreateOrderModal() {
-        let modal = document.getElementById("createOrderModal");
+        const modal =
+            document.getElementById(
+                "createOrderModal",
+            );
 
-        // Some deployed versions of orders.html do not include the modal shell.
-        // Build it here so the Create Order button remains functional.
+        
+
         if (!modal) {
-            modal = document.createElement("section");
-            modal.id = "createOrderModal";
-            modal.className = "admin-modal";
-            modal.setAttribute("aria-hidden", "true");
-            modal.innerHTML = `
-                <div class="admin-modal-overlay" data-create-overlay></div>
-                <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="adminCreateOrderTitle">
-                    <div class="admin-modal-content"></div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+            throw new Error(
+                "createOrderModal was not found in orders.html",
+            );
         }
 
         const content =
@@ -2801,7 +2800,6 @@ if (targetInput && document.activeElement !== targetInput) {
     }
 
     async function loadCreateOrderFoods() {
-        const requestId = ++foodRequestId;
         const restaurantId =
             document.getElementById(
                 "adminCreateRestaurant",
@@ -2815,16 +2813,13 @@ if (targetInput && document.activeElement !== targetInput) {
             return;
         }
 
-        try {
-            const data = await ordersApi.getOptions(restaurantId);
-            const currentRestaurantId = document.getElementById("adminCreateRestaurant")?.value || "";
-            if (requestId !== foodRequestId || currentRestaurantId !== restaurantId) return;
-            createOrderOptions.foods = Array.isArray(data?.foods) ? data.foods : [];
-        } catch (error) {
-            if (requestId !== foodRequestId) return;
-            createOrderOptions.foods = [];
-            showCreateOrderError(error.message || "Could not load food items for this restaurant.");
-        }
+        const data =
+            await ordersApi.getOptions(
+                restaurantId,
+            );
+
+        createOrderOptions.foods =
+            data?.foods || [];
 
         renderOrderItems();
 
@@ -3438,8 +3433,6 @@ if (targetInput && document.activeElement !== targetInput) {
         event,
     ) {
         event.preventDefault();
-        if (createOrderSubmitting) return;
-        createOrderSubmitting = true;
 
         hideCreateOrderError();
 
@@ -3498,8 +3491,12 @@ if (targetInput && document.activeElement !== targetInput) {
                     "Could not create the order.",
             );
         } finally {
-            createOrderSubmitting = false;
-            setLoading(button, false, "Creating...", "Create Order");
+            setLoading(
+                button,
+                false,
+                "Creating...",
+                "Create Order",
+            );
         }
     }
 

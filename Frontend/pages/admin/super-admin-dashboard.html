@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Super Admin Dashboard | FoodDelivery</title>
+
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
+</head>
+
+<body>
+    <!-- =========================
+         ADMIN SIDEBAR
+    ========================== -->
+
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-header">
+            <a href="super-admin-dashboard.html" class="admin-logo">Food<span>Delivery</span></a>
+            <button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button>
+        </div>
+        <div class="admin-profile">
+            <div class="admin-profile-avatar">A</div>
+            <div class="admin-profile-info">
+                <strong>Loading account…</strong>
+                <span>Loading role…</span>
+            </div>
+        </div>
+        <nav class="admin-navigation" aria-label="Super Admin navigation">
+            <a href="super-admin-dashboard.html" class="admin-nav-link active" aria-current="page">
+                <span class="admin-nav-icon">▣</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="orders.html" class="admin-nav-link">
+                <span class="admin-nav-icon">▤</span>
+                <span>Orders</span>
+            </a>
+            <a href="customers.html" class="admin-nav-link">
+                <span class="admin-nav-icon">♙</span>
+                <span>Customers</span>
+            </a>
+            <a href="restaurants.html" class="admin-nav-link">
+                <span class="admin-nav-icon">⌂</span>
+                <span>Restaurants</span>
+            </a>
+            <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
+            <a href="deleted-accounts.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
+            <a href="payments.html" class="admin-nav-link">
+                <span class="admin-nav-icon">▣</span>
+                <span>Payments</span>
+            </a>
+            <a href="reports.html" class="admin-nav-link">
+                <span class="admin-nav-icon">▤</span>
+                <span>Reports</span>
+            </a>
+            <a href="operations.html" class="admin-nav-link">
+                <span class="admin-nav-icon">⚙</span>
+                <span>Super Admin Operations</span>
+            </a>
+            <a href="settings.html" class="admin-nav-link">
+                <span class="admin-nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="admin-sidebar-bottom">
+            <a href="../../pages/auth/login.html" class="admin-nav-link logout-link">
+                <span class="admin-nav-icon">↪</span><span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- =========================
+         MAIN AREA
+    ========================== -->
+
+    <main class="admin-main">
+        <!-- =========================
+             TOPBAR
+        ========================== -->
+
+        <header class="admin-topbar">
+        <div class="admin-topbar-left">
+            <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
+            <div class="admin-page-heading">
+                <h1>Super Admin Dashboard</h1>
+                <p>Full platform control, oversight, and security.</p>
+            </div>
+        </div>
+        <div class="admin-topbar-right">
+            <button type="button" class="admin-notification-button" aria-label="Notifications">
+                <span>🔔</span>
+                <span class="admin-notification-badge" hidden></span>
+            </button>
+            <div class="admin-topbar-profile">
+                <div class="admin-topbar-avatar">A</div>
+                <div class="admin-topbar-profile-info">
+                    <strong>Loading account…</strong>
+                    <span>Loading role…</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+        <!-- =========================
+             CONTENT
+        ========================== -->
+
+        <section class="admin-content">
+            <!-- PAGE HEADER -->
+
+            <div class="admin-page-header">
+                <div>
+                    <h2>Dashboard Overview</h2>
+
+                    <p>Monitor your platform activity and performance.</p>
+                </div>
+
+                <div class="admin-date">
+                    <span id="dashboardDateLabel">Today</span>
+                    <strong id="dashboardCurrentDate">—</strong>
+                </div>
+            </div>
+
+            <!-- =========================
+                 STAT CARDS
+            ========================== -->
+
+            <div class="admin-stats-grid">
+                <!-- TOTAL ORDERS -->
+
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon orders">▤</div>
+
+                    <div class="admin-stat-content">
+                        <span> Total Orders </span>
+
+                        <strong>—</strong>
+
+                        <small></small>
+                    </div>
+                </div>
+
+                <!-- TOTAL REVENUE -->
+
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon revenue">KSh</div>
+
+                    <div class="admin-stat-content">
+                        <span> Total Revenue </span>
+
+                        <strong>—</strong>
+
+                        <small></small>
+                    </div>
+                </div>
+
+                <!-- CUSTOMERS -->
+
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon customers">◯</div>
+
+                    <div class="admin-stat-content">
+                        <span> Customers </span>
+
+                        <strong>—</strong>
+
+                        <small> <b>+156</b> new this month </small>
+                    </div>
+                </div>
+
+                <!-- RESTAURANTS -->
+
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon restaurants">▦</div>
+
+                    <div class="admin-stat-content">
+                        <span> Restaurants </span>
+
+                        <strong>—</strong>
+
+                        <small> <b>+8</b> new this month </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =========================
+                 MAIN DASHBOARD GRID
+            ========================== -->
+
+            <div class="admin-dashboard-grid">
+                <!-- =========================
+                     REVENUE OVERVIEW
+                ========================== -->
+
+                <div class="admin-content-card admin-revenue-card">
+                    <div class="admin-card-header">
+                        <div>
+                            <h3>Revenue Overview</h3>
+
+                            <p>Revenue performance over the past week.</p>
+                        </div>
+
+                        <select class="admin-period-select">
+                            <option>Last 7 Days</option>
+
+                            <option>Last 30 Days</option>
+
+                            <option>Last 3 Months</option>
+                        </select>
+                    </div>
+
+                    <!-- CHART -->
+
+                    <div class="admin-chart">
+                        <!-- Y AXIS -->
+
+                        <div class="admin-chart-y-axis">
+                            <span>—</span>
+
+                            <span>—</span>
+
+                            <span>—</span>
+
+                            <span>—</span>
+
+                            <span>— </span>
+                        </div>
+
+                        <!-- CHART AREA -->
+
+                        <div class="admin-chart-area">
+                            <div class="admin-chart-grid">
+                                <div class="admin-chart-grid-line"></div>
+
+                                <div class="admin-chart-grid-line"></div>
+
+                                <div class="admin-chart-grid-line"></div>
+
+                                <div class="admin-chart-grid-line"></div>
+
+                                <div class="admin-chart-grid-line"></div>
+                            </div>
+
+                            <div class="admin-chart-bars">
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Mon </span>
+                                </div>
+
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Tue </span>
+                                </div>
+
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Wed </span>
+                                </div>
+
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Thu </span>
+                                </div>
+
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Fri </span>
+                                </div>
+
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Sat </span>
+                                </div>
+
+                                <div class="admin-bar-column">
+                                    <div class="admin-bar" style="height: 0%"></div>
+
+                                    <span> Sun </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =========================
+                     ORDER STATUS
+                ========================== -->
+
+                <div class="admin-content-card">
+                    <div class="admin-card-header">
+                        <div>
+                            <h3>Order Status</h3>
+
+                            <p>Current order distribution.</p>
+                        </div>
+                    </div>
+
+                    <div class="admin-order-status">
+                        <!-- TOTAL -->
+
+                        <div class="admin-status-total">
+                            <strong>—</strong>
+
+                            <span> Total Orders </span>
+                        </div>
+
+                        <!-- STATUS ITEMS -->
+
+                        <div class="admin-status-list">
+                            <div class="admin-status-item">
+                                <div class="admin-status-label">
+                                    <span class="admin-status-dot pending"></span>
+
+                                    <span> Pending </span>
+                                </div>
+
+                                <strong>— </strong>
+                            </div>
+
+                            <div class="admin-status-item">
+                                <div class="admin-status-label">
+                                    <span class="admin-status-dot preparing"></span>
+
+                                    <span> Preparing </span>
+                                </div>
+
+                                <strong>— </strong>
+                            </div>
+
+                            <div class="admin-status-item">
+                                <div class="admin-status-label">
+                                    <span class="admin-status-dot delivery"></span>
+
+                                    <span> Out for Delivery </span>
+                                </div>
+
+                                <strong>— </strong>
+                            </div>
+
+                            <div class="admin-status-item">
+                                <div class="admin-status-label">
+                                    <span class="admin-status-dot completed"></span>
+
+                                    <span> Completed </span>
+                                </div>
+
+                                <strong>— </strong>
+                            </div>
+
+                            <div class="admin-status-item">
+                                <div class="admin-status-label">
+                                    <span class="admin-status-dot cancelled"></span>
+
+                                    <span> Cancelled </span>
+                                </div>
+
+                                <strong>— </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =========================
+                 SECOND GRID
+            ========================== -->
+
+            <div class="admin-bottom-grid">
+                <!-- =========================
+                     RECENT ORDERS
+                ========================== -->
+
+                <div class="admin-content-card">
+                    <div class="admin-card-header">
+                        <div>
+                            <h3>Recent Orders</h3>
+
+                            <p>Latest orders placed on the platform.</p>
+                        </div>
+
+                        <a href="orders.html" class="admin-card-link"> View All </a>
+                    </div>
+
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+
+                                    <th>Customer</th>
+
+                                    <th>Restaurant</th>
+
+                                    <th>Amount</th>
+
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+<tr><td colspan="6">Loading recent orders…</td></tr>
+</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div></div>
+
+            <!-- =========================
+                 QUICK ACTIONS
+            ========================== -->
+
+            <div class="admin-content-card admin-quick-actions-card">
+                <div class="admin-card-header">
+                    <div>
+                        <h3>Quick Actions</h3>
+
+                        <p>Super-admin tools and platform controls.</p>
+                    </div>
+                </div>
+
+                <div class="admin-quick-actions">
+                    <a href="orders.html" class="admin-action">
+                        <span class="admin-action-icon"> ▤ </span>
+
+                        <span>
+                            <strong> Manage Orders </strong>
+
+                            <small> View and manage orders </small>
+                        </span>
+                    </a>
+
+                    <a href="restaurants.html" class="admin-action">
+                        <span class="admin-action-icon"> ▦ </span>
+
+                        <span>
+                            <strong> Restaurants </strong>
+
+                            <small> Manage restaurant accounts </small>
+                        </span>
+                    </a>
+
+                    <a href="riders.html" class="admin-action">
+                        <span class="admin-action-icon"> ◈ </span>
+
+                        <span>
+                            <strong> Manage Riders </strong>
+
+                            <small> Manage delivery riders </small>
+                        </span>
+                    </a>
+
+                    <a href="operations.html" class="admin-action"><span class="admin-action-icon">⚙</span><span><strong>Admin Accounts & Audit</strong><small>Manage admins, platform fees and audit history</small></span></a>
+                    <a href="reports.html" class="admin-action">
+                        <span class="admin-action-icon"> ▥ </span>
+
+                        <span>
+                            <strong> Reports </strong>
+
+                            <small> View platform reports </small>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="../../assets/js/api-config.js"></script>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/auth/auth-api.js"></script>
+    <script src="../../assets/js/admin/admin-header.js" defer></script>
+    <script src="../../assets/js/admin/admin-notifications.js" defer></script>
+    <script src="../../assets/js/admin/dashboard.js"></script>
+    <script src="../../assets/js/admin/super-admin-dashboard.js"></script>
+</body>
+
+</html>

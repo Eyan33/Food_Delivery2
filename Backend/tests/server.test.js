@@ -14,6 +14,7 @@ process.env.DATABASE_URL = "postgresql://nobody:nopass@127.0.0.1:1/nodb";
 process.env.DB_CONNECTION_TIMEOUT_MS = "2000";
 process.env.DB_AUTO_INIT = "false";
 process.env.LOGIN_ACCOUNT_MAX = "3";
+process.env.JSON_BODY_LIMIT = "256kb";
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -58,12 +59,12 @@ test("GET / serves the frontend with security headers", async () => {
     const res = await fetch(`${base}/`);
     assert.equal(res.status, 200);
     assert.match(res.headers.get("content-type"), /text\/html/);
-    assert.match(await res.text(), /FoodDelivery/);
+    assert.match(await res.text(), /Food<span>Delivery<\/span>/);
 
     assert.match(res.headers.get("content-security-policy"), /script-src 'self'/);
     assert.match(
         res.headers.get("content-security-policy"),
-        /connect-src 'self' https:\/\/food-delivery-ljy7\.onrender\.com/,
+        /connect-src[^;]*https:\/\/food-delivery-ljy7\.onrender\.com/,
     );
     assert.match(res.headers.get("content-security-policy"), /frame-ancestors 'none'/);
     assert.equal(res.headers.get("x-content-type-options"), "nosniff");

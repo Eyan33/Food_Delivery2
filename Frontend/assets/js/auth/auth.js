@@ -14,20 +14,10 @@ function setLoginMessage(message, type) {
 function destinationForRole(role) {
     const destinations = {
         customer: "../customer/home.html",
-        customer1: "../customer/home.html",
-        customer2: "../customer/home.html",
         restaurant: "../restaurant/dashboard.html",
-        restaurant1: "../restaurant/dashboard.html",
-        market_owner2: "../restaurant/dashboard.html",
         rider: "../rider/dashboard.html",
-        rider1: "../rider/dashboard.html",
-        rider2: "../rider/dashboard.html",
         admin: "../admin/dashboard.html",
-        admin1: "../admin/dashboard.html",
-        admin2: "../admin/dashboard.html",
-        super_admin: "../admin/dashboard.html",
-        super_admin1: "../admin/dashboard.html",
-        super_admin2: "../admin/dashboard.html",
+        super_admin: "../admin/super-admin-dashboard.html",
     };
 
     return destinations[String(role || "").toLowerCase()] || "../../index.html";
@@ -51,9 +41,7 @@ loginForm.addEventListener("submit", async (event) => {
         window.FoodDeliveryAuthApi.saveSession(session, rememberMeInput.checked);
         setLoginMessage("Login successful. Redirecting…", "success");
         window.setTimeout(() => {
-            window.location.href = session.user.must_change_password
-                ? "change-first-password.html"
-                : destinationForRole(session.user.role);
+            window.location.href = session.user.must_change_password ? "change-first-password.html" : destinationForRole(session.user.role);
         }, 500);
     } catch (error) {
         setLoginMessage(error.message || "Unable to log in. Please try again.", "error");
@@ -85,7 +73,7 @@ async function initializeGoogleSignIn() {
                     window.FoodDeliveryAuthApi.saveSession(session, true);
                     if (session.newGoogleAccount === true) sessionStorage.setItem("foodDeliveryGooglePasswordSetupPending", "true");
                     setLoginMessage("Google sign-in successful. Redirecting…", "success");
-                    window.setTimeout(() => { window.location.href = destinationForRole(session.user.role); }, 400);
+                    window.setTimeout(() => { window.location.href = session.user.must_change_password ? "change-first-password.html" : destinationForRole(session.user.role); }, 400);
                 } catch (error) { setLoginMessage(error.message || "Google sign-in failed. Please try again.", "error"); }
             }
         });

@@ -6,12 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>market Orders | DeRon Market Deliveries</title>
+    <title>Restaurant Orders | FoodDelivery</title>
 
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/pages/restaurant/restaurant.css">
     <link rel="stylesheet" href="../../assets/css/pages/restaurant/orders.css">
-    <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
 </head>
 
 <body>
@@ -19,17 +18,17 @@
 
         <!-- SIDEBAR -->
         <aside class="restaurant-sidebar" id="restaurantSidebar">
-  <div class="restaurant-sidebar-header"><a href="dashboard.html" class="restaurant-logo">DeRon<span>Market Deliveries</span></a></div>
+  <div class="restaurant-sidebar-header"><a href="dashboard.html" class="restaurant-logo">Food<span>Delivery</span></a></div>
   <div class="restaurant-profile-mini">
     <div class="restaurant-avatar" id="restaurantSidebarAvatar">R</div>
-    <div class="restaurant-profile-info"><strong id="restaurantSidebarName">Loading market…</strong><span>market</span></div>
+    <div class="restaurant-profile-info"><strong id="restaurantSidebarName">Loading restaurant…</strong><span>Restaurant</span></div>
   </div>
   <nav class="restaurant-navigation">
     <p class="restaurant-nav-title">MAIN MENU</p>
     <a href="dashboard.html" class="restaurant-nav-link"><span class="nav-icon">▦</span><span>Dashboard</span></a>
 <a href="orders.html" class="restaurant-nav-link active" aria-current="page"><span class="nav-icon">▤</span><span>Orders</span><span class="nav-badge" hidden>0</span></a>
 <a href="earnings.html" class="restaurant-nav-link"><span class="nav-icon">▥</span><span>Earnings</span></a>
-<a href="restaurant-profile.html" class="restaurant-nav-link"><span class="nav-icon">◉</span><span>Market Profile</span></a>
+<a href="restaurant-profile.html" class="restaurant-nav-link"><span class="nav-icon">◉</span><span>Restaurant Profile</span></a>
 <a href="settings.html" class="restaurant-nav-link"><span class="nav-icon">⚙</span><span>Settings</span></a>
   </nav>
   <div class="restaurant-sidebar-bottom"><a href="../../pages/auth/login.html" class="restaurant-nav-link logout-link"><span class="nav-icon">↪</span><span>Logout</span></a></div>
@@ -49,14 +48,14 @@
   <div class="restaurant-topbar-right">
     <button type="button" class="restaurant-status" id="restaurantStatusButton" aria-live="polite">
       <span class="status-dot"></span>
-      <span class="status-text"><small>Market Status</small><strong id="restaurantStatusText">Loading…</strong></span>
+      <span class="status-text"><small>Restaurant Status</small><strong id="restaurantStatusText">Loading…</strong></span>
     </button>
     <button type="button" class="restaurant-notification-button" aria-label="Notifications">
       <span>♧</span><span class="notification-badge" hidden>0</span>
     </button>
     <button type="button" class="restaurant-topbar-profile" aria-label="Restaurant profile">
       <span class="topbar-avatar" id="restaurantTopbarAvatar">R</span>
-      <span class="topbar-profile-text"><strong id="restaurantTopbarName">Loading market…</strong><small>market</small></span>
+      <span class="topbar-profile-text"><strong id="restaurantTopbarName">Loading restaurant…</strong><small>Restaurant</small></span>
       <span class="profile-arrow">⌄</span>
     </button>
   </div>
@@ -272,7 +271,7 @@
                                    aria-busy="true">
                                 <tr>
                                     <td colspan="8" class="orders-loading">
-                                        Loading market orders...
+                                        Loading restaurant orders...
                                     </td>
                                 </tr>
                             </tbody>

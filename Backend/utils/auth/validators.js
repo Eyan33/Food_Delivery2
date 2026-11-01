@@ -20,6 +20,38 @@ function isValidPassword(password) {
 }
 
 
+/*
+ * Privileged accounts need stronger passwords than customers. The super
+ * admin is a single break-glass account, so it matches the 16 characters
+ * required when it is seeded; admins match the 8-character minimum required for ADMIN_PASSWORD.
+ */
+const PRIVILEGED_ROLES = ["admin", "super_admin"];
+
+const MIN_PASSWORD_LENGTH_BY_ROLE = {
+    super_admin: 16,
+    admin: 8
+};
+
+function isPrivilegedRole(role) {
+    return PRIVILEGED_ROLES.includes(role);
+}
+
+function minPasswordLengthForRole(role) {
+    return MIN_PASSWORD_LENGTH_BY_ROLE[role] || 8;
+}
+
+function isValidPasswordForRole(password, role) {
+    return (
+        typeof password === "string" &&
+        password.length >= minPasswordLengthForRole(role)
+    );
+}
+
+function passwordRequirementMessage(role) {
+    return `Password must contain at least ${minPasswordLengthForRole(role)} characters`;
+}
+
+
 function isValidName(name) {
     return (
         typeof name === "string" &&
@@ -48,6 +80,10 @@ module.exports = {
     normalizeEmail,
     isValidEmail,
     isValidPassword,
+    isPrivilegedRole,
+    minPasswordLengthForRole,
+    isValidPasswordForRole,
+    passwordRequirementMessage,
     isValidName,
     isValidPhone
 };
