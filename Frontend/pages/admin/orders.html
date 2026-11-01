@@ -118,10 +118,60 @@
         ========================== -->
 
 		<section class="admin-content">
-			<!-- The full order management UI is rendered by orders.js -->
-			<div id="ordersRoot"></div>
+            <div class="admin-content-header">
+              <div><h2>Order Management</h2><p>Track orders, review status, and manage daily performance.</p></div>
+              <div class="admin-header-actions">
+                <button type="button" class="admin-secondary-button">Export CSV</button>
+                <button type="button" class="admin-primary-button">+ Create Order</button>
+              </div>
+            </div>
+            <div class="admin-order-stats">
+              <article class="admin-order-stat-card"><div class="admin-order-stat-icon">▤</div><div class="admin-order-stat-content"><span>Total orders</span><strong>—</strong><small>All platform orders</small></div></article>
+              <article class="admin-order-stat-card"><div class="admin-order-stat-icon">◷</div><div class="admin-order-stat-content"><span>Pending</span><strong>—</strong><small>Awaiting processing</small></div></article>
+              <article class="admin-order-stat-card"><div class="admin-order-stat-icon">✓</div><div class="admin-order-stat-content"><span>Delivered</span><strong>—</strong><small>Successfully completed</small></div></article>
+              <article class="admin-order-stat-card"><div class="admin-order-stat-icon">×</div><div class="admin-order-stat-content"><span>Cancelled</span><strong>—</strong><small>Cancelled orders</small></div></article>
+            </div>
+            <div class="admin-orders-card">
+              <div class="admin-orders-card-header">
+                <div><h3>All Orders</h3><p>Loading orders…</p></div>
+                <div class="admin-orders-actions"><label class="admin-search-box"><span>⌕</span><input type="search" placeholder="Search orders or customers" aria-label="Search orders or customers"></label></div>
+              </div>
+              <div class="admin-order-filters" role="group" aria-label="Filter orders by status">
+                <button type="button" class="admin-filter-tab active">All Orders <span>0</span></button>
+                <button type="button" class="admin-filter-tab">Pending <span>0</span></button>
+                <button type="button" class="admin-filter-tab">Preparing <span>0</span></button>
+                <button type="button" class="admin-filter-tab">Out for Delivery <span>0</span></button>
+                <button type="button" class="admin-filter-tab">Delivered <span>0</span></button>
+                <button type="button" class="admin-filter-tab">Cancelled <span>0</span></button>
+              </div>
+              <div class="admin-orders-table-wrapper">
+                <table class="admin-orders-table">
+                  <thead><tr><th>Order</th><th>Customer</th><th>Market</th><th>Rider</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                  <tbody><tr><td colspan="8" style="text-align:center;padding:35px 20px">Loading orders…</td></tr></tbody>
+                </table>
+              </div>
+              <div class="admin-orders-footer"><p>Showing orders</p><div class="admin-pagination"></div></div>
+            </div>
+            <div class="admin-order-summary-grid">
+              <section class="admin-summary-card">
+                <div class="admin-summary-header"><h3>Today's Order Summary</h3><p>Current order status breakdown</p></div>
+                <div class="admin-summary-list">
+                  <div class="admin-summary-item"><span class="admin-summary-label"><i class="summary-dot pending-dot"></i>Pending</span><strong>0</strong></div>
+                  <div class="admin-summary-item"><span class="admin-summary-label"><i class="summary-dot preparing-dot"></i>Preparing</span><strong>0</strong></div>
+                  <div class="admin-summary-item"><span class="admin-summary-label"><i class="summary-dot delivery-dot"></i>Out for delivery</span><strong>0</strong></div>
+                  <div class="admin-summary-item"><span class="admin-summary-label"><i class="summary-dot delivered-dot"></i>Delivered</span><strong>0</strong></div>
+                </div>
+              </section>
+              <section class="admin-summary-card">
+                <div class="admin-summary-header"><h3>Daily Revenue</h3><p>Revenue performance against target</p></div>
+                <div class="admin-revenue-summary"><strong>KSh 0</strong></div>
+                <p class="admin-revenue-positive">0% from yesterday</p>
+                <div class="admin-revenue-bar"><span style="width:0%"></span></div>
+                <div class="admin-revenue-footer">Daily target: <strong>KSh 25,000</strong></div>
+              </section>
+            </div>
             <div id="adminMessage" class="admin-message" role="alert" aria-live="polite"></div>
-		</section>
+          </section>
 	</main>
 
 	<script src="../../assets/js/api-config.js"></script>
