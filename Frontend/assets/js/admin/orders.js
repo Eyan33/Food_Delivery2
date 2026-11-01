@@ -2165,17 +2165,22 @@ if (targetInput && document.activeElement !== targetInput) {
     */
 
     function ensureCreateOrderModal() {
-        const modal =
-            document.getElementById(
-                "createOrderModal",
-            );
+        let modal = document.getElementById("createOrderModal");
 
-        
-
+        // Some deployed versions of orders.html do not include the modal shell.
+        // Build it here so the Create Order button remains functional.
         if (!modal) {
-            throw new Error(
-                "createOrderModal was not found in orders.html",
-            );
+            modal = document.createElement("section");
+            modal.id = "createOrderModal";
+            modal.className = "admin-modal";
+            modal.setAttribute("aria-hidden", "true");
+            modal.innerHTML = `
+                <div class="admin-modal-overlay" data-create-overlay></div>
+                <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="adminCreateOrderTitle">
+                    <div class="admin-modal-content"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         const content =
