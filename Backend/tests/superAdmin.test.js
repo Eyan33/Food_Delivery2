@@ -269,6 +269,7 @@ test("admin and super-admin tokens expire sooner than other roles", () => {
 
     assert.equal(lifetime("admin"), 12 * 3600);
     assert.equal(lifetime("super_admin"), 12 * 3600);
+    assert.equal(lifetime("super_admin2"), 12 * 3600);
     assert.equal(lifetime("customer"), 7 * 24 * 3600);
     assert.equal(lifetime("restaurant"), 7 * 24 * 3600);
 });
