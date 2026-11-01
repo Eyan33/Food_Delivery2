@@ -1,84 +1,129 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Deleted Accounts | Market Delivery</title>
-<link rel="stylesheet" href="../../assets/css/style.css">
-<link rel="stylesheet" href="../../assets/css/admin.css">
-<style>
-:root{--da-ink:#102820;--da-muted:#53645d;--da-green:#063b28;--da-green-hover:#0b5138;--da-border:#dce5df;--da-surface:#fff;--da-page:#f2f5f2;--da-danger:#a12622}
-*{box-sizing:border-box}
-body{margin:0;background:var(--da-page);color:var(--da-ink);font:15px/1.5 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.admin-header{position:fixed;z-index:100;inset:0 auto 0 0;width:250px;background:#10382d;color:#fff;border-right:1px solid #214d3f;box-shadow:2px 0 12px #10282012}
-.admin-header-inner{height:100%;padding:0;display:flex;flex-direction:column;align-items:stretch;gap:0}
-.admin-logo{display:block;padding:22px 24px;font-size:20px;font-weight:800;color:#fff;text-decoration:none;white-space:nowrap;border-bottom:1px solid #ffffff1c}
-.admin-header nav{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:20px 12px}
-.admin-header nav a{display:flex;align-items:center;min-height:44px;padding:11px 14px;border-radius:9px;color:#f0f7f2;text-decoration:none;font-weight:600;transition:background .15s ease}
-.admin-header nav a:hover{background:#ffffff12;color:#fff}
-.admin-header nav a[aria-current=page]{background:#a9cb48;color:#102820;box-shadow:inset 3px 0 #e2f27a}
-.deleted-wrap{width:auto;max-width:none;margin:0 0 0 250px;padding:32px clamp(18px,2.5vw,38px) 44px}
-.deleted-wrap h1{font-size:clamp(27px,3vw,34px);line-height:1.2;margin:0 0 10px;letter-spacing:-.6px}
-.deleted-intro{color:var(--da-muted);margin:0 0 22px;max-width:900px}
-.deleted-card{background:var(--da-surface);border:1px solid var(--da-border);border-radius:14px;padding:24px;margin-bottom:18px;box-shadow:0 6px 22px #1028200a;min-width:0}
-.deleted-card h2{font-size:22px;line-height:1.3;margin:0 0 6px}
-.deleted-card>p{color:var(--da-muted);margin:0 0 16px}
-.deleted-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}
-.deleted-filters input,.deleted-filters select{font:inherit;min-height:48px;padding:11px 13px;border:1px solid #cbd6cf;border-radius:8px;background:#fff;color:var(--da-ink);min-width:0}
-.deleted-filters input:focus,.deleted-filters select:focus{outline:3px solid #0b513829;border-color:var(--da-green)}
-#deleteType{width:180px}#deleteId{width:230px}#deleteReason{flex:1;min-width:190px}
-#search{flex:1;min-width:220px}#type{width:180px}
-.deleted-filters button,.deleted-btn{font:inherit;font-weight:650;min-height:48px;padding:10px 15px;border:0;border-radius:8px;background:var(--da-green);color:#fff;cursor:pointer;white-space:nowrap}
-.deleted-filters button:hover,.deleted-btn:hover{background:var(--da-green-hover)}
-.deleted-filters button:disabled,.deleted-pagination button:disabled{opacity:.45;cursor:not-allowed}
-#permanentDelete{background:var(--da-danger)}#permanentDelete:hover{background:#851c19}
-.deleted-status{margin:12px 0;color:var(--da-muted);min-height:22px;overflow-wrap:anywhere}
-.deleted-status.error{color:#a12622}
-.deleted-table-wrap{overflow:auto;border:1px solid var(--da-border);border-radius:9px}
-table{width:100%;border-collapse:collapse;min-width:850px;background:#fff}
-th,td{text-align:left;padding:13px 12px;border-bottom:1px solid #e7ece8;vertical-align:top}
-th{background:#f3f7f4;color:#263d32;font-size:13px;text-transform:uppercase;letter-spacing:.035em}
-tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fbfdfb}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:480px;max-height:360px;overflow:auto;margin:8px 0 0;font-size:12px;background:#f5f7f5;padding:12px;border-radius:8px}
-.deleted-pagination{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:18px}
-.deleted-pagination button{font:inherit;padding:9px 13px;border:1px solid #cbd6cf;border-radius:8px;background:#fff;color:var(--da-ink);cursor:pointer}
-#pageLabel{color:var(--da-muted);font-weight:600}
-.deleted-empty{text-align:center;color:var(--da-muted);padding:28px}
-@media(max-width:800px){.admin-header{width:76px}.admin-logo{padding:20px 8px;text-align:center;font-size:0}.admin-logo:after{content:"MD";font-size:17px}.admin-header nav{padding:14px 7px}.admin-header nav a{font-size:0;justify-content:center;padding:10px 4px}.admin-header nav a:before{content:"•";font-size:20px}.deleted-wrap{margin-left:76px;padding:24px 14px 30px}.deleted-wrap h1{font-size:26px}.deleted-card{padding:17px}.deleted-filters>*{width:100%!important;flex:1 1 100%!important}.deleted-pagination{justify-content:center}.deleted-pagination button{flex:1}}
-</style>
-    <link rel="stylesheet" href="../../assets/css/pages/admin/ui-overrides.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deleted Accounts | Market Delivery Admin</title>
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="stylesheet" href="../../assets/css/pages/admin/dashboard.css" />
+  <link rel="stylesheet" href="../../assets/css/theme-palette.css" />
+  <link rel="stylesheet" href="../../assets/css/pages/admin/ui-overrides.css" />
+  <style>
+    .deleted-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0}
+    .deleted-toolbar input,.deleted-toolbar select{min-height:44px;padding:10px 12px;border:1px solid var(--border-color,#dce5df);border-radius:8px;background:#fff;color:inherit;font:inherit;min-width:0}
+    .deleted-toolbar input[type=search]{flex:1 1 260px}
+    .deleted-toolbar select{flex:0 1 190px}
+    .deleted-toolbar button,.deleted-action-button{min-height:44px;padding:10px 15px;border:0;border-radius:8px;background:var(--primary-color,#123b2e);color:#fff;font:inherit;font-weight:650;cursor:pointer}
+    .deleted-toolbar button:hover,.deleted-action-button:hover{filter:brightness(1.08)}
+    .deleted-toolbar button:disabled,.deleted-pagination button:disabled{opacity:.5;cursor:not-allowed}
+    .deleted-danger{background:#a12622!important}
+    .deleted-status{min-height:24px;margin:12px 0;color:var(--text-muted,#53645d);overflow-wrap:anywhere}
+    .deleted-status.error{color:#a12622}
+    .deleted-table-wrap{overflow:auto;border:1px solid var(--border-color,#dce5df);border-radius:10px;background:#fff}
+    .deleted-table{width:100%;min-width:850px;border-collapse:collapse}
+    .deleted-table th,.deleted-table td{text-align:left;padding:13px 12px;border-bottom:1px solid #e7ece8;vertical-align:top}
+    .deleted-table th{background:#f3f7f4;color:#263d32;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+    .deleted-table tbody tr:last-child td{border-bottom:0}
+    .deleted-table tbody tr:hover{background:#fbfdfb}
+    .deleted-table pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:480px;max-height:300px;overflow:auto;margin:8px 0 0;font-size:12px;background:#f5f7f5;padding:12px;border-radius:8px}
+    .deleted-empty{text-align:center;color:var(--text-muted,#53645d);padding:28px!important}
+    .deleted-pagination{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:18px}
+    .deleted-pagination button{padding:9px 13px;border:1px solid #cbd6cf;border-radius:8px;background:#fff;color:inherit;font:inherit;cursor:pointer}
+    #pageLabel{color:var(--text-muted,#53645d);font-weight:600}
+    .deleted-section-note{margin-top:0;color:var(--text-muted,#53645d)}
+    @media(max-width:600px){.deleted-toolbar>*{flex:1 1 100%!important;width:100%}.deleted-pagination{justify-content:space-between}.deleted-pagination button{flex:1}}
+  </style>
 </head>
 <body>
-<header class="admin-header"><div class="admin-header-inner"><a href="dashboard.html" class="admin-logo">Market Delivery</a><nav><a href="customers.html">Customers</a><a href="restaurants.html">Restaurants</a><a href="riders.html">Riders</a><a href="deleted-accounts.html" aria-current="page">Deleted Accounts</a></nav></div></header>
-<main class="deleted-wrap">
-<h1>Deleted Accounts Archive</h1>
-<p class="deleted-intro">Review archived account snapshots and permanently remove active accounts when necessary. Archived records are retained for audit and history.</p>
-<section class="deleted-card" style="margin-bottom:18px">
-<h2>Permanently delete an account</h2>
-<p>This is separate from deactivation. The account snapshot is archived in the database before deletion. If related order or payment records prevent deletion, the entire operation is rolled back.</p>
-<div class="deleted-filters">
-<select id="deleteType" aria-label="Account type to permanently delete"><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
-<input id="deleteId" type="number" min="1" step="1" placeholder="Account ID" aria-label="Account ID to permanently delete" required>
-<input id="deleteReason" type="text" maxlength="1000" placeholder="Reason (optional)" aria-label="Deletion reason">
-<button id="permanentDelete" type="button" style="background:#a12622">Permanently delete</button>
-</div>
-<div id="deleteStatus" class="deleted-status" role="status"></div>
-</section>
-<section class="deleted-card">
-<div class="deleted-filters">
-<input id="search" type="search" placeholder="Search name, email, or details" aria-label="Search archived accounts">
-<select id="type" aria-label="Account type"><option value="">All account types</option><option value="customer">Customer</option><option value="restaurant">Restaurant</option><option value="rider">Rider</option></select>
-<button id="apply" type="button">Search</button>
-<button id="export" type="button">Export Current Page CSV</button>
-</div>
-<div id="status" class="deleted-status" role="status">Loading archived accounts…</div>
-<div class="deleted-table-wrap"><table><thead><tr><th>Deleted at</th><th>Type</th><th>Original ID</th><th>Account</th><th>Deleted by</th><th>Reason</th><th>Snapshot</th></tr></thead><tbody id="rows"></tbody></table></div>
-<div class="deleted-pagination"><button id="prev" type="button">Previous</button><span id="pageLabel">Page 1</span><button id="next" type="button">Next</button></div>
-</section>
-</main>
-<script src="../../assets/js/api-config.js"></script>
-    <script src="../../assets/js/core/platform-name.js"></script>
-<script src="../../assets/js/main.js"></script>
-<script src="../../assets/js/auth/auth-api.js"></script>
-<script src="../../assets/js/admin/deleted-accounts.js"></script>
-</body></html>
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="admin-sidebar-header">
+      <a href="dashboard.html" class="admin-logo">Market Delivery</a>
+      <button type="button" id="adminCloseMenuButton" class="admin-close-menu-button" aria-label="Close menu">×</button>
+    </div>
+    <div class="admin-profile">
+      <div class="admin-profile-avatar">A</div>
+      <div class="admin-profile-info"><strong>Loading account…</strong><span>Loading role…</span></div>
+    </div>
+    <nav class="admin-navigation" aria-label="Admin navigation">
+      <a href="dashboard.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Dashboard</span></a>
+      <a href="orders.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Orders</span></a>
+      <a href="customers.html" class="admin-nav-link"><span class="admin-nav-icon">♙</span><span>Customers</span></a>
+      <a href="restaurants.html" class="admin-nav-link"><span class="admin-nav-icon">▦</span><span>Markets</span></a>
+      <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
+      <a href="reports.html" class="admin-nav-link"><span class="admin-nav-icon">▥</span><span>Reports</span></a>
+      <a href="operations.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Operations</span></a>
+      <a href="settings.html" class="admin-nav-link"><span class="admin-nav-icon">☷</span><span>Settings</span></a>
+      <a href="deleted-accounts.html" class="admin-nav-link active" aria-current="page"><span class="admin-nav-icon">⌫</span><span>Deleted Accounts</span></a>
+    </nav>
+  </aside>
+  <div class="admin-overlay" id="adminOverlay"></div>
+  <main class="admin-main">
+    <div class="admin-content">
+      <header class="admin-topbar">
+        <div class="admin-topbar-left">
+          <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
+          <div class="admin-page-heading"><h1>Deleted Accounts</h1><p>Review archived account snapshots and manage permanent account deletion.</p></div>
+        </div>
+      </header>
+
+      <section class="admin-card" aria-labelledby="permanentDeleteHeading">
+        <div class="admin-card-header">
+          <div>
+            <h2 id="permanentDeleteHeading">Permanently delete an account</h2>
+            <p class="deleted-section-note">The account snapshot is archived before deletion. If related records prevent deletion, the operation should be rolled back.</p>
+          </div>
+        </div>
+        <div class="deleted-toolbar">
+          <select id="deleteType" aria-label="Account type to permanently delete">
+            <option value="customer">Customer</option>
+            <option value="restaurant">Market</option>
+            <option value="rider">Rider</option>
+          </select>
+          <input id="deleteId" type="number" min="1" step="1" placeholder="Account ID" aria-label="Account ID to permanently delete" required />
+          <input id="deleteReason" type="text" maxlength="1000" placeholder="Reason (optional)" aria-label="Deletion reason" />
+          <button id="permanentDelete" class="deleted-danger" type="button">Permanently delete</button>
+        </div>
+        <div id="deleteStatus" class="deleted-status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section class="admin-card" aria-labelledby="archiveHeading">
+        <div class="admin-card-header">
+          <div>
+            <h2 id="archiveHeading">Archived accounts</h2>
+            <p class="deleted-section-note">Search, filter, inspect archived snapshots, or export the current page.</p>
+          </div>
+        </div>
+        <div class="deleted-toolbar">
+          <input id="search" type="search" placeholder="Search name, email, or details" aria-label="Search archived accounts" />
+          <select id="type" aria-label="Account type">
+            <option value="">All account types</option>
+            <option value="customer">Customer</option>
+            <option value="restaurant">Market</option>
+            <option value="rider">Rider</option>
+          </select>
+          <button id="apply" type="button">Search</button>
+          <button id="export" type="button">Export current page CSV</button>
+        </div>
+        <div id="status" class="deleted-status" role="status" aria-live="polite">Loading archived accounts…</div>
+        <div class="deleted-table-wrap">
+          <table class="deleted-table">
+            <thead><tr><th>Deleted at</th><th>Type</th><th>Original ID</th><th>Account</th><th>Deleted by</th><th>Reason</th><th>Snapshot</th></tr></thead>
+            <tbody id="rows"><tr><td class="deleted-empty" colspan="7">Loading archived accounts…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="deleted-pagination">
+          <button id="prev" type="button" disabled>Previous</button>
+          <span id="pageLabel">Page 1</span>
+          <button id="next" type="button" disabled>Next</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="../../assets/js/api-config.js"></script>
+  <script src="../../assets/js/core/platform-name.js"></script>
+  <script src="../../assets/js/auth/auth-api.js"></script>
+  <script src="../../assets/js/admin/admin-header.js" defer></script>
+  <script src="../../assets/js/main.js"></script>
+  <script src="../../assets/js/admin/deleted-accounts.js"></script>
+</body>
+</html>
