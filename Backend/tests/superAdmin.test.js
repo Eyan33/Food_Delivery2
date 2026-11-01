@@ -286,6 +286,7 @@ test("password length requirements depend on the role", () => {
     assert.equal(validators.isValidPasswordForRole("123456789", "admin"), true);
     assert.equal(validators.isValidPasswordForRole("123456789012", "super_admin"), false);
     assert.equal(validators.isValidPasswordForRole("1234567890123456", "super_admin"), true);
+    assert.equal(validators.isValidPasswordForRole("1234567890123456", "super_admin2"), true);
     assert.equal(validators.isValidPasswordForRole(undefined, "customer"), false);
 });
 
