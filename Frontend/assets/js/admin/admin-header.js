@@ -30,7 +30,7 @@
       const last = String(admin.last_name || admin.lastName || "").trim();
       const name = String(admin.name || admin.full_name || [first, last].filter(Boolean).join(" ") || admin.email || "Administrator").trim();
       const normalizedRole = String(admin.role || "admin").toLowerCase();
-      const isSuperAdmin = ["super_admin", "super_admin2"].includes(normalizedRole);
+      const isSuperAdmin = normalizedRole === "super_admin2";
       const role = isSuperAdmin
         ? "Super Admin"
         : normalizedRole === "admin"
