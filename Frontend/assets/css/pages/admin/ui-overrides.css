@@ -1,0 +1,49 @@
+/* Shared admin UI consistency layer — visual-only overrides */
+:root{
+  --admin-forest:#123b2e;
+  --admin-forest-deep:#0b2d22;
+  --admin-leaf:#a9cb48;
+  --admin-canvas:#f3f6f3;
+  --admin-card:#fff;
+  --admin-border:#dce5de;
+  --admin-text:#172b22;
+  --admin-muted:#64736a;
+  --admin-danger:#b42318;
+}
+html{scroll-behavior:smooth}
+body{background:var(--admin-canvas);color:var(--admin-text)}
+.admin-sidebar{background:var(--admin-forest)!important;border-right-color:#244e40!important;box-shadow:2px 0 18px #0b2d2210}
+.admin-sidebar-header{border-bottom-color:#ffffff20!important}
+.admin-logo span{color:var(--admin-leaf)!important}
+.admin-profile{background:#ffffff0d!important;border-color:#ffffff1c!important}
+.admin-profile-avatar{background:var(--admin-leaf)!important;color:var(--admin-forest-deep)!important}
+.admin-nav-link{color:#e2ece5!important;border-radius:9px!important}
+.admin-nav-link:hover{background:#ffffff18!important;color:#fff!important}
+.admin-nav-link.active{background:var(--admin-leaf)!important;color:var(--admin-forest-deep)!important;font-weight:700!important}
+.admin-nav-link.active:before{background:var(--admin-forest-deep)!important}
+.admin-nav-link.active .admin-nav-icon,.admin-nav-link:hover .admin-nav-icon{color:inherit!important}
+.admin-main{background:var(--admin-canvas)!important;min-width:0}
+.admin-content{width:100%;max-width:1700px;margin:0 auto;padding:28px clamp(16px,2.4vw,36px) 48px!important;min-width:0}
+h1,h2,h3,h4{color:var(--admin-text)}
+.admin-content h1,.page-header h1,.page-title{letter-spacing:-.035em;line-height:1.2}
+.card,.stat-card,.summary-card,.dashboard-card,.content-card,.table-container,.panel,.settings-card,.report-card,.metric-card,.section-card{
+  border-color:var(--admin-border);
+}
+button,input,select,textarea{font:inherit}
+button,a,input,select,textarea{transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #a9cb4880;outline-offset:2px}
+input,select,textarea{max-width:100%}
+table{max-width:100%;border-collapse:collapse}
+th{white-space:normal}
+td,th{overflow-wrap:anywhere}
+button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:768px){
+ .admin-main{margin-left:0!important}
+ .admin-content{padding:20px 14px 32px!important}
+ .admin-sidebar{box-shadow:8px 0 24px #0b2d2230}
+}
+@media(max-width:480px){
+ .admin-content{padding:16px 10px 26px!important}
+ .admin-content h1,.page-header h1,.page-title{font-size:1.55rem}
+ .table-container,.table-responsive,.table-wrapper{max-width:100%;overflow-x:auto}
+}
