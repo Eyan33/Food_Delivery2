@@ -62,7 +62,7 @@ const fakePool = {
         if (/COUNT\(\*\)::int AS count FROM public\.users WHERE role = 'super_admin'/.test(text)) {
             return { rows: [{ count: superAdminCount }], rowCount: 1 };
         }
-        if (/FROM public\.users WHERE role = 'super_admin' LIMIT 1/.test(text)) {
+        if (/FROM public\.users WHERE role = 'super_admin2' LIMIT 1/.test(text)) {
             return { rows: superAdminRows, rowCount: superAdminRows.length };
         }
         if (/INSERT INTO admin_audit_logs/.test(text)) {
