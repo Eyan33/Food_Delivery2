@@ -239,7 +239,7 @@ test("requireSuperAdmin: 401 without a user, 403 for admins, passes for the supe
     assert.equal(run(undefined).res.statusCode, 401);
     assert.equal(run({ role: "admin" }).res.statusCode, 403);
     assert.equal(run({ role: "customer" }).res.statusCode, 403);
-    assert.equal(run({ role: "super_admin" }).nextCalled, true);
+    assert.equal(run({ role: "super_admin" }).res.statusCode, 403);
     assert.equal(run({ role: "super_admin2" }).nextCalled, true);
 });
 
@@ -251,7 +251,7 @@ test("authorizeRoles: super admin inherits admin routes only", () => {
         return { res, nextCalled };
     };
 
-    assert.equal(run(["admin"], "super_admin").nextCalled, true);
+    assert.equal(run(["admin"], "super_admin").res.statusCode, 403);
     assert.equal(run(["admin"], "super_admin2").nextCalled, true);
     assert.equal(run(["customer"], "super_admin").res.statusCode, 403);
     assert.equal(run(["restaurant"], "super_admin").res.statusCode, 403);
@@ -396,14 +396,14 @@ test("updateAdmin only edits regular admins and ends their sessions on credentia
 
 test("startup does not crash when the super admin's email no longer matches the environment", async () => {
     superAdminRows = [{ id: 1, email: "renamed-owner@example.com" }];
-    process.env.SUPER_ADMIN_EMAIL = "original-owner@example.com";
-    process.env.SUPER_ADMIN_PASSWORD = "a-long-enough-password-1";
+    process.env.MARKET_SUPER_ADMIN_EMAIL = "original-owner@example.com";
+    process.env.MARKET_SUPER_ADMIN_PASSWORD = "a-long-enough-password-1";
 
     try {
         await quietly(() => seedSuperAdmin());
     } finally {
-        delete process.env.SUPER_ADMIN_EMAIL;
-        delete process.env.SUPER_ADMIN_PASSWORD;
+        delete process.env.MARKET_SUPER_ADMIN_EMAIL;
+        delete process.env.MARKET_SUPER_ADMIN_PASSWORD;
     }
 
     assert.equal(
