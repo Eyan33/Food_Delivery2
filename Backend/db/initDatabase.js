@@ -467,7 +467,7 @@ async function ensureSuperAdminRoleSchema() {
 
     // Only canonical roles plus unrelated legacy values already in the
     // database are retained in the role constraint.
-    const canonicalRoles = ["customer", "restaurant", "rider", "admin", "super_admin"];
+    const canonicalRoles = ["customer", "restaurant", "rider", "admin", "super_admin", "super_admin2"];
     const existingRoles = await pool.query(
         "SELECT DISTINCT role FROM public.users WHERE role IS NOT NULL",
     );
@@ -488,11 +488,20 @@ async function ensureSuperAdminRoleSchema() {
     if (superAdminCount.rows[0].count > 1) {
         throw new Error("Only one super_admin account is supported. Remove duplicate super-admin rows before startup.");
     }
+    const superAdmin2Count = await pool.query(
+        "SELECT COUNT(*)::int AS count FROM public.users WHERE role = 'super_admin2'",
+    );
+    if (superAdmin2Count.rows[0].count > 1) {
+        throw new Error("Only one super_admin2 account is supported for Market Delivery. Resolve duplicate accounts before startup.");
+    }
 
     await pool.query(`
         CREATE UNIQUE INDEX IF NOT EXISTS idx_users_single_super_admin
             ON public.users (role)
             WHERE role = 'super_admin';
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_single_super_admin2
+            ON public.users (role)
+            WHERE role = 'super_admin2';
 
         ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
         ALTER TABLE public.users
@@ -513,7 +522,7 @@ async function seedSuperAdmin() {
     // If the super admin changed their email after the first start, the
     // environment variables no longer match. That must not stop the server
     // from booting (a crash loop in production); leave the account alone.
-    const currentSuperAdmin = await pool.query("SELECT id, email FROM public.users WHERE role = 'super_admin' LIMIT 1");
+    const currentSuperAdmin = await pool.query("SELECT id, email FROM public.users WHERE role IN ('super_admin', 'super_admin2') LIMIT 1");
     if (currentSuperAdmin.rows.length && normalizeEmail(currentSuperAdmin.rows[0].email) !== email) {
         log("a super admin account already exists with a different email than SUPER_ADMIN_EMAIL; leaving it unchanged. Remove SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD from the environment, or set SUPER_ADMIN_EMAIL to the account's current email to use SUPER_ADMIN_FORCE_PASSWORD_RESET.");
         return;
@@ -521,8 +530,8 @@ async function seedSuperAdmin() {
 
     const existing = await pool.query("SELECT id, role FROM public.users WHERE email = $1 LIMIT 1", [email]);
     if (existing.rows.length) {
-        if (existing.rows[0].role !== "super_admin") throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
-        const other = await pool.query("SELECT id FROM public.users WHERE role = 'super_admin' AND id <> $1 LIMIT 1", [existing.rows[0].id]);
+        if (!["super_admin", "super_admin2"].includes(existing.rows[0].role)) throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
+        const other = await pool.query("SELECT id FROM public.users WHERE role IN ('super_admin', 'super_admin2') AND id <> $1 LIMIT 1", [existing.rows[0].id]);
         if (other.rows.length) throw new Error("More than one super_admin account exists. Resolve duplicate accounts before startup.");
         if (forcePasswordReset) {
             const hash = await bcrypt.hash(password, 12);
@@ -539,7 +548,7 @@ async function seedSuperAdmin() {
         }
         return;
     }
-    const other = await pool.query("SELECT id FROM public.users WHERE role = 'super_admin' LIMIT 1");
+    const other = await pool.query("SELECT id FROM public.users WHERE role IN ('super_admin', 'super_admin2') LIMIT 1");
     if (other.rows.length) throw new Error("A super_admin account already exists with a different email. No second super admin was created.");
     await pool.query(`SELECT setval(pg_get_serial_sequence('public.users', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM public.users), 1), 1), TRUE)`);
     const hash = await bcrypt.hash(password, 12);
