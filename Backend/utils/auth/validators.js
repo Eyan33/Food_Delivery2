@@ -25,10 +25,11 @@ function isValidPassword(password) {
  * admin is a single break-glass account, so it matches the 16 characters
  * required when it is seeded; admins match the 8-character minimum required for ADMIN_PASSWORD.
  */
-const PRIVILEGED_ROLES = ["admin", "super_admin"];
+const PRIVILEGED_ROLES = ["admin", "super_admin", "super_admin2"];
 
 const MIN_PASSWORD_LENGTH_BY_ROLE = {
     super_admin: 16,
+    super_admin2: 16,
     admin: 8
 };
 
