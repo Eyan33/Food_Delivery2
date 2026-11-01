@@ -258,7 +258,7 @@ async function getAdminById(id) {
         SELECT ${ADMIN_COLUMNS}
         FROM users
         WHERE id = $1
-          AND role IN ('admin', 'super_admin', 'super_admin2')
+          AND role IN ('admin', 'super_admin2')
         LIMIT 1
         `,
         [adminId]
@@ -1086,7 +1086,7 @@ async function getDashboard(
                         .trim(),
 
                 role:
-                    ["super_admin", "super_admin2"].includes(admin.role)
+                    admin.role === "super_admin2"
                         ? "Super Admin"
                         : "Administrator"
             },
