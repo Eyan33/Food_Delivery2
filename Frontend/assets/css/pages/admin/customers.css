@@ -1008,3 +1008,68 @@ body.modal-open {
  .admin-modal-actions { flex-direction: column-reverse; }
  .admin-modal-actions > button { width: 100%; }
 }
+
+/* Targeted fix: keep customer modals above the page and fully inside viewport.
+   The page loads ui-overrides.css after this file, so these selectors are scoped
+   and use !important only for modal geometry/layering to prevent clipping. */
+#addCustomerModal.admin-modal,
+#viewCustomerModal.admin-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 5000 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+#addCustomerModal.admin-modal.is-open,
+#viewCustomerModal.admin-modal.is-open {
+    display: flex !important;
+}
+#addCustomerModal .admin-modal-backdrop,
+#viewCustomerModal .admin-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    background: rgba(15, 23, 42, .56) !important;
+}
+#addCustomerModal .admin-modal-dialog,
+#viewCustomerModal .admin-modal-dialog {
+    position: relative !important;
+    z-index: 1 !important;
+    flex: 0 0 auto !important;
+    width: min(680px, 100%) !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - 32px) !important;
+    margin: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
+}
+#addCustomerModal .admin-modal-actions,
+#viewCustomerModal .admin-modal-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 2 !important;
+    background: #fff !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+}
+@media (max-width: 600px) {
+    #addCustomerModal.admin-modal,
+    #viewCustomerModal.admin-modal {
+        align-items: flex-start !important;
+        padding: 8px !important;
+    }
+    #addCustomerModal .admin-modal-dialog,
+    #viewCustomerModal .admin-modal-dialog {
+        width: 100% !important;
+        max-height: calc(100dvh - 16px) !important;
+        border-radius: 14px !important;
+        padding: 20px 16px !important;
+    }
+}
