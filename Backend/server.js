@@ -37,6 +37,8 @@ const PORT = Number(process.env.PORT) || 5000;
 const FRONTEND_DIR = path.resolve(__dirname, "..", "Frontend");
 const UPLOADS_DIR = path.resolve(__dirname, "uploads");
 
+const DEFAULT_PLATFORM_NAME = "Market Delivery";
+
 app.disable("x-powered-by");
 app.set("trust proxy", resolveTrustProxy());
 
@@ -264,17 +266,47 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/admins", adminRoutes);
 app.use("/api/riders/notifications", riderNotificationRoutes);
 app.use("/api/riders", riderRoutes);
+
+/*
+ * Public platform branding + support contacts.
+ * Used by the frontend to render the platform name everywhere without
+ * requiring authentication. Falls back to "Market Delivery" when unset.
+ */
 app.get("/api/public/support", async (req, res) => {
     try {
         const result = await pool.query(
-            "SELECT settings #>> '{general,supportEmail}' AS \"supportEmail\", settings #>> '{general,supportPhone}' AS \"supportPhone\" FROM admin_settings WHERE id = 1 LIMIT 1",
+            `SELECT
+                settings #>> '{general,platformName}' AS "platformName",
+                settings #>> '{general,supportEmail}' AS "supportEmail",
+                settings #>> '{general,supportPhone}' AS "supportPhone"
+             FROM admin_settings
+             WHERE id = 1
+             LIMIT 1`,
         );
         const settings = result.rows[0] || {};
+        const platformName =
+            String(settings.platformName || "").trim() || DEFAULT_PLATFORM_NAME;
+
         res.set("Cache-Control", "public, max-age=300");
-        return res.status(200).json({ success: true, data: { supportEmail: settings.supportEmail || "", supportPhone: settings.supportPhone || "" } });
+        return res.status(200).json({
+            success: true,
+            data: {
+                platformName,
+                supportEmail: settings.supportEmail || "",
+                supportPhone: settings.supportPhone || "",
+            },
+        });
     } catch (error) {
         console.error("Could not load public support contacts:", error.message);
-        return res.status(500).json({ success: false, message: "Support contacts are temporarily unavailable." });
+        return res.status(500).json({
+            success: false,
+            message: "Support contacts are temporarily unavailable.",
+            data: {
+                platformName: DEFAULT_PLATFORM_NAME,
+                supportEmail: "",
+                supportPhone: "",
+            },
+        });
     }
 });
 
@@ -299,7 +331,7 @@ app.use((req, res) => {
                 '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Page not found</title>' +
                     '<meta name="viewport" content="width=device-width, initial-scale=1"></head>' +
                     '<body style="font-family:sans-serif;text-align:center;padding:4rem 1rem">' +
-                    '<h1>Page not found</h1><p><a href="/">Back to FoodDelivery</a></p></body></html>',
+                    '<h1>Page not found</h1><p><a href="/">Back to Market Delivery</a></p></body></html>',
             );
     }
 
@@ -406,7 +438,7 @@ async function start() {
     }
 
     const server = app.listen(PORT, () => {
-        console.log(`FoodDelivery listening on port ${PORT} (${isProduction ? "production" : "development"})`);
+        console.log(`Market Delivery listening on port ${PORT} (${isProduction ? "production" : "development"})`);
     });
 
     // Longer than the platform proxy's idle timeout, which avoids sporadic 502s.
