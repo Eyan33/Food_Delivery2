@@ -8,7 +8,7 @@ module.exports = function requireSuperAdmin(req, res, next) {
         });
     }
 
-    if (!["super_admin", "super_admin2"].includes(req.user.role)) {
+    if (req.user.role !== "super_admin2") {
         return res.status(403).json({
             success: false,
             message: "This action is restricted to the super admin."
