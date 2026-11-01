@@ -443,17 +443,31 @@ async function ensureDeletedAccountsSchema() {
 }
 
 async function ensureSuperAdminRoleSchema() {
-    // Preserve legacy values while allowing both isolated role families.
-    // Do not rewrite existing user roles during application startup.
+    // Keep canonical roles and any legacy role values already present in the
+    // database. This avoids making startup fail when older deployments used
+    // a role value that is not in the current canonical list. Existing rows
+    // are not rewritten; new unknown role values remain restricted.
+    const canonicalRoles = [
+        "customer", "restaurant", "rider", "admin", "super_admin",
+        "customer1", "restaurant1", "rider1", "admin1", "super_admin1",
+        "customer2", "market_owner2", "rider2", "admin2", "super_admin2",
+    ];
+    const existingRoles = await pool.query(
+        "SELECT DISTINCT role FROM public.users WHERE role IS NOT NULL",
+    );
+    const allowedRoles = [...new Set([
+        ...canonicalRoles,
+        ...existingRoles.rows.map((row) => String(row.role)),
+    ])];
+    const roleList = allowedRoles
+        .map((role) => "'" + role.replace(/'/g, "''") + "'")
+        .join(", ");
+
     await pool.query(`
         ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
         ALTER TABLE public.users
             ADD CONSTRAINT users_role_check
-            CHECK (role IN (
-                'customer', 'restaurant', 'rider', 'admin', 'super_admin',
-                'customer1', 'restaurant1', 'rider1', 'admin1', 'super_admin1',
-                'customer2', 'market_owner2', 'rider2', 'admin2', 'super_admin2'
-            ));
+            CHECK (role IN (${roleList}));
     `);
 }
 
