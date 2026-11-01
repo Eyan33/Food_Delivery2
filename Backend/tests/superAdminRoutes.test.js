@@ -19,7 +19,7 @@ const jwt = require("jsonwebtoken");
 
 const users = new Map([
     [1, { id: 1, first_name: "Ada", last_name: "Admin", email: "admin@example.com", phone: null, role: "admin", is_active: true, must_change_password: false, tokens_valid_after: null }],
-    [2, { id: 2, first_name: "Sam", last_name: "Super", email: "super@example.com", phone: null, role: "super_admin", is_active: true, must_change_password: false, tokens_valid_after: null }],
+    [2, { id: 2, first_name: "Sam", last_name: "Super", email: "super@example.com", phone: null, role: "super_admin2", is_active: true, must_change_password: false, tokens_valid_after: null }],
     [3, { id: 3, first_name: "Food", last_name: "Super Admin", email: "food-super@example.com", phone: null, role: "super_admin", is_active: true, must_change_password: false, tokens_valid_after: null }],
 ]);
 
