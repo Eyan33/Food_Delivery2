@@ -511,54 +511,62 @@ async function ensureSuperAdminRoleSchema() {
 }
 
 async function seedSuperAdmin() {
-    const email = normalizeEmail(process.env.SUPER_ADMIN_EMAIL);
-    const password = process.env.SUPER_ADMIN_PASSWORD;
+    // This repository is Market Delivery. Its privileged account has a
+    // separate role and environment namespace from Food Delivery's super_admin.
+    const email = normalizeEmail(process.env.MARKET_SUPER_ADMIN_EMAIL);
+    const password = process.env.MARKET_SUPER_ADMIN_PASSWORD;
     if (!email && !password) return;
-    if (!email || !password) throw new Error("SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD must both be set to create the super admin.");
-    if (!isValidEmail(email)) throw new Error("SUPER_ADMIN_EMAIL is not a valid email address.");
-    if (password.length < 16) throw new Error("SUPER_ADMIN_PASSWORD must be at least 16 characters.");
-    const forcePasswordReset = String(process.env.SUPER_ADMIN_FORCE_PASSWORD_RESET || "").toLowerCase() === "true";
+    if (!email || !password) throw new Error("MARKET_SUPER_ADMIN_EMAIL and MARKET_SUPER_ADMIN_PASSWORD must both be set to create the Market Delivery super admin.");
+    if (!isValidEmail(email)) throw new Error("MARKET_SUPER_ADMIN_EMAIL is not a valid email address.");
+    if (password.length < 16) throw new Error("MARKET_SUPER_ADMIN_PASSWORD must be at least 16 characters.");
+    const forcePasswordReset = String(process.env.MARKET_SUPER_ADMIN_FORCE_PASSWORD_RESET || "").toLowerCase() === "true";
 
-    // If the super admin changed their email after the first start, the
-    // environment variables no longer match. That must not stop the server
-    // from booting (a crash loop in production); leave the account alone.
-    const currentSuperAdmin = await pool.query("SELECT id, email FROM public.users WHERE role IN ('super_admin', 'super_admin2') LIMIT 1");
-    if (currentSuperAdmin.rows.length && normalizeEmail(currentSuperAdmin.rows[0].email) !== email) {
-        log("a super admin account already exists with a different email than SUPER_ADMIN_EMAIL; leaving it unchanged. Remove SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD from the environment, or set SUPER_ADMIN_EMAIL to the account's current email to use SUPER_ADMIN_FORCE_PASSWORD_RESET.");
+    const currentMarketSuperAdmin = await pool.query(
+        "SELECT id, email FROM public.users WHERE role = 'super_admin2' LIMIT 1",
+    );
+    if (currentMarketSuperAdmin.rows.length && normalizeEmail(currentMarketSuperAdmin.rows[0].email) !== email) {
+        log("a Market Delivery super_admin2 account already exists with a different email than MARKET_SUPER_ADMIN_EMAIL; leaving it unchanged.");
         return;
     }
 
-    const existing = await pool.query("SELECT id, role FROM public.users WHERE email = $1 LIMIT 1", [email]);
+    const existing = await pool.query(
+        "SELECT id, role FROM public.users WHERE email = $1 LIMIT 1",
+        [email],
+    );
     if (existing.rows.length) {
-        if (!["super_admin", "super_admin2"].includes(existing.rows[0].role)) throw new Error("SUPER_ADMIN_EMAIL already belongs to a non-super-admin account. No role was changed.");
-        const other = await pool.query("SELECT id FROM public.users WHERE role IN ('super_admin', 'super_admin2') AND id <> $1 LIMIT 1", [existing.rows[0].id]);
-        if (other.rows.length) throw new Error("More than one super_admin account exists. Resolve duplicate accounts before startup.");
+        if (existing.rows[0].role !== "super_admin2") {
+            throw new Error("MARKET_SUPER_ADMIN_EMAIL already belongs to a different role. No role was changed.");
+        }
         if (forcePasswordReset) {
             const hash = await bcrypt.hash(password, 12);
             await pool.query(
                 `UPDATE public.users
                  SET password_hash = $1, must_change_password = TRUE,
                      password_changed_at = NULL, updated_at = CURRENT_TIMESTAMP
-                 WHERE id = $2 AND role = 'super_admin'`,
+                 WHERE id = $2 AND role = 'super_admin2'`,
                 [hash, existing.rows[0].id],
             );
-            log("super admin password rotated and marked for mandatory change. Remove SUPER_ADMIN_FORCE_PASSWORD_RESET from the environment now.");
+            log("Market Delivery super admin password rotated and marked for mandatory change. Remove MARKET_SUPER_ADMIN_FORCE_PASSWORD_RESET now.");
         } else {
-            log("super admin account already exists; leaving its credentials unchanged. Set SUPER_ADMIN_FORCE_PASSWORD_RESET=true for an intentional one-time rotation, then remove the flag.");
+            log("Market Delivery super_admin2 already exists; leaving its credentials unchanged.");
         }
         return;
     }
-    const other = await pool.query("SELECT id FROM public.users WHERE role IN ('super_admin', 'super_admin2') LIMIT 1");
-    if (other.rows.length) throw new Error("A super_admin account already exists with a different email. No second super admin was created.");
-    await pool.query(`SELECT setval(pg_get_serial_sequence('public.users', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM public.users), 1), 1), TRUE)`);
+
+    await pool.query("SELECT setval(pg_get_serial_sequence('public.users', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM public.users), 1), 1), TRUE)");
     const hash = await bcrypt.hash(password, 12);
-    const result = await pool.query(`INSERT INTO public.users (first_name,last_name,email,phone,password_hash,role,is_active,must_change_password)
-      VALUES ($1,$2,$3,$4,$5,'super_admin',TRUE,TRUE) RETURNING id`, [
-      String(process.env.SUPER_ADMIN_FIRST_NAME || "Platform").trim().slice(0,100),
-      String(process.env.SUPER_ADMIN_LAST_NAME || "Super Admin").trim().slice(0,100),
-      email, process.env.SUPER_ADMIN_PHONE ? String(process.env.SUPER_ADMIN_PHONE).trim().slice(0,30) : null, hash
-    ]);
-    log(`super admin account created (user ID ${result.rows[0].id}). Remove SUPER_ADMIN_PASSWORD after successful creation.`);
+    const result = await pool.query(
+        `INSERT INTO public.users (first_name,last_name,email,phone,password_hash,role,is_active,must_change_password)
+         VALUES ($1,$2,$3,$4,$5,'super_admin2',TRUE,TRUE) RETURNING id`,
+        [
+            String(process.env.MARKET_SUPER_ADMIN_FIRST_NAME || "Market").trim().slice(0, 100),
+            String(process.env.MARKET_SUPER_ADMIN_LAST_NAME || "Super Admin 2").trim().slice(0, 100),
+            email,
+            process.env.MARKET_SUPER_ADMIN_PHONE ? String(process.env.MARKET_SUPER_ADMIN_PHONE).trim().slice(0, 30) : null,
+            hash,
+        ],
+    );
+    log(`Market Delivery super_admin2 account created (user ID ${result.rows[0].id}). Remove MARKET_SUPER_ADMIN_PASSWORD after successful creation.`);
 }
 
 async function initializeDatabase() {
