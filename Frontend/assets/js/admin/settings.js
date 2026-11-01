@@ -539,9 +539,13 @@ function restoreSectionValues(section) {
         try {
             const result = await apiRequest("/admins/settings");
             const settings = result?.settings || result?.data?.settings || {};
+            const defaults = {
+                general: { platformName: "Market Delivery", currency: "KES", timezone: "Africa/Nairobi" },
+                security: { sessionTimeout: "30 Minutes" }
+            };
             preferenceSections.forEach((name) => {
                 const section = getField(`settings-${name}`);
-                const saved = settings[name] || {};
+                const saved = { ...(defaults[name] || {}), ...(settings[name] || {}) };
                 if (!section) return;
 
                 section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
