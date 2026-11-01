@@ -1321,25 +1321,24 @@ if (targetInput && document.activeElement !== targetInput) {
         state.loading = true;
 
         try {
-            const data =
-                await ordersApi.getOrders();
+            const response = await ordersApi.getOrders();
+            if (response?.success === false) {
+                throw new Error(response.message || "The server could not load orders.");
+            }
 
-            renderAdminHeader(
-                data,
-            );
+            // Support both direct payloads and the standard { success, data } envelope.
+            const data = response?.data && typeof response.data === "object"
+                ? { ...response, ...response.data }
+                : response;
 
-            renderStatistics(
-                data.statistics || {},
-                data.pagination || {},
-            );
+            if (!Array.isArray(data?.orders)) {
+                throw new Error("The orders API returned an unexpected response. Check the deployed API response.");
+            }
 
-            renderOrders(
-                data.orders || [],
-            );
-
-            renderPagination(
-                data.pagination || {},
-            );
+            renderAdminHeader(data);
+            renderStatistics(data.statistics || {}, data.pagination || {});
+            renderOrders(data.orders);
+            renderPagination(data.pagination || {});
 
             await loadQuickOrderSummary();
         } catch (error) {
