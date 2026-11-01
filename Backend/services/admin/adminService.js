@@ -499,7 +499,7 @@ async function deactivateAdmin(
                 `
                 SELECT id
                 FROM users
-                WHERE role IN ('admin', 'super_admin')
+                WHERE role IN ('admin', 'super_admin', 'super_admin2')
                   AND is_active = true
                 FOR UPDATE
                 `
