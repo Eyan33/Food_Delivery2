@@ -2,7 +2,8 @@
     const normalizeBaseUrl = (value) => String(value || "").trim().replace(/\/+$/, "");
     const hostname = window.location.hostname;
     const isLocalDevelopment = ["localhost", "127.0.0.1", "::1"].includes(hostname);
-    const productionApiBase = normalizeBaseUrl("https://food-delivery-tcwn.onrender.com/api");
+    const productionApiBase = normalizeBaseUrl("https://food-delivery2-c8m3.onrender.com/api");
+    window.MARKET_DELIVERY_PRODUCTION_URL = "https://food-delivery2-c8m3.onrender.com";
 
     const servedByExpress = window.location.port === "5000";
     const resolvedBase = normalizeBaseUrl(
