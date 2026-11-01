@@ -274,7 +274,7 @@ async function updateAdminAvatar(id, avatarUrl) {
     const adminId = validateAdminId(id);
     const result = await pool.query(
         `UPDATE users SET avatar_url = $1, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $2 AND role = '${ADMIN_ROLE}'
+         WHERE id = $2 AND role IN ('${ADMIN_ROLE}', '${SUPER_ADMIN_ROLE}')
          RETURNING ${ADMIN_COLUMNS}`,
         [avatarUrl, adminId]
     );

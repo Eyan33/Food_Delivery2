@@ -29,9 +29,12 @@ function authorizeRoles(...allowedRoles) {
         }
 
         const { admin, superAdmin } = getSystemRoles();
+        // A super admin is a superset of an admin: any route open to "admin"
+        // is also open to this system's super admin.
         const roleIsAllowed =
             allowedRoles.includes(req.user.role) ||
-            (allowedRoles.includes("admin") && req.user.role === admin) ||
+            (allowedRoles.includes("admin") &&
+                (req.user.role === admin || req.user.role === superAdmin)) ||
             (allowedRoles.includes("super_admin") && req.user.role === superAdmin);
 
         if (!roleIsAllowed) {

@@ -710,7 +710,8 @@
             return false;
         }
         const user = API.getCurrentUser();
-        if (!API.getToken() || !user || user.role !== "admin") {
+        // admin, admin1, admin2, super_admin, super_admin1 and super_admin2 may use this page.
+        if (!API.getToken() || !user || !/^(super_)?admin[12]?$/.test(String(user.role || "").toLowerCase())) {
             redirectToLogin();
             return false;
         }
