@@ -511,7 +511,7 @@ async function changeCurrentUserPassword(userId, currentPassword, newPassword) {
     await pool.query(
         `INSERT INTO admin_audit_logs (admin_id, admin_role, action, resource, status_code)
          SELECT id, role, 'PASSWORD', '/auth/me/password', 200
-         FROM users WHERE id = $1 AND role IN ('admin', 'super_admin')`,
+         FROM users WHERE id = $1 AND role IN ('admin', 'super_admin', 'super_admin2')`,
         [userId]
     );
 
@@ -646,7 +646,7 @@ async function loginWithGoogleCredential(credential) {
     let newGoogleAccount = false;
     if (existing.rows.length) {
         user = existing.rows[0];
-        if (user.role === "super_admin") {
+        if (["super_admin", "super_admin2"].includes(user.role)) {
             throw new Error("Super-admin accounts must sign in with their email and password.");
         }
         if (!user.is_active) throw new Error("This account has been deactivated");
