@@ -252,6 +252,7 @@ test("authorizeRoles: super admin inherits admin routes only", () => {
     };
 
     assert.equal(run(["admin"], "super_admin").nextCalled, true);
+    assert.equal(run(["admin"], "super_admin2").nextCalled, true);
     assert.equal(run(["customer"], "super_admin").res.statusCode, 403);
     assert.equal(run(["restaurant"], "super_admin").res.statusCode, 403);
     assert.equal(run(["admin"], "customer").res.statusCode, 403);
