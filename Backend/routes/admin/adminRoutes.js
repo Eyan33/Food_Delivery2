@@ -5,15 +5,15 @@ const deletedAccountsController = require("../../controllers/admin/deletedAccoun
 const permanentAccountDeletionController = require("../../controllers/admin/permanentAccountDeletionController");
 const authenticateToken = require("../../middleware/auth/authMiddleware");
 const authorizeRoles = require("../../middleware/auth/roleMiddleware");
-const auditAdminAction = require("../../middleware/adminAuditMiddleware");
 const requireSuperAdmin = require("../../middleware/auth/superAdminMiddleware");
 
 const router = express.Router();
 
+// authorizeRoles already attaches the admin audit hook for admin and super
+// admin requests; adding auditAdminAction here would write each entry twice.
 router.use(
     authenticateToken,
-    authorizeRoles("admin", "super_admin"),
-    auditAdminAction
+    authorizeRoles("admin", "super_admin")
 );
 
 // Static paths must come before /:id

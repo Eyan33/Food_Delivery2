@@ -29,9 +29,12 @@
       const first = String(admin.first_name || admin.firstName || "").trim();
       const last = String(admin.last_name || admin.lastName || "").trim();
       const name = String(admin.name || admin.full_name || [first, last].filter(Boolean).join(" ") || admin.email || "Administrator").trim();
-      const role = String(admin.role || "admin").toLowerCase() === "admin"
-        ? "Administrator"
-        : String(admin.role || "Administrator");
+      const roleKey = String(admin.role || "admin").toLowerCase();
+      const role = /^super_admin[12]?$/.test(roleKey)
+        ? "Super Administrator"
+        : /^admin[12]?$/.test(roleKey)
+          ? "Administrator"
+          : String(admin.role || "Administrator");
 
       nameNodes.forEach((node) => { node.textContent = name; });
       roleNodes.forEach((node) => { node.textContent = role; });

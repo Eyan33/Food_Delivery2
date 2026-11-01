@@ -229,7 +229,11 @@ function restoreSectionValues(section) {
         setFieldValue("adminPhone", admin.phone || "");
         setFieldValue(
             "adminRole",
-            admin.role === "admin" ? "Administrator" : admin.role || ""
+            /^super_admin[12]?$/.test(String(admin.role || "").toLowerCase())
+                ? "Super Administrator"
+                : /^admin[12]?$/.test(String(admin.role || "").toLowerCase())
+                    ? "Administrator"
+                    : admin.role || ""
         );
 
         const profileCard = document.querySelector(

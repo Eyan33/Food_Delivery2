@@ -9,5 +9,5 @@ $("createAdminForm").addEventListener("submit",async e=>{e.preventDefault();cons
 $("adminRows").addEventListener("click",async e=>{const b=e.target.closest("button[data-action]");if(!b)return;const action=b.dataset.action,id=b.dataset.id;if(!confirm((action==="deactivate"?"Deactivate":"Activate")+" admin account #"+id+"?"))return;b.disabled=true;try{if(action==="deactivate")await request("/admins/"+encodeURIComponent(id),{method:"DELETE"});else await request("/admins/"+encodeURIComponent(id)+"/activate",{method:"PATCH"});await loadAdmins();}catch(err){$("listStatus").textContent=err.message||"Admin account update failed.";}finally{b.disabled=false;}});
 $("refreshAdmins").addEventListener("click",loadAdmins);
 const stored=(()=>{try{return JSON.parse(localStorage.getItem("foodDeliveryUser")||"{}")}catch{return {}}})();if(stored.first_name)$("superAdminName").textContent=[stored.first_name,stored.last_name].filter(Boolean).join(" ");
-if(stored.role!=="super_admin"){document.querySelector(".super-admin-accounts").innerHTML="<h2>Access denied</h2><p>Only the super admin can access this page.</p>";}else loadAdmins();
+if(!/^super_admin[12]?$/.test(String(stored.role||"").toLowerCase())){document.querySelector(".super-admin-accounts").innerHTML="<h2>Access denied</h2><p>Only the super admin can access this page.</p>";}else loadAdmins();
 })();
