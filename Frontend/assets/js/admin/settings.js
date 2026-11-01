@@ -479,13 +479,60 @@ function restoreSectionValues(section) {
         const values = {};
         section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
             if (field.type === "file" || field.disabled) return;
+            const raw = field.value.trim();
             values[field.id] = field.type === "checkbox"
                 ? field.checked
                 : field.type === "number"
-                    ? Number(field.value)
-                    : field.value.trim();
+                    ? (raw === "" ? null : Number(raw))
+                    : raw;
         });
         return values;
+    }
+
+    function validatePreferenceSection(sectionName, values) {
+        const section = getField(`settings-${sectionName}`);
+        if (!section) return false;
+
+        const invalid = (id, message) => {
+            markInvalid(getField(id), true);
+            showMessage(message, "danger");
+            getField(id)?.focus();
+            return false;
+        };
+
+        section.querySelectorAll("input, textarea, select").forEach((field) => markInvalid(field, false));
+
+        if (sectionName === "general") {
+            if (!values.platformName || values.platformName.length > 120) {
+                return invalid("platformName", "Platform name is required and must be 120 characters or fewer.");
+            }
+            if (values.supportEmail && !isValidEmail(values.supportEmail)) {
+                return invalid("supportEmail", "Enter a valid support email address.");
+            }
+            if (!values.currency) return invalid("currency", "Choose a platform currency.");
+            if (!values.timezone) return invalid("timezone", "Choose a platform timezone.");
+        }
+
+        const numericFields = {
+            payments: { transactionFee: { min: 0, max: 100, label: "Transaction fee" } },
+            delivery: {
+                maxDistance: { min: 1, label: "Maximum delivery distance" },
+                minimumOrder: { min: 0, label: "Minimum order amount" },
+                deliveryTime: { min: 1, label: "Estimated delivery time" }
+            }
+        };
+        for (const [id, rule] of Object.entries(numericFields[sectionName] || {})) {
+            const value = values[id];
+            if (value === null || !Number.isFinite(value) || value < rule.min || (rule.max !== undefined && value > rule.max)) {
+                return invalid(id, `${rule.label} must be ${rule.max !== undefined ? `between ${rule.min} and ${rule.max}` : `at least ${rule.min}`}.`);
+            }
+        }
+
+        if (sectionName === "security" && !["15 Minutes", "30 Minutes", "1 Hour", "4 Hours", "Never"].includes(values.sessionTimeout)) {
+            return invalid("sessionTimeout", "Choose a valid session timeout.");
+        }
+
+        return true;
     }
 
     async function loadPlatformSettings() {
@@ -496,19 +543,34 @@ function restoreSectionValues(section) {
                 const section = getField(`settings-${name}`);
                 const saved = settings[name] || {};
                 if (!section) return;
-                Object.entries(saved).forEach(([id, value]) => {
-                    const field = getField(id);
-                    if (!field) return;
-                    if (field.type === "checkbox") field.checked = Boolean(value);
-                    else field.value = value;
+
+                section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
+                    if (field.type === "file" || field.disabled) return;
+                    if (Object.prototype.hasOwnProperty.call(saved, field.id)) {
+                        const value = saved[field.id];
+                        if (field.type === "checkbox") {
+                            field.checked = value === true || value === "true";
+                        } else if (value !== null && value !== undefined) {
+                            field.value = String(value);
+                        }
+                    }
+                    // Remove stale "Loading saved setting…" placeholders from selects.
+                    if (field.tagName === "SELECT" && field.value === "" && field.options.length) {
+                        const placeholder = field.options[0];
+                        if (placeholder.disabled && /loading saved setting/i.test(placeholder.textContent)) {
+                            placeholder.hidden = true;
+                        }
+                    }
                 });
+
                 if (name === "general") {
                     applyPlatformName(saved.platformName || getField("platformName")?.value || "");
                 }
                 rememberSectionValues(section);
             });
         } catch (error) {
-            showMessage(getErrorMessage(error, "Could not load platform settings."), "danger");
+            console.error("Failed to load platform settings:", error);
+            showMessage(getErrorMessage(error, "Could not load platform settings. Check your connection and try again."), "danger");
         }
     }
 
@@ -520,16 +582,15 @@ function restoreSectionValues(section) {
         button.textContent = "Saving…";
         try {
             const values = readSection(section);
+            if (!validatePreferenceSection(sectionName, values)) return;
+
             const result = await apiRequest("/admins/settings", {
                 method: "PUT",
                 body: { [sectionName]: values }
             });
+            const persistedSettings = result?.settings || result?.data?.settings || {};
             if (sectionName === "general") {
-                // Confirm the server returned persisted data before showing the
-                // updated platform name as applied. Empty value → default.
-                const savedName = result?.settings?.general?.platformName
-                    || values.platformName
-                    || "";
+                const savedName = persistedSettings?.general?.platformName ?? values.platformName;
                 applyPlatformName(savedName);
             }
             rememberSectionValues(section);
