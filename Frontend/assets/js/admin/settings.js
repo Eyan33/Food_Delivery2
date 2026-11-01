@@ -555,7 +555,26 @@ function restoreSectionValues(section) {
                         if (field.type === "checkbox") {
                             field.checked = value === true || value === "true";
                         } else if (value !== null && value !== undefined) {
-                            field.value = String(value);
+                            let normalizedValue = String(value);
+                            if (field.id === "currency") {
+                                const currencyAliases = {
+                                    "US Dollar (USD)": "USD",
+                                    "Euro (EUR)": "EUR",
+                                    "Kenyan Shilling (KSh)": "KES"
+                                };
+                                normalizedValue = currencyAliases[normalizedValue] || normalizedValue;
+                            }
+                            if (field.id === "sessionTimeout") {
+                                const timeoutAliases = {
+                                    "15": "15 Minutes",
+                                    "30": "30 Minutes",
+                                    "60": "1 Hour",
+                                    "240": "4 Hours",
+                                    "0": "Never"
+                                };
+                                normalizedValue = timeoutAliases[normalizedValue] || normalizedValue;
+                            }
+                            field.value = normalizedValue;
                         }
                     }
                     // Remove stale "Loading saved setting…" placeholders from selects.
