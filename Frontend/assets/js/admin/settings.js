@@ -479,36 +479,121 @@ function restoreSectionValues(section) {
         const values = {};
         section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
             if (field.type === "file" || field.disabled) return;
+            const raw = field.value.trim();
             values[field.id] = field.type === "checkbox"
                 ? field.checked
                 : field.type === "number"
-                    ? Number(field.value)
-                    : field.value.trim();
+                    ? (raw === "" ? null : Number(raw))
+                    : raw;
         });
         return values;
+    }
+
+    function validatePreferenceSection(sectionName, values) {
+        const section = getField(`settings-${sectionName}`);
+        if (!section) return false;
+
+        const invalid = (id, message) => {
+            markInvalid(getField(id), true);
+            showMessage(message, "danger");
+            getField(id)?.focus();
+            return false;
+        };
+
+        section.querySelectorAll("input, textarea, select").forEach((field) => markInvalid(field, false));
+
+        if (sectionName === "general") {
+            if (!values.platformName || values.platformName.length > 120) {
+                return invalid("platformName", "Platform name is required and must be 120 characters or fewer.");
+            }
+            if (values.supportEmail && !isValidEmail(values.supportEmail)) {
+                return invalid("supportEmail", "Enter a valid support email address.");
+            }
+            if (!values.currency) return invalid("currency", "Choose a platform currency.");
+            if (!values.timezone) return invalid("timezone", "Choose a platform timezone.");
+        }
+
+        const numericFields = {
+            payments: { transactionFee: { min: 0, max: 100, label: "Transaction fee" } },
+            delivery: {
+                maxDistance: { min: 1, label: "Maximum delivery distance" },
+                minimumOrder: { min: 0, label: "Minimum order amount" },
+                deliveryTime: { min: 1, label: "Estimated delivery time" }
+            }
+        };
+        for (const [id, rule] of Object.entries(numericFields[sectionName] || {})) {
+            const value = values[id];
+            if (value === null || !Number.isFinite(value) || value < rule.min || (rule.max !== undefined && value > rule.max)) {
+                return invalid(id, `${rule.label} must be ${rule.max !== undefined ? `between ${rule.min} and ${rule.max}` : `at least ${rule.min}`}.`);
+            }
+        }
+
+        if (sectionName === "security" && !["15 Minutes", "30 Minutes", "1 Hour", "4 Hours", "Never"].includes(values.sessionTimeout)) {
+            return invalid("sessionTimeout", "Choose a valid session timeout.");
+        }
+
+        return true;
     }
 
     async function loadPlatformSettings() {
         try {
             const result = await apiRequest("/admins/settings");
             const settings = result?.settings || result?.data?.settings || {};
+            const defaults = {
+                general: { platformName: "Market Delivery", currency: "KES", timezone: "Africa/Nairobi" },
+                security: { sessionTimeout: "30 Minutes" }
+            };
             preferenceSections.forEach((name) => {
                 const section = getField(`settings-${name}`);
-                const saved = settings[name] || {};
+                const saved = { ...(defaults[name] || {}), ...(settings[name] || {}) };
                 if (!section) return;
-                Object.entries(saved).forEach(([id, value]) => {
-                    const field = getField(id);
-                    if (!field) return;
-                    if (field.type === "checkbox") field.checked = Boolean(value);
-                    else field.value = value;
+
+                section.querySelectorAll("input[id], textarea[id], select[id]").forEach((field) => {
+                    if (field.type === "file" || field.disabled) return;
+                    if (Object.prototype.hasOwnProperty.call(saved, field.id)) {
+                        const value = saved[field.id];
+                        if (field.type === "checkbox") {
+                            field.checked = value === true || value === "true";
+                        } else if (value !== null && value !== undefined) {
+                            let normalizedValue = String(value);
+                            if (field.id === "currency") {
+                                const currencyAliases = {
+                                    "US Dollar (USD)": "USD",
+                                    "Euro (EUR)": "EUR",
+                                    "Kenyan Shilling (KSh)": "KES"
+                                };
+                                normalizedValue = currencyAliases[normalizedValue] || normalizedValue;
+                            }
+                            if (field.id === "sessionTimeout") {
+                                const timeoutAliases = {
+                                    "15": "15 Minutes",
+                                    "30": "30 Minutes",
+                                    "60": "1 Hour",
+                                    "240": "4 Hours",
+                                    "0": "Never"
+                                };
+                                normalizedValue = timeoutAliases[normalizedValue] || normalizedValue;
+                            }
+                            field.value = normalizedValue;
+                        }
+                    }
+                    // Remove stale "Loading saved setting…" placeholders from selects.
+                    if (field.tagName === "SELECT" && field.value === "" && field.options.length) {
+                        const placeholder = field.options[0];
+                        if (placeholder.disabled && /loading saved setting/i.test(placeholder.textContent)) {
+                            placeholder.hidden = true;
+                        }
+                    }
                 });
+
                 if (name === "general") {
                     applyPlatformName(saved.platformName || getField("platformName")?.value || "");
                 }
                 rememberSectionValues(section);
             });
         } catch (error) {
-            showMessage(getErrorMessage(error, "Could not load platform settings."), "danger");
+            console.error("Failed to load platform settings:", error);
+            showMessage(getErrorMessage(error, "Could not load platform settings. Check your connection and try again."), "danger");
         }
     }
 
@@ -520,16 +605,15 @@ function restoreSectionValues(section) {
         button.textContent = "Saving…";
         try {
             const values = readSection(section);
+            if (!validatePreferenceSection(sectionName, values)) return;
+
             const result = await apiRequest("/admins/settings", {
                 method: "PUT",
                 body: { [sectionName]: values }
             });
+            const persistedSettings = result?.settings || result?.data?.settings || {};
             if (sectionName === "general") {
-                // Confirm the server returned persisted data before showing the
-                // updated platform name as applied. Empty value → default.
-                const savedName = result?.settings?.general?.platformName
-                    || values.platformName
-                    || "";
+                const savedName = persistedSettings?.general?.platformName ?? values.platformName;
                 applyPlatformName(savedName);
             }
             rememberSectionValues(section);
@@ -587,38 +671,100 @@ function restoreSectionValues(section) {
         }
     });
 
-    // NOTE: Password change modal and remaining security handlers live below.
-    // Restored full file continues with password modal logic from original.
-
     /* =====================================================
-       PASSWORD CHANGE (minimal stub so page does not break;
-       full modal handlers were in the original file)
+       PASSWORD CHANGE
     ===================================================== */
 
     function openPasswordModal() {
-        const modal = document.getElementById("changePasswordModal");
-        if (modal) {
-            modal.classList.add("is-open");
-            modal.setAttribute("aria-hidden", "false");
+        const modal = getField("changePasswordModal");
+        if (!modal) {
+            showMessage("The password-change form is unavailable. Refresh the page and try again.", "danger");
+            return;
         }
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        getField("currentPassword")?.focus();
     }
 
     function closePasswordModal() {
-        const modal = document.getElementById("changePasswordModal");
-        if (modal) {
-            modal.classList.remove("is-open");
-            modal.setAttribute("aria-hidden", "true");
-        }
+        const modal = getField("changePasswordModal");
+        if (!modal) return;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        getField("changePasswordForm")?.reset();
+        const feedback = getField("changePasswordMessage");
+        if (feedback) feedback.textContent = "";
     }
 
-    document.querySelectorAll("[data-close-password-modal]").forEach((btn) => {
-        btn.addEventListener("click", closePasswordModal);
+    document.querySelectorAll("[data-open-password-modal]").forEach((button) => {
+        button.addEventListener("click", openPasswordModal);
+    });
+    document.querySelectorAll("[data-close-password-modal]").forEach((button) => {
+        button.addEventListener("click", closePasswordModal);
+    });
+
+    const passwordForm = getField("changePasswordForm");
+    passwordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const currentPassword = getField("currentPassword")?.value || "";
+        const newPassword = getField("newPassword")?.value || "";
+        const confirmPassword = getField("confirmNewPassword")?.value || "";
+        const feedback = getField("changePasswordMessage");
+        const submit = passwordForm.querySelector('button[type="submit"]');
+
+        if (feedback) feedback.textContent = "";
+        if (newPassword.length < 8) {
+            if (feedback) feedback.textContent = "New password must contain at least 8 characters.";
+            getField("newPassword")?.focus();
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            if (feedback) feedback.textContent = "The new passwords do not match.";
+            getField("confirmNewPassword")?.focus();
+            return;
+        }
+        if (newPassword === currentPassword) {
+            if (feedback) feedback.textContent = "Choose a new password different from your current password.";
+            getField("newPassword")?.focus();
+            return;
+        }
+
+        const originalText = submit?.textContent || "Change Password";
+        if (submit) {
+            submit.disabled = true;
+            submit.textContent = "Updating…";
+        }
+        try {
+            await apiRequest("/auth/me/password", {
+                method: "PATCH",
+                body: { currentPassword, newPassword }
+            });
+            closePasswordModal();
+            showMessage("Password changed successfully.", "success");
+        } catch (error) {
+            if (feedback) feedback.textContent = getErrorMessage(error, "Could not change password.");
+        } finally {
+            if (submit) {
+                submit.disabled = false;
+                submit.textContent = originalText;
+            }
+        }
+    });
+
+    getField("changePasswordModal")?.addEventListener("click", (event) => {
+        if (event.target === event.currentTarget) closePasswordModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && getField("changePasswordModal")?.classList.contains("is-open")) {
+            closePasswordModal();
+        }
     });
 
     const securitySection = getField("settings-security");
     securitySection
         ?.querySelector(".admin-settings-security-block .admin-save-button")
-        ?.addEventListener("click", openPasswordModal);
+        ?.setAttribute("data-open-password-modal", "");
 
     /* =====================================================
        INITIALIZATION
