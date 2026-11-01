@@ -1045,3 +1045,198 @@ textarea:focus-visible, select:focus-visible {
     border-color: var(--brand-soft-green);
 }
 hr { border-color: var(--brand-soft-green); }
+
+
+/* =========================================================
+   SHARED MODAL SYSTEM — CUSTOMER, ADMIN, RESTAURANT & RIDER
+   CSS-only layout normalization. Existing open/close behavior
+   and portal-specific colors remain controlled by their own code.
+   ========================================================= */
+:root {
+    --modal-layer: 2000;
+    --modal-radius: 18px;
+    --modal-border: #dce8d8;
+    --modal-shadow: 0 24px 70px rgba(0, 21, 18, .28);
+}
+body.modal-open,
+body:has(.admin-modal[aria-hidden="false"]),
+body:has(.modal.show),
+body:has(.modal[aria-hidden="false"]) {
+    overflow: hidden;
+}
+.modal,
+.modal-overlay,
+.modal-backdrop,
+.admin-modal,
+[data-modal-overlay] {
+    box-sizing: border-box;
+}
+.modal.show,
+.modal[aria-hidden="false"],
+.admin-modal[aria-hidden="false"] {
+    z-index: var(--modal-layer);
+}
+.modal-dialog,
+.modal-container,
+.modal-content,
+.admin-modal-dialog,
+.admin-modal-content,
+[role="dialog"] {
+    min-width: 0;
+    box-sizing: border-box;
+}
+.modal-dialog,
+.admin-modal-dialog {
+    width: min(720px, calc(100vw - 32px));
+    max-width: 100%;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+}
+.modal-content,
+.admin-modal-content {
+    max-width: 100%;
+    max-height: calc(100dvh - 32px);
+    min-width: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--modal-border);
+    border-radius: var(--modal-radius);
+    background: #fff;
+    box-shadow: var(--modal-shadow);
+    color: #001512;
+    -webkit-overflow-scrolling: touch;
+}
+.modal-header,
+.modal-title-row,
+.admin-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    min-width: 0;
+}
+.modal-header h1,
+.modal-header h2,
+.modal-title,
+.admin-modal-header h1,
+.admin-modal-header h2 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.modal-body,
+.modal-form,
+.admin-modal-body {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.modal-footer,
+.modal-actions,
+.admin-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.modal-content img,
+.admin-modal-content img {
+    max-width: 100%;
+    height: auto;
+}
+.modal-content input,
+.modal-content select,
+.modal-content textarea,
+.admin-modal-content input,
+.admin-modal-content select,
+.admin-modal-content textarea {
+    max-width: 100%;
+    min-width: 0;
+}
+.modal-content button,
+.modal-actions button,
+.modal-footer button,
+.admin-modal-content button,
+.admin-modal-actions button {
+    min-height: 42px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+.modal-close,
+.close-modal,
+[data-modal-close],
+.admin-modal-close {
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.modal-content :focus-visible,
+.admin-modal-content :focus-visible,
+[role="dialog"] :focus-visible {
+    outline: 3px solid #7FE84D;
+    outline-offset: 2px;
+}
+@media (max-width: 640px) {
+    .modal-dialog,
+    .modal-container,
+    .admin-modal-dialog,
+    [role="dialog"] {
+        width: min(100%, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+        max-height: calc(100dvh - 16px);
+        margin: 8px auto;
+    }
+    .modal-content,
+    .admin-modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: calc(100dvh - 16px);
+        border-radius: 14px;
+    }
+    .modal-header,
+    .modal-title-row,
+    .admin-modal-header {
+        gap: 10px;
+    }
+    .modal-body,
+    .admin-modal-body {
+        padding: 16px !important;
+    }
+    .modal-footer,
+    .modal-actions,
+    .admin-modal-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+        gap: 9px;
+    }
+    .modal-footer > *,
+    .modal-actions > *,
+    .admin-modal-actions > * {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+@media (max-width: 360px) {
+    .modal-dialog,
+    .modal-container,
+    .admin-modal-dialog,
+    [role="dialog"] {
+        width: calc(100vw - 12px);
+        max-width: calc(100vw - 12px);
+        margin: 6px auto;
+    }
+    .modal-content,
+    .admin-modal-content {
+        border-radius: 12px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .modal-content,
+    .admin-modal-content {
+        animation: none !important;
+        transition: none !important;
+    }
+}
