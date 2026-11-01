@@ -35,6 +35,7 @@
   </style>
 </head>
 <body>
+  <div class="admin-layout">
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="admin-sidebar-header">
       <a href="dashboard.html" class="admin-logo">Market Delivery</a>
@@ -52,19 +53,24 @@
       <a href="riders.html" class="admin-nav-link"><span class="admin-nav-icon">♧</span><span>Riders</span></a>
       <a href="reports.html" class="admin-nav-link"><span class="admin-nav-icon">▥</span><span>Reports</span></a>
       <a href="operations.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Operations</span></a>
-      <a href="settings.html" class="admin-nav-link"><span class="admin-nav-icon">☷</span><span>Settings</span></a>
-      <a href="deleted-accounts.html" class="admin-nav-link active" aria-current="page"><span class="admin-nav-icon">⌫</span><span>Deleted Accounts</span></a>
+      <a href="deleted-accounts.html" class="admin-nav-link active" aria-current="page"><span class="admin-nav-icon">▣</span><span>Deleted Accounts</span></a>
+      <a href="payments.html" class="admin-nav-link"><span class="admin-nav-icon">▣</span><span>Payments</span></a>
+      <a href="reports.html" class="admin-nav-link"><span class="admin-nav-icon">▤</span><span>Reports</span></a>
+      <a href="operations.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Operations</span></a>
+      <a href="settings.html" class="admin-nav-link"><span class="admin-nav-icon">⚙</span><span>Settings</span></a>
     </nav>
+    <div class="admin-sidebar-bottom"><a href="../../pages/auth/login.html" class="admin-nav-link logout-link"><span class="admin-nav-icon">↪</span><span>Logout</span></a></div>
   </aside>
   <div class="admin-overlay" id="adminOverlay"></div>
   <main class="admin-main">
-    <div class="admin-content">
       <header class="admin-topbar">
         <div class="admin-topbar-left">
           <button type="button" class="admin-mobile-menu-button" id="adminMenuButton" aria-label="Open menu">☰</button>
           <div class="admin-page-heading"><h1>Deleted Accounts</h1><p>Review archived account snapshots and manage permanent account deletion.</p></div>
         </div>
+        <div class="admin-topbar-right"><button type="button" class="admin-notification-button" aria-label="Notifications"><span>🔔</span><span class="admin-notification-badge" hidden></span></button><div class="admin-topbar-profile"><div class="admin-topbar-avatar">A</div><div class="admin-topbar-profile-info"><strong>Loading account…</strong><span>Loading role…</span></div></div></div>
       </header>
+      <div class="admin-content">
 
       <section class="admin-card" aria-labelledby="permanentDeleteHeading">
         <div class="admin-card-header">
@@ -117,8 +123,9 @@
           <button id="next" type="button" disabled>Next</button>
         </div>
       </section>
-    </div>
+      </div>
   </main>
+  </div>
   <script src="../../assets/js/api-config.js"></script>
   <script src="../../assets/js/core/platform-name.js"></script>
   <script src="../../assets/js/auth/auth-api.js"></script>
