@@ -652,38 +652,100 @@ function restoreSectionValues(section) {
         }
     });
 
-    // NOTE: Password change modal and remaining security handlers live below.
-    // Restored full file continues with password modal logic from original.
-
     /* =====================================================
-       PASSWORD CHANGE (minimal stub so page does not break;
-       full modal handlers were in the original file)
+       PASSWORD CHANGE
     ===================================================== */
 
     function openPasswordModal() {
-        const modal = document.getElementById("changePasswordModal");
-        if (modal) {
-            modal.classList.add("is-open");
-            modal.setAttribute("aria-hidden", "false");
+        const modal = getField("changePasswordModal");
+        if (!modal) {
+            showMessage("The password-change form is unavailable. Refresh the page and try again.", "danger");
+            return;
         }
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        getField("currentPassword")?.focus();
     }
 
     function closePasswordModal() {
-        const modal = document.getElementById("changePasswordModal");
-        if (modal) {
-            modal.classList.remove("is-open");
-            modal.setAttribute("aria-hidden", "true");
-        }
+        const modal = getField("changePasswordModal");
+        if (!modal) return;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        getField("changePasswordForm")?.reset();
+        const feedback = getField("changePasswordMessage");
+        if (feedback) feedback.textContent = "";
     }
 
-    document.querySelectorAll("[data-close-password-modal]").forEach((btn) => {
-        btn.addEventListener("click", closePasswordModal);
+    document.querySelectorAll("[data-open-password-modal]").forEach((button) => {
+        button.addEventListener("click", openPasswordModal);
+    });
+    document.querySelectorAll("[data-close-password-modal]").forEach((button) => {
+        button.addEventListener("click", closePasswordModal);
+    });
+
+    const passwordForm = getField("changePasswordForm");
+    passwordForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const currentPassword = getField("currentPassword")?.value || "";
+        const newPassword = getField("newPassword")?.value || "";
+        const confirmPassword = getField("confirmNewPassword")?.value || "";
+        const feedback = getField("changePasswordMessage");
+        const submit = passwordForm.querySelector('button[type="submit"]');
+
+        if (feedback) feedback.textContent = "";
+        if (newPassword.length < 8) {
+            if (feedback) feedback.textContent = "New password must contain at least 8 characters.";
+            getField("newPassword")?.focus();
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            if (feedback) feedback.textContent = "The new passwords do not match.";
+            getField("confirmNewPassword")?.focus();
+            return;
+        }
+        if (newPassword === currentPassword) {
+            if (feedback) feedback.textContent = "Choose a new password different from your current password.";
+            getField("newPassword")?.focus();
+            return;
+        }
+
+        const originalText = submit?.textContent || "Change Password";
+        if (submit) {
+            submit.disabled = true;
+            submit.textContent = "Updating…";
+        }
+        try {
+            await apiRequest("/auth/me/password", {
+                method: "PATCH",
+                body: { currentPassword, newPassword }
+            });
+            closePasswordModal();
+            showMessage("Password changed successfully.", "success");
+        } catch (error) {
+            if (feedback) feedback.textContent = getErrorMessage(error, "Could not change password.");
+        } finally {
+            if (submit) {
+                submit.disabled = false;
+                submit.textContent = originalText;
+            }
+        }
+    });
+
+    getField("changePasswordModal")?.addEventListener("click", (event) => {
+        if (event.target === event.currentTarget) closePasswordModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && getField("changePasswordModal")?.classList.contains("is-open")) {
+            closePasswordModal();
+        }
     });
 
     const securitySection = getField("settings-security");
     securitySection
         ?.querySelector(".admin-settings-security-block .admin-save-button")
-        ?.addEventListener("click", openPasswordModal);
+        ?.setAttribute("data-open-password-modal", "");
 
     /* =====================================================
        INITIALIZATION
