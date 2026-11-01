@@ -271,7 +271,7 @@ async function updateAdminAvatar(id, avatarUrl) {
     const adminId = validateAdminId(id);
     const result = await pool.query(
         `UPDATE users SET avatar_url = $1, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $2 AND role IN ('admin', 'super_admin2', 'super_admin2')
+         WHERE id = $2 AND role IN ('admin', 'super_admin2')
          RETURNING ${ADMIN_COLUMNS}`,
         [avatarUrl, adminId]
     );
@@ -499,7 +499,7 @@ async function deactivateAdmin(
                 `
                 SELECT id
                 FROM users
-                WHERE role IN ('admin', 'super_admin2', 'super_admin2')
+                WHERE role IN ('admin', 'super_admin2')
                   AND is_active = true
                 FOR UPDATE
                 `
