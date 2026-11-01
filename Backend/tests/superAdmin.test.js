@@ -432,7 +432,7 @@ test("role constraint allows canonical roles and existing legacy roles, nothing 
     for (const role of ["customer", "restaurant", "rider", "admin", "super_admin", "super_admin2", "legacy_manager"]) {
         assert.match(alter.sql, new RegExp(`'${role}'`), role);
     }
-    for (const role of ["super_admin1", "super_admin2", "admin1", "admin2", "market_owner2"]) {
+    for (const role of ["super_admin1", "admin1", "admin2", "market_owner2"]) {
         assert.doesNotMatch(alter.sql, new RegExp(`'${role}'`), role);
     }
 });
