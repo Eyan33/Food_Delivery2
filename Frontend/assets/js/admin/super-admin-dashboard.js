@@ -21,15 +21,17 @@
       window.location.replace("../../pages/auth/login.html");
       return;
     }
+    const isSuperAdminRole = (role) =>
+      ["super_admin", "super_admin2"].includes(String(role || "").toLowerCase());
     const cachedUser = api.getCurrentUser ? api.getCurrentUser() : null;
-    if (cachedUser && cachedUser.role && cachedUser.role !== "super_admin") {
+    if (cachedUser && cachedUser.role && !isSuperAdminRole(cachedUser.role)) {
       window.location.replace(cachedUser.role === "admin" ? "dashboard.html" : "../../pages/auth/login.html");
       return;
     }
     try {
       const response = await api.request("/auth/me", { authenticated: true });
       const user = response && (response.user || response.data?.user);
-      if (!user || user.role !== "super_admin") {
+      if (!user || !isSuperAdminRole(user.role)) {
         window.location.replace(user?.role === "admin" ? "dashboard.html" : "../../pages/auth/login.html");
         return;
       }
